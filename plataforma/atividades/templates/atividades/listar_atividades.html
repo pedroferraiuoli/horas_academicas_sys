@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load atividade_extras %}
+{% block content %}
+<h2 class="text-main-green">Minhas Atividades</h2>
+{% if categoria_filtrada %}
+  <div class="alert alert-info">Filtrando por categoria: <b>{{ categoria_filtrada.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-green ms-2">Remover filtro</a></div>
+{% endif %}
+<a href="{% url 'cadastrar_atividade' %}?categoria={{ categoria_filtrada.id }}" class="btn btn-success mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
+<table class="table table-bordered table-sm align-middle shadow-sm rounded bg-white">
+  <thead style="background-color: var(--main-green); color: #fff;">
+    <tr>
+      <th>Nome</th>
+      <th>Categoria</th>
+      <th>Horas</th>
+      <th>Data</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for atividade in atividades %}
+    <tr>
+      <td>{{ atividade.nome }}</td>
+      <td>{{ atividade.categoria.categoria.nome }}</td>
+      <td><span class="badge bg-success bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
+      <td>{{ atividade.data }}</td>
+      <td>
+          <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-green btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+          <a href="{% url 'excluir_atividade' atividade.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Excluir</a>
+          {% if atividade.documento %}
+            <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i> Visualizar</a>
+            <a href="{{ atividade.documento.url }}" download class="btn btn-secondary btn-sm"><i class="bi bi-download"></i> Baixar</a>
+          {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Nenhuma atividade cadastrada.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a href="{% url 'dashboard' %}" class="btn btn-outline-main-green"><i class="bi bi-arrow-left"></i> Voltar</a>
+{% endblock %}

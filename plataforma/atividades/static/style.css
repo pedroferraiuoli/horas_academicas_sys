@@ -1,0 +1,105 @@
+/* Paleta personalizada */
+:root {
+  --main-green: #004F2D;
+  --main-green-dark: #00381f;
+  --main-green-light: #197a4b;
+  --main-info-blue: #227c9d;
+}
+.text-main-green {
+  color: var(--main-green) !important;
+}
+
+.btn-outline-main-green {
+  border-color: var(--main-green) !important;
+  color: var(--main-green) !important;
+}
+.btn-outline-info {
+  border-color: var(--main-info-blue) !important;
+  color: var(--main-info-blue) !important;
+}
+.btn-outline-info:hover, .btn-outline-info:focus {
+  background-color: var(--main-info-blue) !important;
+  color: #fff !important;
+}
+
+.btn-outline-main-green:hover, .btn-outline-main-green:focus {
+  background-color: var(--main-green) !important;
+  color: #fff !important;
+}
+
+.progress-bar.bg-main-green, .progress-bar.bg-main-green {
+  background-color: var(--main-green) !important;
+}
+
+.navbar.bg-primary {
+  background-color: var(--main-green) !important;
+}
+
+.navbar .navbar-brand, .navbar .nav-link, .navbar .dropdown-item, .dropdown-item-text {
+  color: #fff !important;
+}
+
+.navbar .dropdown-menu {
+  background-color: var(--main-green-dark);
+}
+
+.navbar .dropdown-item:hover, .navbar .dropdown-item:focus {
+  background-color: var(--main-green-light);
+  color: #fff !important;
+}
+
+.sidebar {
+  background: #f6faf8;
+  border-right: 1px solid #e0e0e0;
+  color: var(--main-green);
+  min-height: 100vh;
+  box-shadow: 2px 0 8px 0 rgba(0,0,0,0.04);
+}
+
+.sidebar .sidebar-heading {
+  color: var(--main-green);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.sidebar .nav-link {
+  color: var(--main-green) !important;
+  border-radius: 0.5rem;
+  margin-bottom: 0.2rem;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar .nav-link.active, .sidebar .nav-link:hover, .sidebar .nav-link:focus {
+  background: var(--main-green-light);
+  color: #fff !important;
+}
+.sidebar .badge {
+  font-size: 0.85em;
+  margin-left: 0.3em;
+  background: #e6f2ed;
+  color: var(--main-green);
+}
+.sidebar .nav-link.text-muted {
+  color: #b0b0b0 !important;
+}
+
+.btn-success {
+  background-color: var(--main-green) !important;
+  border-color: var(--main-green) !important;
+  color: #fff !important;
+}
+
+.btn-info {
+  background-color: var(--main-info-blue) !important;
+  border-color: var(--main-info-blue) !important;
+  color: #fff !important;
+}
+
+.form-card {
+    max-width: 800px;
+}
+
+.form-label {
+    margin-top: 1rem !important;
+}

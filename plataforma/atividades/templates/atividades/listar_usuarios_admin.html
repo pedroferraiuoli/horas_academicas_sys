@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Usuários Administrativos{% endblock %}
+{% block content %}
+<div class="card shadow-sm mx-auto mt-5" style="max-width: 900px;">
+  <div class="card-header bg-white border-bottom-0">
+    <h4 class="mb-0 text-main-green"><i class="bi bi-people"></i> Usuários Administrativos</h4>
+  </div>
+  <div class="card-body bg-white">
+    <h5 class="text-main-green">Gestores</h5>
+    <table class="table table-bordered table-sm align-middle shadow-sm rounded bg-white mb-4">
+      <thead style="background-color: var(--main-green); color: #fff;">
+        <tr>
+          <th>Nome</th>
+          <th>Usuário</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in gestores %}
+        <tr>
+          <td>{{ user.get_full_name|default:user.username }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">Nenhum gestor cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <h5 class="text-main-green">Coordenadores</h5>
+    <table class="table table-bordered table-sm align-middle shadow-sm rounded bg-white">
+      <thead style="background-color: var(--main-green); color: #fff;">
+        <tr>
+          <th>Nome</th>
+          <th>Usuário</th>
+          <th>Email</th>
+          <th>Curso</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in coordenadores %}
+        <tr>
+          <td>{{ item.get_full_name|default:item.username }}</td>
+          <td>{{ item.username }}</td>
+          <td>{{ item.email }}</td>
+          <td>{% if item.coordenador.curso %}{{ item.coordenador.curso.nome }}{% else %}<span class="text-muted">(sem curso)</span>{% endif %}</td>
+          <td>
+            {% if item.is_active %}
+              <span class="badge bg-success">Ativo</span>
+            {% else %}
+              <span class="badge bg-danger">Inativo</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'ativar_desativar_usuario' item.id %}" style="display:inline;">
+              {% csrf_token %}
+              {% if item.is_active %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" title="Desativar"><i class="bi bi-person-x"></i> Desativar</button>
+              {% else %}
+                <button type="submit" class="btn btn-sm btn-outline-success" title="Ativar"><i class="bi bi-person-check"></i> Ativar</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nenhum coordenador cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

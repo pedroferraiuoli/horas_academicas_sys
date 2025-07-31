@@ -1,0 +1,45 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+/static/
+media/
+migrations/
+*.log
+.env
+*.sqlite3
+*.pyo
+*.pyd
+*.swp
+*.bak
+*.tmp
+.DS_Store
+.vscode/
+.idea/
+*.egg-info/
+*.coverage
+htmlcov/
+node_modules/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# VSCode
+.history/
+
+# Mac
+.DS_Store
+
+# Test/coverage
+.coverage
+.pytest_cache/
+
+# Pipenv
+Pipfile.lock
+
+# Migrations
+*/migrations/*.pyc
+*/migrations/__pycache__/
+*/migrations/*.py
+!*/migrations/__init__.py

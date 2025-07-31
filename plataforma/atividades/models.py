@@ -75,6 +75,11 @@ class Aluno(models.Model):
             else:
                 total += soma
         return total
+    
+    def horas_complementares_validas_formatado(self):
+        fracao_decimal, parte_inteira = modf(float(self.horas_complementares_validas()))
+        minutos = round(fracao_decimal * 60)
+        return f"{int(parte_inteira)}:{minutos:02d}h"
 
 class Atividade(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)

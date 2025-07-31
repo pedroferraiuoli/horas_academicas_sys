@@ -58,7 +58,7 @@
                     <a class="nav-link {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" href="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
                       <i class="bi bi-folder2-open me-1"></i>{{ categoria.categoria.nome }}
                       <span class="badge bg-light text-main-green">
-                        Feitas: {{ user.aluno.atividade_set.all|categoria_horas:categoria }}h
+                        Feitas: {{ user.aluno.atividade_set.all|categoria_horas:categoria }}
                       </span>
                       <span class="badge bg-secondary">Limite: {{ categoria.limite_horas_formatado }}</span>
                     </a>

@@ -19,7 +19,7 @@ def criar_curso(request):
         if form.is_valid():
             form.save()
             messages.success(request, f'Curso {form.instance.nome} criado com sucesso!')
-            return redirect('dashboard')
+            return redirect('dashboards')
     else:
         form = CursoForm()
     return render(request, 'atividades/form_curso.html', {'form': form})

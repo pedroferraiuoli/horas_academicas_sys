@@ -298,7 +298,7 @@ def dashboard(request):
 
     return render(request, 'atividades/dashboard.html', {
         'aluno': aluno,
-        'total_horas': total_horas_formatado,
+        'total_horas': total_horas_formatado if aluno else None,
         'progresso_percentual': progresso_percentual,
         'atividades_recentes': atividades_recentes,
         'ultrapassou_limite': ultrapassou_limite

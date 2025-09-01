@@ -136,6 +136,10 @@ class EditarCursoView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         else:
             return False
 
+    def handle_no_permission(self):
+        messages.error(self.request, 'Acesso negado.')
+        return redirect('dashboard')
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['instance'] = get_object_or_404(Curso, id=self.kwargs['curso_id'])
@@ -156,6 +160,10 @@ class EditarCursoView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
 class ExcluirCursoView(LoginRequiredMixin, GestorRequiredMixin, TemplateView):
     template_name = 'atividades/excluir_curso.html'
+
+    def handle_no_permission(self):
+        messages.error(self.request, 'Acesso negado.')
+        return redirect('dashboard')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -202,6 +210,10 @@ class CriarCategoriaView(LoginRequiredMixin, GestorRequiredMixin, FormView):
     form_class = CategoriaAtividadeForm
     success_url = reverse_lazy('dashboard')
 
+    def handle_no_permission(self):
+        messages.error(self.request, 'Acesso negado.')
+        return redirect('dashboard')
+
     def form_valid(self, form):
         categoria = form.save()
         messages.success(self.request, f'Categoria {categoria.nome} criada com sucesso!')
@@ -212,6 +224,10 @@ class EditarCategoriaView(LoginRequiredMixin, GestorRequiredMixin, FormView):
     template_name = 'atividades/form_categoria.html'
     form_class = CategoriaAtividadeForm
     success_url = reverse_lazy('listar_categorias')
+
+    def handle_no_permission(self):
+        messages.error(self.request, 'Acesso negado.')
+        return redirect('dashboard')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -250,6 +266,10 @@ class ExcluirCategoriaView(LoginRequiredMixin, GestorRequiredMixin, TemplateView
 class ListarCategoriasView(LoginRequiredMixin, GestorRequiredMixin, ListView):
     template_name = 'atividades/listar_categorias.html'
     context_object_name = 'categorias'
+
+    def handle_no_permission(self):
+        messages.error(self.request, 'Acesso negado.')
+        return redirect('dashboard')
 
     def get_queryset(self):
         return CategoriaAtividade.objects.all()

@@ -597,7 +597,7 @@ class CriarCategoriaCursoDiretaView(LoginRequiredMixin, CoordenadorRequiredMixin
         return super().form_valid(form)
 
 
-class AssociarCategoriasAoCursoView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+class AssociarCategoriasAoCursoView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'atividades/form_associar_categorias.html'
     success_url = reverse_lazy('dashboard')
 
@@ -611,7 +611,6 @@ class AssociarCategoriasAoCursoView(LoginRequiredMixin, UserPassesTestMixin, For
         return redirect('dashboard')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         user = self.request.user
         coordenador = getattr(user, 'coordenador', None)
         
@@ -628,20 +627,17 @@ class AssociarCategoriasAoCursoView(LoginRequiredMixin, UserPassesTestMixin, For
                     curso = Curso.objects.get(id=curso_id)
                 except Curso.DoesNotExist:
                     curso = None
-        else:
-            messages.error(self.request, 'Acesso negado.')
-            return context
 
         categorias_vinculadas = CursoCategoria.objects.filter(curso=curso).values_list('categoria_id', flat=True) if curso else []
         categorias_disponiveis = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas) if curso else []
         
-        context.update({
+        context = {
             'categorias': categorias_disponiveis,
             'curso_nome': curso.nome if curso else '',
             'cursos': cursos,
             'curso_selecionado': curso.id if curso else '',
             'curso_required': True if user.groups.filter(name='Gestor').exists() else False
-        })
+        }
         
         return context
 

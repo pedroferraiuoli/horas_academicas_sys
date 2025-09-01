@@ -32,10 +32,20 @@ Este projeto é uma plataforma web desenvolvida em Django para gestão de ativid
    ```bash
    python manage.py migrate
    ```
+   Caso ocorra algum erro ao rodar o comando acima, tente migrar diretamente o app de atividades:
+   ```bash
+   python manage.py migrate atividades
+   ```
 5. Inicie o servidor:
    ```bash
    python manage.py runserver
    ```
+
+6. (Opcional, mas recomendado) Crie um superusuário para acessar o painel administrativo:
+   ```bash
+   python manage.py createsuperuser
+   ```
+   Siga as instruções no terminal para definir nome de usuário, e-mail e senha.
 
 ## Estrutura do Projeto
 - `plataforma/atividades/` - App principal com models, views, forms e templates

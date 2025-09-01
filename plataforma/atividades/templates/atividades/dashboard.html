@@ -22,10 +22,10 @@
       </div>
     {% endif %}
     <div class="mb-4">
-      <label class="fw-bold text-main-green">Progresso de horas complementares:</label> <span class="fw-bold text-main-green">{{progresso_percentual}}% ({{ total_horas }}h / {{ aluno.curso.horas_requeridas_formatada }})</span>
+      <label class="fw-bold text-main-green">Progresso de horas complementares:</label> <span class="fw-bold text-main-green">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }})</span>
       <div class="progress" style="height: 30px; background-color: #e6f2ed;">
           <div class="progress-bar bg-main-green" role="progressbar" style="width:{{ progresso_percentual }}%;">
-            <span class="fw-bold">{{ total_horas }}h / {{ aluno.curso.horas_requeridas_formatada }}</span>
+            <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }}</span>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ media/
 migrations/
 *.log
 .env
+venv
 *.sqlite3
 *.pyo
 *.pyd

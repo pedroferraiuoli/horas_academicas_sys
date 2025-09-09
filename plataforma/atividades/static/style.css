@@ -26,7 +26,7 @@
 .navbar .nav-link,
 .navbar .dropdown-item,
 .dropdown-item-text {
-    color: #fff !important;
+    color: var(--btn-primary-blue) !important;
 }
 
 .navbar .dropdown-menu {
@@ -37,6 +37,11 @@
 .navbar .dropdown-item:focus {
     background-color: var(--main-green-light);
     color: #fff !important;
+}
+
+.navbar-head {
+  color: var(--btn-delete-orange) !important;
+  font-size: large !important;
 }
 
 /* Sidebar - fundo claro, borda fina */

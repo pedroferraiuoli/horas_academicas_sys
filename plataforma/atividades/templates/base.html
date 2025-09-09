@@ -19,27 +19,32 @@
                 <i class="bi bi-hash fs-2 me-2 text-light"></i>
                 <h4 class="mb-0">ATIVIDADES COMPLEMENTARES</h4>
             </div>
-            <div class="dropdown">
-                <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-person-circle me-1"></i> {{ user.get_full_name|default:user.username }}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><span class="dropdown-item-text"><strong>Usuário:</strong> {{ user.username }}</span></li>
-                    <li><span class="dropdown-item-text"><strong>Email:</strong> {{ user.email }}</span></li>
-                    {% if user.aluno %}
-                        <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
-                    {% endif %}
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{% url 'password_change' %}">Trocar senha</a></li>
-                    <li><a class="dropdown-item" href="{% url 'alterar_email' %}">Alterar e-mail</a></li>
-                    <li>
-                        <form action="{% url 'logout' %}" method="post" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="dropdown-item">Sair</button>
-                        </form>
-                    </li>
+            {% if user.is_authenticated %}
+              <span class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li><span class="dropdown-item-text"><strong>Usuário:</strong> {{ user.username }}</span></li>
+                  <li><span class="dropdown-item-text"><strong>Email:</strong> {{ user.email }}</span></li>
+                  {% if user.aluno %}
+                    <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
+                  {% endif %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'password_change' %}">Trocar senha</a></li>
+                  <li><a class="dropdown-item" href="{% url 'alterar_email' %}">Alterar e-mail</a></li>
+                  <li>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item">Sair</button>
+                    </form>
+                  </li>
                 </ul>
-            </div>
+              </span>
+            {% else %}
+              <span class="nav-item"><a class="nav-link" href="{% url 'login' %}">Entrar</a></span>
+              <span class="nav-item"><a class="nav-link" href="{% url 'register' %}">Cadastrar</a></span>
+            {% endif %}
         </div>
     </header>
 
@@ -53,9 +58,9 @@
                         <table class="table table-borderless">
                             <thead>
                                 <tr>
-                                    <th class="text-muted small orange">CATEGORIAS</th>
-                                    <th class="text-muted small text-center orange">CARGA HORÁRIA</th>
-                                    <th class="text-muted small text-center orange">LIMITE</th>
+                                    <th class="navbar-head">CATEGORIAS</th>
+                                    <th class="navbar-head text-center">CARGA HORÁRIA</th>
+                                    <th class=" navbar-head text-center">LIMITE</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -24,6 +24,8 @@ class CursoCategoria(models.Model):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
     categoria = models.ForeignKey('CategoriaAtividade', on_delete=models.CASCADE, related_name='curso_categorias')
     limite_horas = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Limite máximo de horas para esta categoria neste curso")
+    carga_horaria = models.CharField(max_length=50, help_text="Carga horária do curso (e.g., 2000h)", null=True, blank=True, default="1h = 1h")
+
 
     class Meta:
         unique_together = ('curso', 'categoria')

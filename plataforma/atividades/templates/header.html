@@ -1,0 +1,35 @@
+ <!-- Header -->
+    <header class="bg-primary-dark text-white py-3 shadow-sm">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-hash fs-2 me-2 text-light"></i>
+                <h4 class="mb-0">ATIVIDADES COMPLEMENTARES</h4>
+            </div>
+            {% if user.is_authenticated %}
+              <span class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li><span class="dropdown-item-text"><strong>Usuário:</strong> {{ user.username }}</span></li>
+                  <li><span class="dropdown-item-text"><strong>Email:</strong> {{ user.email }}</span></li>
+                  {% if user.aluno %}
+                    <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
+                  {% endif %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'password_change' %}">Trocar senha</a></li>
+                  <li><a class="dropdown-item" href="{% url 'alterar_email' %}">Alterar e-mail</a></li>
+                  <li>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item">Sair</button>
+                    </form>
+                  </li>
+                </ul>
+              </span>
+            {% else %}
+              <span class="nav-item"><a class="nav-link" href="{% url 'login' %}">Entrar</a></span>
+              <span class="nav-item"><a class="nav-link" href="{% url 'register' %}">Cadastrar</a></span>
+            {% endif %}
+        </div>
+    </header>

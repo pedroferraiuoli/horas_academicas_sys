@@ -94,7 +94,7 @@
 }
 
 .sidebar .table tbody tr:hover {
-    background-color: rgba(0, 79, 45, 0.03);
+    background-color: rgba(0, 79, 45, 0.03) !important; /* Cor de fundo ao passar o mouse */
 }
 
 .sidebar .table td:first-child {
@@ -357,4 +357,9 @@
 
 .orange {
   color: var(--btn-delete-orange) !important;
+}
+
+.active {
+    background-color: var(--main-green-light) !important;
+    color: white !important;
 }

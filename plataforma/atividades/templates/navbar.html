@@ -14,29 +14,29 @@
                             </thead>
                             <tbody>
                                 {% for categoria in user.aluno.curso.curso_categorias.all %}
-                                <tr class="border-bottom">
-                                    <td class="py-3">
-                                        <div class="d-flex align-items-center">
-                                            <span class="fw-bold me-4" style="font-size: x-large;">
-                                                {% if categoria.id %}
-                                                    {% if categoria.id|length == 0 %}
-                                                        0{{ categoria.id }}
-                                                    {% else %}
-                                                        {{ categoria.id }}
-                                                    {% endif %}
-                                                {% endif %}
-                                            </span>
-                                            <p class="mb-0 text-start">{{ categoria.categoria.nome }}</p>
-                                        </div>
-                                    </td>
-                                    <td class="text-center py-3 small">{{ categoria.carga_horaria }}</td>
-                                    <td class="text-center py-3">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>
-                                            <span class="badge text-white small mt-1">Feitas: {{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        <tr class="{% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" onclick="window.location='{% url 'listar_atividades' %}?categoria={{ categoria.id }}'" style="cursor:pointer;">
+                                            <td class="py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fw-bold me-4" style="font-size: x-large;">
+                                                        {% if categoria.id %}
+                                                            {% if categoria.id|length == 0 %}
+                                                                0{{ categoria.id }}
+                                                            {% else %}
+                                                                {{ categoria.id }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </span>
+                                                    <p class="mb-0 text-start">{{ categoria.categoria.nome }}</p>
+                                                </div>
+                                            </td>
+                                            <td class="text-center py-3 small">{{ categoria.carga_horaria }}</td>
+                                            <td class="text-center py-3">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>
+                                                    <span class="badge text-white small mt-1">Feitas: {{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
                                 {% empty %}
                                 <tr>
                                     <td colspan="3" class="text-muted text-center py-3">Nenhuma categoria</td>

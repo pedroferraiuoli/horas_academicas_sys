@@ -47,15 +47,15 @@
         <div class="min-vh-100 row">
             <!-- Sidebar -->
             {% if user.is_authenticated and user.aluno %}
-            <nav class="col-md-4 d-none d-md-block sidebar border-end" style="min-height: 100vh; position: sticky; top: 0;">
+            <nav class="col-md-4 d-none d-md-block sidebar border-end mt-4" style="min-height: 100vh; position: sticky; top: 0;">
                 <div class="">
                     <div class="table-responsive">
                         <table class="table table-borderless">
                             <thead>
                                 <tr>
-                                    <th class="text-muted small">CATEGORIAS</th>
-                                    <th class="text-muted small text-center">CARGA HORÁRIA</th>
-                                    <th class="text-muted small text-center">LIMITE</th>
+                                    <th class="text-muted small orange">CATEGORIAS</th>
+                                    <th class="text-muted small text-center orange">CARGA HORÁRIA</th>
+                                    <th class="text-muted small text-center orange">LIMITE</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -63,7 +63,15 @@
                                 <tr class="border-bottom">
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            <span class="fw-bold me-2">{{ categoria.id }}</span>
+                                            <span class="fw-bold me-4" style="font-size: x-large;">
+                                                {% if categoria.id %}
+                                                    {% if categoria.id|length == 0 %}
+                                                        0{{ categoria.id }}
+                                                    {% else %}
+                                                        {{ categoria.id }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </span>
                                             <p class="mb-0 text-start">{{ categoria.categoria.nome }}</p>
                                         </div>
                                     </td>
@@ -71,7 +79,7 @@
                                     <td class="text-center py-3">
                                         <div class="d-flex flex-column align-items-center">
                                             <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>
-                                            <span class="badge bg-main-green text-white small mt-1">Feitas: {{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
+                                            <span class="badge text-white small mt-1">Feitas: {{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
                                         </div>
                                     </td>
                                 </tr>

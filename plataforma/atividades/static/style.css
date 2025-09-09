@@ -63,6 +63,14 @@
     margin-bottom: 0;
 }
 
+.sidebar .table tbody tr {
+    border-bottom: 2px solid var(--header-dark-blue) !important; /* Borda entre linhas */
+}
+
+.sidebar .table tbody tr:last-child {
+    border-bottom: none; /* Remove borda da última linha */
+}
+
 .sidebar .table th {
     color: var(--text-muted);
     font-size: 0.85rem;
@@ -73,7 +81,6 @@
 
 .sidebar .table td {
     padding: 0.75rem 0;
-    vertical-align: middle;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -108,7 +115,7 @@
 }
 
 .sidebar .table td:nth-child(3) .badge {
-    background-color: var(--main-green);
+    background-color: var(--btn-primary-blue);
     color: white;
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
@@ -120,6 +127,14 @@
     color: var(--text-secondary);
     display: block;
     margin-bottom: 0.3rem;
+}
+
+.sidebar .table thead th {
+    border-bottom: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+    text-align: left;
 }
 
 /* Scrollbar personalizada */
@@ -333,4 +348,8 @@
 
 .main {
   background-color: var(--bg-light);
+}
+
+.orange {
+  color: var(--btn-delete-orange) !important;
 }

@@ -6,14 +6,14 @@
   <div class="alert alert-info">Filtrando por categoria: <b>{{ categoria_filtrada.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-green ms-2">Remover filtro</a></div>
 {% endif %}
 <a href="{% url 'cadastrar_atividade' %}?categoria={{ categoria_filtrada.id }}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
-<table class="table table-bordered table-sm align-middle shadow-sm rounded bg-white">
-  <thead style="background-color: var(--main-green); color: #fff;">
+<table class="table table-bordered table-sm align-middle rounded ">
+  <thead style="color: #fff;">
     <tr>
-      <th>Nome</th>
-      <th>Categoria</th>
-      <th>Horas</th>
-      <th>Data</th>
-      <th>Ações</th>
+       <th class="orange">NOME</th>
+          <th class="orange">CATEGORIA</th>
+          <th class="orange">HORAS</th>
+          <th class="orange">DATA</th>
+          <th class="orange">AÇÕES</th>
     </tr>
   </thead>
   <tbody>
@@ -21,7 +21,7 @@
     <tr>
       <td>{{ atividade.nome }}</td>
       <td>{{ atividade.categoria.categoria.nome }}</td>
-      <td><span class="badge bg-success bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
+      <td><span class="badge bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
       <td>{{ atividade.data }}</td>
       <td>
           <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-green btn-sm"><i class="bi bi-pencil"></i> Editar</a>

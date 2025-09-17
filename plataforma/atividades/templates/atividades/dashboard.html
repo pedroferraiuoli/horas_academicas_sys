@@ -51,7 +51,7 @@
           <td>{{ atividade.data }}</td>
           <td><span class="badge  bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
           <td>
-            <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-green btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+            <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i> Editar</a>
             {% if atividade.documento %}
               <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i> Visualizar</a>
             {% endif %}

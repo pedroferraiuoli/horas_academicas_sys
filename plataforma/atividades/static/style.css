@@ -402,6 +402,12 @@
     color: #fff !important;
 }
 
+.btn-danger {
+    background-color: var(--main-orange) !important;
+    border-color: var(--main-orange) !important;
+    color: #fff !important;
+}
+
 .btn-info {
     background-color: var(--main-blue) !important;
     border-color: var(--main-blue) !important;
@@ -409,14 +415,14 @@
 }
 
 /* Dropdowns */
-.btn-outline-main-green {
-    border-color: var(--main-green) !important;
-    color: var(--main-green) !important;
+.btn-outline-main-blue {
+    border-color: var(--main-blue) !important;
+    color: var(--main-blue) !important;
 }
 
-.btn-outline-main-green:hover,
-.btn-outline-main-green:focus {
-    background-color: var(--main-green) !important;
+.btn-outline-main-blue:hover,
+.btn-outline-main-blue:focus {
+    background-color: var(--main-blue) !important;
     color: #fff !important;
 }
 

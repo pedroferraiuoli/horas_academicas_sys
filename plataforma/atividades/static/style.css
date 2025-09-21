@@ -35,7 +35,7 @@
 }
 
 .main {
-    width: 1155px !important;
+    width: 60.7% !important;
     background-color: var(--bg-light);
     background-image: url('./images/logo2fundo.png');
     background-repeat: no-repeat;
@@ -59,7 +59,7 @@
 
 .login-border {
     width: 8px;
-    height: 834px;    
+    height: 97%;    
     background: var(--main-orange);
     margin-top: 4px;
     border-radius: 5px;
@@ -72,7 +72,7 @@
 
 .login-card {
     background-color: var(--background-card);
-    width: 602px;
+    width: 37.6rem;
     border-radius: 30px !important;
 }
 

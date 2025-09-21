@@ -101,6 +101,12 @@
     color: white;
 }
 
+.alert-warning {
+    background-color: #EBCABE;
+    color: var(--main-orange);
+    border-color: #EBCABE;
+}
+
 .navbar .navbar-brand,
 .navbar .nav-link,
 .navbar .dropdown-item,
@@ -168,34 +174,20 @@
     gap: 0.5rem;
 }
 
-.sidebar .table {
-    width: 100%;
-    margin-bottom: 0;
+.table th {
+    background-color: transparent !important;
 }
 
-.sidebar .table tbody tr {
-    border-bottom: 2px solid var(--header-dark-blue) !important; /* Borda entre linhas */
-}
-
-.sidebar .table tbody tr:last-child {
-    border-bottom: none; /* Remove borda da última linha */
-}
-
-.sidebar .table th {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    padding: 0.5rem 0;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.sidebar .table td {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
+.table td {
+    background-color: transparent !important;
 }
 
 .sidebar .table tbody tr:last-child {
     border-bottom: none;
+}
+
+.table {
+    border-color: var(--main-blue);
 }
 
 .sidebar .table tbody tr:hover {
@@ -410,6 +402,12 @@
     color: #fff !important;
 }
 
+.btn-danger {
+    background-color: var(--main-orange) !important;
+    border-color: var(--main-orange) !important;
+    color: #fff !important;
+}
+
 .btn-info {
     background-color: var(--main-blue) !important;
     border-color: var(--main-blue) !important;
@@ -417,14 +415,14 @@
 }
 
 /* Dropdowns */
-.btn-outline-main-green {
-    border-color: var(--main-green) !important;
-    color: var(--main-green) !important;
+.btn-outline-main-blue {
+    border-color: var(--main-blue) !important;
+    color: var(--main-blue) !important;
 }
 
-.btn-outline-main-green:hover,
-.btn-outline-main-green:focus {
-    background-color: var(--main-green) !important;
+.btn-outline-main-blue:hover,
+.btn-outline-main-blue:focus {
+    background-color: var(--main-blue) !important;
     color: #fff !important;
 }
 
@@ -453,6 +451,5 @@
 }
 
 .active {
-    background-color: var(--main-green-light) !important;
-    color: white !important;
+    background-color: var(--bg-light) !important;
 }

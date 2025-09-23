@@ -158,7 +158,7 @@ class EmailOrUsernameAuthenticationForm(AuthenticationForm):
         password = self.cleaned_data.get('password')
         if username and password:
             # Tenta autenticar por username
-            user_qs = User.objects.filter(username=username)
+            user_qs = User.objects.filter(username__iexact=username)
             if not user_qs.exists():
                 # Se não existe username, tenta por email
                 try:

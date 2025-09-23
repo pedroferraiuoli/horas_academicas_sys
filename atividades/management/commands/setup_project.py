@@ -26,4 +26,4 @@ class Command(BaseCommand):
         call_command('populate_initial_data')
 
         self.stdout.write(self.style.NOTICE('Iniciando servidor de desenvolvimento...'))
-        call_command('runserver', '0.0.0.0:8000')
+        call_command('runserver')

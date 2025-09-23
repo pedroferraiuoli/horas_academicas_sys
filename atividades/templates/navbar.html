@@ -1,0 +1,44 @@
+{% load atividade_extras %}
+{% load static %}
+ <!-- Sidebar -->
+            {% if user.is_authenticated and user.aluno %}
+            <nav class="d-none d-md-block sidebar" style="min-height: 100vh; position: sticky; top: 0; width: 39.3%;">
+                <div class="navbar-list">
+                    <div class="d-flex">
+                        <div class="navbar-head flex-grow-1">CATEGORIAS</div>
+                        <div class="navbar-head text-center" style="width: 200px;">CARGA HORÁRIA</div>
+                        <div class="navbar-head text-center" style="width: 200px;">LIMITE</div>
+                    </div>
+                    {% for categoria in user.aluno.curso.curso_categorias.all %}
+                        <div class="d-flex navbar-row {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
+                            <div class="py-3 flex-grow-1 d-flex">
+                                <div class="fw-bold me-4" style="font-size: x-large;">
+                                    {% if categoria.id %}
+                                        {% if categoria.id|length == 0 %}
+                                            0{{ categoria.id }}
+                                        {% else %}
+                                            {{ categoria.id }}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="mb-0 text-start">{{ categoria.categoria.nome }}</div>
+                            </div>
+                            <div class="text-center py-3 small" style="width: 200px;">{{ categoria.carga_horaria }}</div>
+                            <div class="text-center py-3" style="width: 200px;">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>
+                                    <div class="badge">
+                                    <span class="small mt-1">Feitas:</span>
+                                    <span class="small mt-1">{{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="navbar-separator"></div>
+                    {% empty %}
+                        <div class="text-muted text-center py-3">Nenhuma categoria</div>
+                    {% endfor %}
+                </div>
+            </nav>
+            {% endif %}
+<script src="{% static 'js/navbar.js' %}"></script>

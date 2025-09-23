@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load atividade_extras %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="orange" style="font-weight: 600;">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
+      
+        <div>
+            <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info ms-2"><i class="bi bi-plus-circle"></i> Cadastrar Atividade</a>
+            <a href="{% url 'listar_atividades' %}" class="btn btn-info ms-2"><i class="bi bi-list"></i> Listar Atividades</a>
+        </div>
+
+    </div>
+
+    <p>Curso: {{ aluno.curso }} / Horas complementares requeridas: {{ aluno.curso.horas_requeridas_formatada }}</p>
+    {% if ultrapassou_limite %}
+      <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Você possui categorias em que o total de horas cadastradas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
+      </div>
+    {% endif %}
+    <div class="mb-4">
+      <label class="fw-bold">Progresso de horas complementares:</label> <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }})</span>
+      <div class="progress" style="height: 30px; background-color: #939FB5;">
+          <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;">
+            <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }}</span>
+        </div>
+      </div>
+    </div>
+
+  {% if atividades_recentes %}
+    <h4 class="mt-4 main-blue">Últimas atividades cadastradas</h4>
+    <table class="table table-bordered table-sm align-middle rounded">
+      <thead style="color: #fff;">
+        <tr>
+          <th class="orange">NOME</th>
+          <th class="orange">CATEGORIA</th>
+          <th class="orange">DATA</th>
+          <th class="orange">HORAS</th>
+          <th class="orange">AÇÕES</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for atividade in atividades_recentes %}
+        <tr>
+          <td>{{ atividade.nome }}</td>
+          <td>{{ atividade.categoria.categoria.nome }}</td>
+          <td>{{ atividade.data }}</td>
+          <td><span class="badge  bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
+          <td>
+            <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+            {% if atividade.documento %}
+              <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-info btn-sm"><i class="bi bi-eye"></i> Visualizar</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

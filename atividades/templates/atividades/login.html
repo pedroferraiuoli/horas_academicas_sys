@@ -1,0 +1,47 @@
+{% extends 'base_login.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+
+<div class="d-flex" style="gap: 100px;">
+
+  <div class="d-flex">
+
+    <div class="login-border"></div>
+    <div class="div-login">
+    <img src="{% static 'images/ifformou1.png' %}" alt="" style="width: 673px;">
+    <div class="login-text" style="margin-top: 7rem;">Sitema acadêmico de <br><span style="font-weight: 600;">Horas Complementares</span></div>
+    <img src="{% static 'images/logoiff.png' %}" alt="" style="width: 147px; margin-top: 7rem;">
+    </div>
+
+  </div>
+
+
+  <div class="card login-card" >
+    <div class="text-center main-blue" style="font-size: 80px; font-weight: 600; margin-top: 4rem;">
+    Login
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3" style="padding: 0px 20px 0px 20px;">
+          {% for field in form.visible_fields %}
+            <label for="{{ field.id_for_label }}" class="form-label main-blue" style="font-size: x-large; font-weight: 500;">{{ field.label }}:</label>
+            {{ field|add_class:'form-control-login' }}
+            {% for error in field.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+          <button type="submit" class="btn bg-orange text-white w-100 mt-5" style="font-size: x-large; font-weight: 500;"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
+          <div class="d-flex justify-content-between mt-3" style="border-bottom: 1px solid white; padding-bottom: 15px;">
+            <a href="{% url 'password_reset' %}" class="small main-blue">Esqueceu a senha?</a>
+            <a href="{% url 'register' %}" class="small main-blue">Cadastre-se</a>
+          </div>
+          <div style="justify-self: center;margin-top: 4rem;"><img src="{% static 'images/logo2fundo.png' %}" alt="" style="width: 145px;"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

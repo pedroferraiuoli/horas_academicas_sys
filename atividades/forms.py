@@ -95,7 +95,7 @@ class CategoriaCursoForm(forms.ModelForm):
 
     class Meta:
         model = CursoCategoria
-        fields = ['curso', 'categoria', 'limite_horas_int', 'limite_minutos_int']
+        fields = ['curso', 'categoria', 'limite_horas_int', 'limite_minutos_int', 'carga_horaria']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

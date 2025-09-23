@@ -17,7 +17,11 @@ class Command(BaseCommand):
             {'nome': 'Sistemas de Informação', 'horas_requeridas': 600},
             {'nome': 'Design Gráfico', 'horas_requeridas': 400},
             {'nome': 'Engenharia da Computação', 'horas_requeridas': 500},
-            {'nome': 'Educação Física', 'horas_requeridas': 250},
+            {'nome': 'Arquitetura e Urbanismo', 'horas_requeridas': 450},
+            {'nome': 'Engenharia Ambiental', 'horas_requeridas': 250},
+            {'nome': 'Engenharia Elétrica', 'horas_requeridas': 350},
+            {'nome': 'Engenharia Mecânica', 'horas_requeridas': 400},
+            {'nome': 'Administração', 'horas_requeridas': 200},        
         ]
         cursos = []
         for info in cursos_info:
@@ -25,7 +29,25 @@ class Command(BaseCommand):
             cursos.append(curso)
 
         # Categorias
-        categorias_nomes = ['Extensão', 'Pesquisa', 'Ensino', 'Cultura']
+        categorias_nomes = [
+            "Curso de idioma",
+            "Participação como ouvinte em defesas (TCC, mestrado, doutorado)",
+            "Participação em evento acadêmico (congresso, seminário, workshop, palestra)",
+            "Participação em comissão organizadora de eventos",
+            "Atividade acadêmica não creditada no curso",
+            "Participação em curso afins (oficina, minicurso, extensão, capacitação)",
+            "Ministrante de curso/extensão/palestra; debatedor em mesa-redonda",
+            "Participação em curso na área específica (oficina, minicurso, extensão)",
+            "Monitoria (mín. 20h/semestre)",
+            "Iniciação científica (mín. 150h)",
+            "Publicação de artigo científico/resumo em anais (autor/coautor)",
+            "Publicação de produção autoral (foto, artigo, exposição, reportagem) em periódico/site",
+            "Apresentação de trabalho científico (incl. pôster) em evento regional/nacional/internacional",
+            "Autor/coautor de capítulo de livro ou produção na revista Cayana",
+            "Publicação de artigo científico completo em periódico",
+            "Estágio Curricular Orientado",
+            "Disciplinas Optativas e Eletivas oferecidas",
+        ]
         categorias = []
         for nome in categorias_nomes:
             categoria, _ = CategoriaAtividade.objects.get_or_create(nome=nome)

@@ -3,7 +3,7 @@
 {% load static %}
 {% block content %}
 
-<div class="d-flex" style="gap: 100px;">
+<div class="d-flex" style="gap: 5%; padding: 30px;">
 
   <div class="d-flex">
 
@@ -25,6 +25,14 @@
       <form method="post">
         {% csrf_token %}
         <div class="mb-3" style="padding: 0px 20px 0px 20px;">
+          {# Exibe erros gerais do formulário (ex: usuário ou senha incorretos) #}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for error in form.non_field_errors %}
+                <div class="text-center">Por favor, entre com um usuário e senha corretos.</div>
+              {% endfor %}
+            </div>
+          {% endif %}
           {% for field in form.visible_fields %}
             <label for="{{ field.id_for_label }}" class="form-label main-blue" style="font-size: x-large; font-weight: 500;">{{ field.label }}:</label>
             {{ field|add_class:'form-control-login' }}

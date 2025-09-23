@@ -21,7 +21,7 @@
         Você possui categorias em que o total de horas cadastradas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
       </div>
     {% endif %}
-    <div class="mb-4">
+    <div class="mb-4 mt-5">
       <label class="fw-bold">Progresso de horas complementares:</label> <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }})</span>
       <div class="progress" style="height: 30px; background-color: #939FB5;">
           <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;">
@@ -31,7 +31,7 @@
     </div>
 
   {% if atividades_recentes %}
-    <h4 class="mt-4 main-blue">Últimas atividades cadastradas</h4>
+    <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>
     <table class="table table-bordered table-sm align-middle rounded">
       <thead style="color: #fff;">
         <tr>

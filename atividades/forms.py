@@ -157,15 +157,16 @@ class EmailOrUsernameAuthenticationForm(AuthenticationForm):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
         if username and password:
-            # Tenta autenticar por username
+            # Tenta autenticar por username (case insensitive)
             user_qs = User.objects.filter(username__iexact=username)
-            if not user_qs.exists():
-                # Se não existe username, tenta por email
-                try:
-                    user = User.objects.get(email=username)
-                    self.cleaned_data['username'] = user.username
-                except User.DoesNotExist:
-                    pass
+            if user_qs.exists():
+                # Garante que o username usado é o correto (case insensitive)
+                self.cleaned_data['username'] = user_qs.first().username
+            else:
+                # Se não existe username, tenta por email (case insensitive)
+                user_qs_email = User.objects.filter(email__iexact=username)
+                if user_qs_email.exists():
+                    self.cleaned_data['username'] = user_qs_email.first().username
         return super().clean()
 
 class UserRegistrationForm(forms.ModelForm):

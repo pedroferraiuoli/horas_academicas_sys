@@ -296,12 +296,16 @@ def dashboard(request):
                 ultrapassou_limite = True
                 break
 
-    return render(request, 'atividades/dashboard.html', {
-        'aluno': aluno,
-        'total_horas': total_horas_formatado if aluno else None,
-        'progresso_percentual': progresso_percentual,
-        'atividades_recentes': atividades_recentes,
-        'ultrapassou_limite': ultrapassou_limite
+        return render(request, 'atividades/dashboard.html', {
+            'aluno': aluno,
+            'total_horas': total_horas_formatado if aluno else None,
+            'progresso_percentual': progresso_percentual,
+            'atividades_recentes': atividades_recentes,
+            'ultrapassou_limite': ultrapassou_limite
+        })
+
+    return render(request, 'atividades/dashboard_gestor.html', {
+        'grupo': request.user.groups.all().first().name if request.user.groups.exists() else ''
     })
 
 def register(request):

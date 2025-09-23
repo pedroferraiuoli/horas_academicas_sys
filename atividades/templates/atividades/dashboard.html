@@ -6,14 +6,14 @@
 {% block content %}
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="orange" style="font-weight: 600;">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
-        {% if user.aluno %}
+      
         <div>
             <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info ms-2"><i class="bi bi-plus-circle"></i> Cadastrar Atividade</a>
             <a href="{% url 'listar_atividades' %}" class="btn btn-info ms-2"><i class="bi bi-list"></i> Listar Atividades</a>
         </div>
-        {% endif %}
+
     </div>
-  {% if aluno %}
+
     <p>Curso: {{ aluno.curso }} / Horas complementares requeridas: {{ aluno.curso.horas_requeridas_formatada }}</p>
     {% if ultrapassou_limite %}
       <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
@@ -29,7 +29,6 @@
         </div>
       </div>
     </div>
-  {% endif %}
 
   {% if atividades_recentes %}
     <h4 class="mt-4 main-blue">Últimas atividades cadastradas</h4>
@@ -60,23 +59,5 @@
         {% endfor %}
       </tbody>
     </table>
-  {% endif %}
-
-  {% if user.groups.all.0.name == 'Gestor' %}
-    <a href="{% url 'criar_categoria' %}" class="btn btn-warning mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria geral</a>
-    <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-warning mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
-    <a href="{% url 'criar_curso' %}" class="btn btn-warning mb-3"><i class="bi bi-plus-circle"></i> Criar Curso</a>
-    <a href="{% url 'listar_cursos' %}" class="btn btn-warning mb-3"><i class="bi bi-list"></i> Listar Cursos</a>
-    <a href="{% url 'listar_categorias' %}" class="btn btn-warning mb-3">Listar Categorias</a>
-    <a href="{% url 'listar_categorias_curso' %}" class="btn btn-warning mb-3">Listar Categorias do Curso</a>
-    <a href="{% url 'criar_usuario_admin' %}" class="btn btn-warning mb-3">Criar Usuário Gestor ou Coordenador</a>
-    <a href="{% url 'listar_usuarios_admin' %}" class="btn btn-warning mb-3">Listar Usuários Administrativos</a>
-    {% endif %}
-
-  {% if user.groups.all.0.name == 'Coordenador' %}
-  <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-warning mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
-    <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-warning mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
-    
-    <a href="{% url 'listar_categorias_curso' %}" class="btn btn-warning mb-3">Listar Categorias do Curso</a>
   {% endif %}
 {% endblock %}

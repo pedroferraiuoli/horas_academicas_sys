@@ -13,11 +13,11 @@
                         <div class="d-flex navbar-row {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
                             <div class="d-flex" style="width: 60%;">
                                 <div class="me-4 py-2" style="font-size: 1.5rem;">
-                                    {% if categoria.id %}
-                                        {% if categoria.id < 10 %}
-                                            0{{ categoria.id }}
+                                    {% if categoria.categoria.id %}
+                                        {% if categoria.categoria.id < 10 %}
+                                            0{{ categoria.categoria.id }}
                                         {% else %}
-                                            {{ categoria.id }}
+                                            {{ categoria.categoria.id }}
                                         {% endif %}
                                     {% endif %}
                                 </div>

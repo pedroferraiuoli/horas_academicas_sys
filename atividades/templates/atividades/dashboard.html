@@ -4,13 +4,13 @@
 
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+<div style="justify-self: end;">
+    <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info ms-2"><i class="bi bi-plus-circle"></i> Cadastrar Atividade</a>
+    <a href="{% url 'listar_atividades' %}" class="btn btn-info ms-2"><i class="bi bi-list"></i> Listar Atividades</a>
+</div>
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="orange" style="font-weight: 600;">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
       
-        <div>
-            <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info ms-2"><i class="bi bi-plus-circle"></i> Cadastrar Atividade</a>
-            <a href="{% url 'listar_atividades' %}" class="btn btn-info ms-2"><i class="bi bi-list"></i> Listar Atividades</a>
-        </div>
 
     </div>
 
@@ -22,7 +22,7 @@
       </div>
     {% endif %}
     <div class="mb-4 mt-5">
-      <label class="fw-bold">Progresso de horas complementares:</label> <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }})</span>
+      <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }})</span>
       <div class="progress" style="height: 30px; background-color: #939FB5;">
           <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;">
             <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }}</span>

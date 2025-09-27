@@ -4,13 +4,13 @@
             {% if user.is_authenticated and user.aluno %}
             <nav class="d-none d-md-block sidebar" style="min-height: 100vh; position: sticky; top: 0; width: 39.3%; max-height: 100vh; overflow-y: auto;">
                 <div class="navbar-list">
-                    <div class="d-flex" style="padding: 0 1rem 0rem 1rem;">
+                    <div class="d-flex" style="padding: 0 0.5rem 0rem 0.5rem;">
                         <div class="navbar-head" style="width: 60%;">CATEGORIAS</div>
                         <div class="navbar-head text-center" style="width: 30%;">CARGA HORÁRIA</div>
                         <div class="navbar-head text-center" style="width: 10%;">LIMITE</div>
                     </div>
                     {% for categoria in user.aluno.curso.curso_categorias.all %}
-                        <div class="d-flex navbar-row {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}" style="padding: 0 1rem 0rem 1rem;">
+                        <div class="d-flex navbar-row {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}" style="padding: 0 0.5rem 0rem 0.5rem;">
                             <div class="d-flex" style="width: 60%;">
                                 <div class="me-4 py-2" style="font-size: 1.5rem;">
                                     {% if categoria.categoria.id %}

@@ -216,9 +216,9 @@ def cadastrar_atividade(request):
     initial = {}
     if categoria_id:
         try:
-            categoria = CategoriaAtividade.objects.get(id=categoria_id)
+            categoria = CursoCategoria.objects.get(id=categoria_id)
             initial['categoria'] = categoria
-        except CategoriaAtividade.DoesNotExist:
+        except CursoCategoria.DoesNotExist:
             pass
     if request.method == 'POST':
         form = AtividadeForm(request.POST, request.FILES, aluno=aluno)

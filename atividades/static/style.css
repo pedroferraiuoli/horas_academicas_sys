@@ -1,15 +1,15 @@
 /* === PALETA PERSONALIZADA CORRIGIDA === */
 :root {
-  --main-blue: #15224F;
-  --main-green: #004F2D;
-  --main-green-dark: #00381f;
-  --main-green-light: #197a4b;
-  --bg-light: #E8F1F9;
-  --text-muted: #6c757d;
-  --text-secondary: #333;
-  --main-orange: #F16F33;
-  --main-bg: #F8FCFF;
-  --background-card: #929EB4;
+    --main-blue: #15224F;
+    --main-green: #004F2D;
+    --main-green-dark: #00381f;
+    --main-green-light: #197a4b;
+    --bg-light: #E8F1F9;
+    --text-muted: #6c757d;
+    --text-secondary: #333;
+    --main-orange: #F16F33;
+    --main-bg: #F8FCFF;
+    --background-card: #929EB4;
 }
 
 * {
@@ -17,14 +17,15 @@
 }
 
 .link-limpo {
-    text-decoration: none; color: var(--main-bg) !important;
+    text-decoration: none;
+    color: var(--main-bg) !important;
 }
 
 .main-blue {
     color: var(--main-blue) !important;
 }
 
-.bg-orange{
+.bg-orange {
     background-color: var(--main-orange) !important;
 }
 
@@ -59,7 +60,7 @@
 
 .login-border {
     width: 18px;
-    height: 97%;    
+    height: 97%;
     background: var(--main-orange);
     margin-top: 4px;
     border-radius: 5px;
@@ -91,10 +92,9 @@
     -moz-appearance: none;
     appearance: none;
     border-radius: 15px;
-    transition: border-color .15s 
-        ease-in-out, box-shadow .15s 
-        ease-in-out;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
+
 /* Header - azul escuro */
 .bg-primary-dark {
     background-color: var(--main-blue) !important;
@@ -125,14 +125,14 @@
 }
 
 .navbar-head {
-  color: var(--main-orange) !important;
-  font-size: large !important;
-  font-weight: 600 !important;
+    color: var(--main-orange) !important;
+    font-size: large !important;
+    font-weight: 600 !important;
 }
 
 .navbar-row {
     border-radius: 5px;
-    cursor:pointer; 
+    cursor: pointer;
     padding-bottom: 10px;
     margin-top: 4px;
 }
@@ -142,6 +142,7 @@
     width: 80px;
     display: grid !important;
 }
+
 /* Linha separadora entre categorias na navbar */
 .navbar-separator {
     width: 100%;
@@ -388,9 +389,71 @@
 }
 
 .orange {
-  color: var(--main-orange) !important;
+    color: var(--main-orange) !important;
 }
 
 .active {
     background-color: var(--bg-light) !important;
+}
+
+.grp-botton{
+    display: flex;
+    align-items: center ms-auto;
+    gap: 10px;
+    margin-right: 10px;
+    margin-left: auto;
+}
+
+header button {
+    background: #F16F33;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+header button:hover {
+    background: #929EB4;
+}
+
+.modal {
+    display: none;
+    /* escondido por padrão */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    position: center;
+    max-width: 80%;
+    max-height: 80%;
+}
+
+.modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #F16F33;
 }

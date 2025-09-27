@@ -446,5 +446,5 @@ header button:hover {
 }
 
 .close:hover {
-    color: #F16F33 !important;
+    color: var(--main-orange) !important;
 }

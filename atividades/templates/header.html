@@ -7,7 +7,11 @@
                  <a href="{% url 'dashboard' %}" class="link-limpo"><h4 class="mb-0">ATIVIDADES COMPLEMENTARES</h4></a>
             </div>
             {% if user.is_authenticated %}
-              <span class="nav-item dropdown">
+            <div class="grp-botton">
+              <button onclick="abrirModal('img1')">Sobre</button>
+              <button onclick="abrirModal('img2')">Guia</button>
+            </div>
+            <span class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
                 </a>
@@ -36,3 +40,38 @@
             {% endif %}
         </div>
     </header>
+ <!-- Modal 1 -->
+  <div id="img1" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal('img1')">&times;</span>
+      <img src="{% static 'images/Como app pode te ajudar.png' %}" alt="Imagem 1">
+    </div>
+  </div>
+
+  <!-- Modal 2 -->
+  <div id="img2" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal('img2')">&times;</span>
+      <img src="{% static 'images/Guia do aluno.png' %}" alt="Imagem 2">
+    </div>
+  </div>
+
+  <script>
+    function abrirModal(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    // Fecha se clicar fora do conteúdo
+    window.onclick = function(event) {
+      const modais = document.querySelectorAll(".modal");
+      modais.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    }
+  </script>

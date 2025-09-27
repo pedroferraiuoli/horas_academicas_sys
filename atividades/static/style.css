@@ -139,7 +139,7 @@
 
 .badge {
     background-color: var(--main-blue);
-    width: 80px;
+    min-width: 100%;
     display: grid !important;
 }
 

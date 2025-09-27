@@ -55,7 +55,11 @@
       {% csrf_token %}
       <div class="row g-4">
         {% for field in form.visible_fields %}
-          <div class="col-12 col-md-6">
+          {% if field.name == 'descricao' %}
+              <div class="w-100">
+          {% else %}
+              <div class='w-50'>
+          {% endif %}
             <label for="{{ field.id_for_label }}" class="form-label main-blue form-atividade-label">{{ field.label }}{% if field.field.required %} <span class="orange">*</span>{% endif %}</label>
             <div class="input-group">
               {% if field.field.widget.input_type == 'select' %}

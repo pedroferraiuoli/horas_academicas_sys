@@ -54,7 +54,7 @@
 }
 
 .login-text {
-    font-size: xxx-large;
+    font-size: 2.5rem;
     color: var(--main-blue);
 }
 
@@ -67,7 +67,7 @@
 }
 
 .div-login {
-    padding-left: 60px;
+    padding-left: 2rem;
     align-self: center;
 }
 

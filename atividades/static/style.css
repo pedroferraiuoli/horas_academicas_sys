@@ -73,7 +73,6 @@
 
 .login-card {
     background-color: var(--background-card);
-    width: 100%;
     border-radius: 30px !important;
 }
 

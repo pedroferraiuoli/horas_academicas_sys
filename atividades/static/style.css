@@ -54,7 +54,7 @@
 }
 
 .login-text {
-    font-size: xxx-large;
+    font-size: 2.5rem;
     color: var(--main-blue);
 }
 
@@ -67,13 +67,12 @@
 }
 
 .div-login {
-    padding-left: 60px;
+    padding-left: 2rem;
     align-self: center;
 }
 
 .login-card {
     background-color: var(--background-card);
-    width: 100%;
     border-radius: 30px !important;
 }
 
@@ -446,4 +445,56 @@ header button:hover {
 
 .close:hover {
     color: var(--main-orange) !important;
+}
+
+.main-login-register {
+    width: 100% !important;
+    min-height: 100vh;
+    background-color: var(--bg-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.register-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5rem;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.form-column {
+    flex: 1;
+    max-width: 500px;
+}
+
+.logo-column {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.register-logo {
+    max-width: 300px;
+    opacity: 0.7;
+}
+
+
+.login-card {
+    border: none;
+}
+
+@media (max-width: 992px) {
+    .register-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .logo-column {
+        display: none;
+    }
 }

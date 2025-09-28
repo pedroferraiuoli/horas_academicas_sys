@@ -447,7 +447,7 @@ header button:hover {
     color: var(--main-orange) !important;
 }
 
-.main-login {
+.main-login-register {
     width: 100% !important;
     min-height: 100vh;
     background-color: var(--bg-light);

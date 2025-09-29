@@ -304,8 +304,37 @@ def dashboard(request):
             'ultrapassou_limite': ultrapassou_limite
         })
 
+    # Dashboard para gestor ou coordenador
+    grupo = request.user.groups.all().first().name if request.user.groups.exists() else ''
+    stats = {}
+    if grupo == 'Coordenador':
+        coordenador = getattr(request.user, 'coordenador', None)
+        if coordenador:
+            curso = coordenador.curso
+            alunos = curso.aluno_set.all()
+            num_alunos = alunos.count()
+            total_horas_alunos = 0
+            categoria_horas = {}
+            for aluno in alunos:
+                horas = aluno.horas_complementares_validas()
+                total_horas_alunos += horas
+                # Soma por categoria
+                for cat in curso.curso_categorias.all():
+                    atividades = aluno.atividade_set.filter(categoria=cat)
+                    horas_cat = sum(float(a.horas) for a in atividades)
+                    if horas_cat > 0:
+                        categoria_horas[cat.categoria.nome] = categoria_horas.get(cat.categoria.nome, 0) + horas_cat
+            media_horas = (total_horas_alunos / num_alunos) if num_alunos > 0 else 0
+            cat_mais_horas = max(categoria_horas.items(), key=lambda x: x[1]) if categoria_horas else (None, 0)
+            stats = {
+                'num_alunos': num_alunos,
+                'media_horas': media_horas,
+                'cat_mais_horas': cat_mais_horas[0],
+                'cat_mais_horas_valor': cat_mais_horas[1],
+            }
     return render(request, 'atividades/dashboard_gestor.html', {
-        'grupo': request.user.groups.all().first().name if request.user.groups.exists() else ''
+        'grupo': grupo,
+        'stats': stats
     })
 
 def register(request):

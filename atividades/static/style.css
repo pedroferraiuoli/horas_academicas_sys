@@ -38,10 +38,13 @@
     background-size: 200px;
 }
 
-@media (max-width: 768px) {
-    .main {
-        width: 100% !important;
-    }
+.main-nosidebar {
+    background-color: var(--bg-light);
+    background-image: url('./images/logo2fundo.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 200px;
+    min-height: 100vh;
 }
 
 .main-login {
@@ -51,6 +54,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+@media (max-width: 768px) {
+    .main {
+        width: 100% !important;
+    }
 }
 
 .login-text {

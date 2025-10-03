@@ -3,7 +3,7 @@
     <header class="bg-primary-dark text-white py-3 shadow-sm">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <a href="{% url 'dashboard' %}"><img src="{% static 'images/logo1.png' %}" alt="Logo" style="height: 40px; margin-right: 12px; width: 46;"></a>
+                <a href="{% url 'dashboard' %}"><img src="{% static 'images/logo1.png' %}" alt="Logo" class="h-10 mr-3"></a>
                  <a href="{% url 'dashboard' %}" class="link-limpo"><h4 class="mb-0">ATIVIDADES COMPLEMENTARES</h4></a>
             </div>
             {% if user.is_authenticated %}
@@ -33,7 +33,7 @@
                 </ul>
               </span>
             {% else %}
-              <div class="d-flex" style="gap: 30px;">
+              <div class="d-flex gap-3">
               <span class="nav-item"><a class="nav-link" href="{% url 'login' %}">Entrar</a></span>
               <span class="nav-item"><a class="nav-link" href="{% url 'register' %}">Cadastrar</a></span>
               </div>

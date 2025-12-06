@@ -55,6 +55,3 @@ Este projeto é uma plataforma web desenvolvida em Django para gestão de ativid
 ## Observações
 - O arquivo `.gitignore` já está configurado para ignorar arquivos sensíveis e pastas de mídia/migrações
 - Para produção, configure variáveis de ambiente e um banco de dados seguro
-
-## Licença
-Este projeto é distribuído sob a licença MIT.

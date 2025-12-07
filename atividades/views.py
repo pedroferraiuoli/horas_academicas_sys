@@ -18,13 +18,18 @@ def criar_semestre(request):
         form = SemestreForm(request.POST)
         if form.is_valid():
             semestre = form.save()
+            copiar_de_id = request.POST.get('copiar_de')
+            if copiar_de_id and copiar_de_id != 'Nenhum':
+                source_semestre = Semestre.objects.filter(id=copiar_de_id).first()
+                if source_semestre:
+                    semestre.duplicate_categories_from(source_semestre)
             messages.success(request, f'Semestre {semestre.nome} criado com sucesso!')
             return redirect('dashboard')
         else:
             messages.error(request, 'Por favor, corrija os erros abaixo.')
     else:
         form = SemestreForm()
-    return render(request, 'atividades/form_semestre.html', {'form': form})
+    return render(request, 'atividades/form_semestre.html', {'form': form, 'semestres': Semestre.objects.all()})
 
 @login_required
 def editar_semestre(request, semestre_id):

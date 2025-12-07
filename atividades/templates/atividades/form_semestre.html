@@ -31,6 +31,17 @@
             {% endfor %}
           </div>
         {% endfor %}
+          <div class="col-12">
+            <label for="copiar_de" class="form-label fw-semibold">Copiar categorias de:</label>
+            <div class="input-group">
+                <select id="copiar_de" name="copiar_de" class="form-select" required>
+                  <option value="">Nenhum</option>
+                  {% for semestre in semestres %}
+                    <option value="{{ semestre.id }}">{{ semestre.nome }}</option>
+                  {% endfor %}
+                </select>
+            </div>
+          </div>
       </div>
       <div class="d-flex justify-content-between mt-4">
         <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>

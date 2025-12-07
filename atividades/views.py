@@ -4,8 +4,8 @@ from .forms import CursoForm
 from .forms import CategoriaAtividadeForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .forms import UserRegistrationForm, AtividadeForm, CalendarioForm
-from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Calendario, CursoSemestre
+from .forms import UserRegistrationForm, AtividadeForm, SemestreForm
+from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Semestre
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
@@ -15,7 +15,7 @@ def criar_semestre(request):
     if not request.user.groups.filter(name='Gestor').exists():
         return redirect('dashboard')
     if request.method == 'POST':
-        form = CalendarioForm(request.POST)
+        form = SemestreForm(request.POST)
         if form.is_valid():
             semestre = form.save()
             messages.success(request, f'Semestre {semestre.nome} criado com sucesso!')
@@ -28,22 +28,22 @@ def criar_semestre(request):
 def editar_semestre(request, semestre_id):
     if not request.user.groups.filter(name='Gestor').exists():
         return redirect('dashboard')
-    semestre = get_object_or_404(Calendario, id=semestre_id)
+    semestre = get_object_or_404(Semestre, id=semestre_id)
     if request.method == 'POST':
-        form = CalendarioForm(request.POST, instance=semestre)
+        form = SemestreForm(request.POST, instance=semestre)
         if form.is_valid():
             semestre = form.save()
             messages.success(request, f'Semestre {semestre.nome} atualizado com sucesso!')
             return redirect('listar_semestres')
     else:
-        form = CalendarioForm(instance=semestre)
+        form = SemestreForm(instance=semestre)
     return render(request, 'atividades/form_semestre.html', {'form': form, 'semestre': semestre, 'edit': True})
 
 @login_required
 def excluir_semestre(request, semestre_id):
     if not request.user.groups.filter(name='Gestor').exists():
         return redirect('dashboard')
-    semestre = get_object_or_404(Calendario, id=semestre_id)
+    semestre = get_object_or_404(Semestre, id=semestre_id)
     if request.method == 'POST':
         semestre.delete()
         messages.success(request, f'Semestre {semestre.nome} excluído com sucesso!')
@@ -54,7 +54,7 @@ def excluir_semestre(request, semestre_id):
 def listar_semestres(request):
     if not request.user.groups.filter(name='Gestor').exists():
         return redirect('dashboard')
-    semestres = Calendario.objects.all()
+    semestres = Semestre.objects.all()
     return render(request, 'atividades/listar_semestres.html', {'semestres': semestres})
 
 @login_required
@@ -393,8 +393,7 @@ def register(request):
             user.save()
             curso = form.cleaned_data['curso']
             semestre = form.cleaned_data['semestre']
-            CursoSemestre.objects.get_or_create(curso=curso, semestre=semestre)
-            Aluno.objects.create(user=user, curso_semestre=CursoSemestre.objects.get(curso=curso, semestre=semestre))
+            Aluno.objects.create(user=user, curso=curso, semestre_ingresso=semestre)
             messages.success(request, 'Registro realizado com sucesso!')
             return redirect('login')
     else:

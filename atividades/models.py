@@ -71,6 +71,7 @@ class Coordenador(models.Model):
 
 class Aluno(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
     semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
@@ -78,15 +79,15 @@ class Aluno(models.Model):
 
     def horas_complementares_validas(self):
         total = 0
-        if not self.curso_semestre:
+        if not self.curso:
             return 0
         # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
-        for cat in self.curso_semestre.curso.curso_categorias.all():
+        for cat in self.curso.curso_categorias.all():
             categoria = cat.categoria
             atividades = self.atividade_set.filter(categoria=cat)
             soma = sum(float(a.horas) for a in atividades)
             try:
-                curso_categoria = CursoCategoria.objects.get(curso=self.curso_semestre.curso, categoria=categoria)
+                curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria)
                 limite = float(curso_categoria.limite_horas)
             except CursoCategoria.DoesNotExist:
                 limite = 0

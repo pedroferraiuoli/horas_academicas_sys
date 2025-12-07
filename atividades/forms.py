@@ -4,18 +4,18 @@ from .models import CategoriaAtividade
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Aluno, Curso, Calendario
+from .models import Aluno, Curso, Semestre
 from .models import Atividade, CategoriaAtividade
 
-class CalendarioForm(forms.ModelForm):
+class SemestreForm(forms.ModelForm):
     nome = forms.CharField(label='Nome do Semestre', max_length=20)
     data_inicio = forms.DateField(label='Data de Início', widget=forms.DateInput(attrs={'type': 'date'}))
     data_fim = forms.DateField(label='Data de Fim', widget=forms.DateInput(attrs={'type': 'date'}))
 
     class Meta:
-        model = Calendario
+        model = Semestre
         fields = ['nome', 'data_inicio', 'data_fim']
-        
+
 class AlterarEmailForm(forms.ModelForm):
     email = forms.EmailField(label='Novo e-mail', max_length=254)
     email_confirm = forms.EmailField(label='Confirme o novo e-mail', max_length=254)
@@ -181,7 +181,7 @@ class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(label='Senha', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirme a senha', widget=forms.PasswordInput)
     curso = forms.ModelChoiceField(queryset=Curso.objects.all(), label='Curso de Graduação')
-    semestre = forms.ModelChoiceField(queryset=Calendario.objects.all(), label='Semestre Atual')
+    semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre de Ingresso')
 
     class Meta:
         model = User

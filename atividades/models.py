@@ -28,29 +28,19 @@ class Curso(models.Model):
     def __str__(self):
         return self.nome
     
-class CursoSemestre(models.Model):
-    curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='versoes')
-    semestre = models.ForeignKey('Calendario', on_delete=models.PROTECT)
-    criado_em = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('curso', 'semestre')
-    def __str__(self):
-        return f"{self.curso.nome} - {self.semestre}"
     
 class CursoCategoria(models.Model):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
-    curso_semestre = models.ForeignKey('CursoSemestre', related_name='curso_categorias', on_delete=models.CASCADE, null=True, blank=True)
     categoria = models.ForeignKey('CategoriaAtividade', on_delete=models.CASCADE, related_name='curso_categorias')
     limite_horas = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Limite máximo de horas para esta categoria neste curso")
-    carga_horaria = models.CharField(max_length=50, help_text="Carga horária do curso (e.g., 2000h)", null=True, blank=True, default="1h = 1h")
-
+    equivalencia_horas = models.CharField(max_length=50, help_text="Equivalência de horas (e.g., 1h = 1h)", null=True, blank=True, default="1h = 1h")
+    semestre = models.ForeignKey('Semestre', on_delete=models.PROTECT)
 
     class Meta:
-        unique_together = ('curso', 'categoria')
+        unique_together = ('curso', 'categoria', 'semestre')
 
     def __str__(self):
-        return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h)"
+        return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
     
     def limite_horas_formatado(self):
         fracao_decimal, parte_inteira = modf(float(self.limite_horas))

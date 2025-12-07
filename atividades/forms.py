@@ -100,10 +100,11 @@ class CategoriaAtividadeForm(forms.ModelForm):
 class CategoriaCursoForm(forms.ModelForm):
     limite_horas_int = forms.IntegerField(label='Limite de Horas', min_value=0, required=False, initial=0)
     limite_minutos_int = forms.IntegerField(label='Limite de Minutos', min_value=0, max_value=59, required=False, initial=0)
+    semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre')
 
     class Meta:
         model = CursoCategoria
-        fields = ['curso', 'categoria', 'limite_horas_int', 'limite_minutos_int', 'carga_horaria']
+        fields = ['curso', 'categoria', 'limite_horas_int', 'limite_minutos_int', 'semestre']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -196,13 +197,15 @@ class UserRegistrationForm(forms.ModelForm):
 class CategoriaCursoDiretaForm(forms.Form):
     nome = forms.CharField(label='Nome da categoria', max_length=100)
     limite_horas = forms.DecimalField(label='Limite de horas', max_digits=5, decimal_places=2, min_value=0)
+    semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre')
 
     def save(self, coordenador):
         categoria = CategoriaAtividade.objects.create(nome=self.cleaned_data['nome'])
         curso_categoria = CursoCategoria.objects.create(
             curso=coordenador.curso,
             categoria=categoria,
-            limite_horas=self.cleaned_data['limite_horas']
+            limite_horas=self.cleaned_data['limite_horas'],
+            semestre=self.cleaned_data['semestre']
         )
         return curso_categoria
 

@@ -2,6 +2,14 @@ from math import modf
 from django.db import models
 from django.contrib.auth.models import User
 
+class Semestre(models.Model):
+    nome = models.CharField(max_length=20)
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.nome
+
 class CategoriaAtividade(models.Model):
     nome = models.CharField(max_length=100)
 
@@ -20,8 +28,19 @@ class Curso(models.Model):
     def __str__(self):
         return self.nome
     
+class CursoSemestre(models.Model):
+    curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='versoes')
+    semestre = models.ForeignKey('Calendario', on_delete=models.PROTECT)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('curso', 'semestre')
+    def __str__(self):
+        return f"{self.curso.nome} - {self.semestre}"
+    
 class CursoCategoria(models.Model):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
+    curso_semestre = models.ForeignKey('CursoSemestre', related_name='curso_categorias', on_delete=models.CASCADE, null=True, blank=True)
     categoria = models.ForeignKey('CategoriaAtividade', on_delete=models.CASCADE, related_name='curso_categorias')
     limite_horas = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Limite máximo de horas para esta categoria neste curso")
     carga_horaria = models.CharField(max_length=50, help_text="Carga horária do curso (e.g., 2000h)", null=True, blank=True, default="1h = 1h")
@@ -52,23 +71,22 @@ class Coordenador(models.Model):
 
 class Aluno(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
-
+    semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
-        return self.user.get_full_name() or self.user.username
+        return f"{self.user.get_full_name() or self.user.username} ({self.semestre_ingresso})"
 
     def horas_complementares_validas(self):
         total = 0
-        if not self.curso:
+        if not self.curso_semestre:
             return 0
         # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
-        for cat in self.curso.curso_categorias.all():
+        for cat in self.curso_semestre.curso.curso_categorias.all():
             categoria = cat.categoria
             atividades = self.atividade_set.filter(categoria=cat)
             soma = sum(float(a.horas) for a in atividades)
             try:
-                curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria)
+                curso_categoria = CursoCategoria.objects.get(curso=self.curso_semestre.curso, categoria=categoria)
                 limite = float(curso_categoria.limite_horas)
             except CursoCategoria.DoesNotExist:
                 limite = 0

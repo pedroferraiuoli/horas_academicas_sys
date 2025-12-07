@@ -10,6 +10,8 @@
   <thead style="color: #fff;">
     <tr>
       <th class="orange">NOME</th>
+      <th class="orange">DATA INÍCIO</th>
+      <th class="orange">DATA FIM</th>
       <th class="orange">AÇÕES</th>
     </tr>
   </thead>
@@ -17,6 +19,8 @@
     {% for semestre in semestres %}
     <tr>
       <td>{{ semestre.nome }}</td>
+      <td>{{ semestre.data_inicio }}</td>
+      <td>{{ semestre.data_fim }}</td>
       <td>
         <a href="{% url 'editar_semestre' semestre.id %}" class="btn btn-outline-main-green btn-sm"><i class="bi bi-pencil"></i> Editar</a>
         <a href="{% url 'excluir_semestre' semestre.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Excluir</a>

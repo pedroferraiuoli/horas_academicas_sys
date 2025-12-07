@@ -9,17 +9,23 @@
   <div class="card-body bg-white">
     <form method="post">
       {% csrf_token %}
-      {% if cursos %}
         <div class="mb-3">
+          <label for="semestre_id" class="form-label">Selecione o semestre:</label>
+          <select name="semestre_id" id="semestre_id" class="form-select">
+            <option value="" disabled selected>-- Escolha --</option>
+            {% for s in semestres %}
+              <option value="{{ s.id }}" {% if s.id|stringformat:'s' == semestre_selecionado|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+            {% endfor %}
+          </select>
           <label for="curso_id" class="form-label">Selecione o curso:</label>
-          <select name="curso_id" id="curso_id" class="form-select" onchange="this.form.submit()">
+          <select name="curso_id" id="curso_id" class="form-select">
             <option value="" disabled selected>-- Escolha --</option>
             {% for c in cursos %}
               <option value="{{ c.id }}" {% if c.id|stringformat:'s' == curso_selecionado|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
             {% endfor %}
           </select>
+          <button type="submit" class="btn btn-success mt-3" onclick="this.form.submit()"><i class="bi bi-check-lg"></i> Continuar</button>
         </div>
-      {% endif %}
       {% if categorias %}
           <table class="table table-bordered align-middle">
             <thead>

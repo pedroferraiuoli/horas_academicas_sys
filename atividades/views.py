@@ -22,7 +22,9 @@ def criar_semestre(request):
             return redirect('dashboard')
         else:
             messages.error(request, 'Por favor, corrija os erros abaixo.')
-    return render(request, 'atividades/form_semestre.html')
+    else:
+        form = SemestreForm()
+    return render(request, 'atividades/form_semestre.html', {'form': form})
 
 @login_required
 def editar_semestre(request, semestre_id):
@@ -337,7 +339,7 @@ def dashboard(request):
             progresso_percentual = min(100, round((float(total_horas) / float(horas_requeridas)) * 100))
         atividades_recentes = atividades.order_by('-criado_em')[:5]
 
-        categorias = aluno.curso.curso_categorias.all() if aluno.curso else []
+        categorias = aluno.curso.get_categorias(semestre=aluno.semestre_ingresso) if aluno.curso else []
         for categoria in categorias:
             if categoria.ultrapassou_limite_pelo_aluno(aluno):
                 ultrapassou_limite = True
@@ -348,7 +350,7 @@ def dashboard(request):
             'total_horas': total_horas_formatado if aluno else None,
             'progresso_percentual': progresso_percentual,
             'atividades_recentes': atividades_recentes,
-            'ultrapassou_limite': ultrapassou_limite
+            'ultrapassou_limite': ultrapassou_limite,
         })
 
     # Dashboard para gestor ou coordenador
@@ -488,6 +490,7 @@ def associar_categorias_ao_curso(request):
     coordenador = getattr(user, 'coordenador', None)
     curso = None
     cursos = None
+    semestres = Semestre.objects.all()
     if coordenador:
         curso = coordenador.curso
     elif user.groups.filter(name='Gestor').exists():
@@ -498,11 +501,12 @@ def associar_categorias_ao_curso(request):
                 curso = Curso.objects.get(id=curso_id)
             except Curso.DoesNotExist:
                 curso = None
+            semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
     else:
         messages.error(request, 'Acesso negado.')
         return redirect('dashboard')
 
-    categorias_vinculadas = CursoCategoria.objects.filter(curso=curso).values_list('categoria_id', flat=True) if curso else []
+    categorias_vinculadas = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True) if curso else []
     categorias_disponiveis = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas) if curso else []
 
     if request.method == 'POST' and curso:
@@ -515,7 +519,9 @@ def associar_categorias_ao_curso(request):
                 'curso_nome': curso.nome if curso else '',
                 'cursos': cursos,
                 'curso_selecionado': curso.id if curso else '',
-                'curso_required': True if user.groups.filter(name='Gestor').exists() else False
+                'curso_required': True if user.groups.filter(name='Gestor').exists() else False,
+                'semestres': semestres,
+                'semestre_selecionado': request.POST.get('semestre_id', '')
             })
         adicionadas = 0
         for categoria in categorias_disponiveis:
@@ -528,7 +534,8 @@ def associar_categorias_ao_curso(request):
                 CursoCategoria.objects.create(
                     curso=curso,
                     categoria=categoria,
-                    limite_horas=limite
+                    limite_horas=limite,
+                    semestre=semestre
                 )
                 adicionadas += 1
         if adicionadas:
@@ -542,5 +549,6 @@ def associar_categorias_ao_curso(request):
         'curso_nome': curso.nome if curso else '',
         'cursos': cursos,
         'curso_selecionado': curso.id if curso else '',
-        'curso_required': True if user.groups.filter(name='Gestor').exists() else False
+        'curso_required': True if user.groups.filter(name='Gestor').exists() else False,
+        'semestres': semestres,
     })

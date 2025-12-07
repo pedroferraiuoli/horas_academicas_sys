@@ -28,6 +28,12 @@ class Curso(models.Model):
     def __str__(self):
         return self.nome
     
+
+    def get_categorias(self, semestre=None):
+        if semestre:
+            return self.curso_categorias.filter(semestre=semestre).select_related('categoria').all()
+        return self.curso_categorias.select_related('categoria').all()
+    
     
 class CursoCategoria(models.Model):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
@@ -51,6 +57,8 @@ class CursoCategoria(models.Model):
         atividades = aluno.atividade_set.filter(categoria=self)
         total_horas = sum(float(a.horas) for a in atividades)
         return total_horas > float(self.limite_horas)
+    
+
 
 class Coordenador(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='coordenador')
@@ -72,12 +80,12 @@ class Aluno(models.Model):
         if not self.curso:
             return 0
         # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
-        for cat in self.curso.curso_categorias.all():
+        for cat in self.curso.get_categorias(semestre=self.semestre_ingresso):
             categoria = cat.categoria
             atividades = self.atividade_set.filter(categoria=cat)
             soma = sum(float(a.horas) for a in atividades)
             try:
-                curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria)
+                curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria, semestre=self.semestre_ingresso)
                 limite = float(curso_categoria.limite_horas)
             except CursoCategoria.DoesNotExist:
                 limite = 0

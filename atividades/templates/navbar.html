@@ -9,7 +9,7 @@
                         <div class="navbar-head text-center w-[30%]">CARGA HORÁRIA</div>
                         <div class="navbar-head text-center w-[10%]">LIMITE</div>
                     </div>
-                    {% for categoria in user.aluno.curso.curso_categorias.all %}
+                    {% for categoria in categorias %}
                         <div class="d-flex navbar-row px-2 {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
                             <div class="d-flex w-[60%]">
                                 <div class="me-4 py-2 text-2xl">
@@ -23,7 +23,7 @@
                                 </div>
                                 <div class="mb-0 text-start py-3 ">{{ categoria.categoria.nome }}</div>
                             </div>
-                            <div class="text-center py-3 small w-[30%]">{{ categoria.carga_horaria }}</div>
+                            <div class="text-center py-3 small w-[30%]">{{ categoria.equivalencia_horas }}</div>
                             <div class="text-center py-3 w-[10%]">
                                 <div class="d-flex flex-column align-items-center">
                                     <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>

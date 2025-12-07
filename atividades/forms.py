@@ -7,14 +7,15 @@ from django.contrib.auth.models import User
 from .models import Aluno, Curso, Semestre
 from .models import Atividade, CategoriaAtividade
 
-class SemestreForm(forms.ModelForm):
-    nome = forms.CharField(label='Nome do Semestre', max_length=20)
-    data_inicio = forms.DateField(label='Data de Início', widget=forms.DateInput(attrs={'type': 'date'}))
-    data_fim = forms.DateField(label='Data de Fim', widget=forms.DateInput(attrs={'type': 'date'}))
+class SemestreForm(forms.ModelForm): 
 
     class Meta:
         model = Semestre
         fields = ['nome', 'data_inicio', 'data_fim']
+        widgets = {
+            'data_inicio': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'data_fim': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
+        }
 
 class AlterarEmailForm(forms.ModelForm):
     email = forms.EmailField(label='Novo e-mail', max_length=254)

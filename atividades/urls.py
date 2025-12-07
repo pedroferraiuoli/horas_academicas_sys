@@ -31,6 +31,10 @@ urlpatterns = [
     path('atividades/', views.listar_atividades, name='listar_atividades'),
     path('atividades/<int:atividade_id>/editar/', views.editar_atividade, name='editar_atividade'),
     path('atividades/<int:atividade_id>/excluir/', views.excluir_atividade, name='excluir_atividade'),
+    path('criar-semestre/', views.criar_semestre, name='criar_semestre'),
+    path('semestre/<int:semestre_id>/editar/', views.editar_semestre, name='editar_semestre'),
+    path('semestres/', views.listar_semestres, name='listar_semestres'),
+    path('semestre/<int:semestre_id>/excluir/', views.excluir_semestre, name='excluir_semestre'),
     path('alterar-email/', views.alterar_email, name='alterar_email'),
     path('trocar-senha/', auth_views.PasswordChangeView.as_view(template_name='atividades/password_change_form.html', success_url='/'), name='password_change'),
     # Password reset

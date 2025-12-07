@@ -12,6 +12,24 @@ class Command(BaseCommand):
             'Gestor': Group.objects.get_or_create(name='Gestor')[0],
         }
 
+        # Semestres
+        semestres_info = [
+            {'nome': '2023.1', 'data_inicio': '2023-02-01', 'data_fim': '2023-07-31'},
+            {'nome': '2023.2', 'data_inicio': '2023-08-01', 'data_fim': '2023-12-20'},
+            {'nome': '2024.1', 'data_inicio': '2024-02-01', 'data_fim': '2024-07-31'},
+            {'nome': '2024.2', 'data_inicio': '2024-08-01', 'data_fim': '2024-12-20'},
+            {'nome': '2025.1', 'data_inicio': '2025-02-01', 'data_fim': '2025-07-31'},
+            {'nome': '2025.2', 'data_inicio': '2025-08-01', 'data_fim': '2025-12-20'},
+            {'nome': '2026.1', 'data_inicio': '2026-02-01', 'data_fim': '2026-07-31'},
+            {'nome': '2026.2', 'data_inicio': '2026-08-01', 'data_fim': '2026-12-20'},
+        ]
+        for info in semestres_info:
+            from atividades.models import Semestre
+            Semestre.objects.get_or_create(nome=info['nome'], defaults={
+                'data_inicio': info['data_inicio'],
+                'data_fim': info['data_fim']
+            })
+
         # Cursos
         cursos_info = [
             {'nome': 'Sistemas de Informação', 'horas_requeridas': 600},
@@ -55,6 +73,7 @@ class Command(BaseCommand):
 
         # CursoCategoria (associação)
         import random
+        semestre = Semestre.objects.filter(nome='2025.2').first()
         for curso in cursos:
             for categoria in categorias:
                 limite_horas = random.randint(10, 60)
@@ -63,7 +82,8 @@ class Command(BaseCommand):
                     categoria=categoria,
                     defaults={
                         'limite_horas': limite_horas,
-                        'carga_horaria': '1h = 1h'
+                        'equivalencia_horas': '1h = 1h',
+                        'semestre': semestre
                     }
                 )
 
@@ -75,7 +95,7 @@ class Command(BaseCommand):
             aluno_user.save()
         aluno_curso = cursos[0]  # Sistemas de Informação
         from atividades.models import Aluno, Coordenador
-        aluno_obj, _ = Aluno.objects.get_or_create(user=aluno_user, curso=aluno_curso)
+        aluno_obj, _ = Aluno.objects.get_or_create(user=aluno_user, curso=aluno_curso, semestre_ingresso=semestre)
 
         # Coordenador
         coord_user, created = User.objects.get_or_create(username='coordenador', defaults={'email': 'coordenador@example.com'})

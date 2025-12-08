@@ -338,7 +338,6 @@ def dashboard(request):
         aluno = request.user.aluno
         atividades = aluno.atividade_set.all()
         total_horas = aluno.horas_complementares_validas()
-        total_horas_formatado = aluno.horas_complementares_validas_formatado()
         horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
         if horas_requeridas > 0:
             progresso_percentual = min(100, round((float(total_horas) / float(horas_requeridas)) * 100))
@@ -352,7 +351,7 @@ def dashboard(request):
 
         return render(request, 'atividades/dashboard.html', {
             'aluno': aluno,
-            'total_horas': total_horas_formatado if aluno else None,
+            'total_horas': total_horas if aluno else None,
             'progresso_percentual': progresso_percentual,
             'atividades_recentes': atividades_recentes,
             'ultrapassou_limite': ultrapassou_limite,

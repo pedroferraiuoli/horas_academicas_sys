@@ -49,17 +49,11 @@ class CategoriaAtividade(models.Model):
 
 class Curso(models.Model):
     nome = models.CharField(max_length=100)
-    horas_requeridas = models.DecimalField(max_digits=5, decimal_places=2, help_text="Horas totais necessárias para conclusão do curso", default=0)
-
-    def horas_requeridas_formatada(self):
-        fracao_decimal, parte_inteira = modf(float(self.horas_requeridas))
-        minutos = round(fracao_decimal * 60)
-        return f"{int(parte_inteira)}:{minutos:02d}h"
+    horas_requeridas = models.IntegerField(help_text="Horas totais necessárias para conclusão do curso")
 
     def __str__(self):
         return self.nome
     
-
     def get_categorias(self, semestre=None):
         if semestre:
             return self.curso_categorias.filter(semestre=semestre).select_related('categoria').all()
@@ -69,7 +63,7 @@ class Curso(models.Model):
 class CursoCategoria(models.Model):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
     categoria = models.ForeignKey('CategoriaAtividade', on_delete=models.CASCADE, related_name='curso_categorias')
-    limite_horas = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Limite máximo de horas para esta categoria neste curso")
+    limite_horas = models.IntegerField(help_text="Limite máximo de horas para esta categoria neste curso")
     equivalencia_horas = models.CharField(max_length=50, help_text="Equivalência de horas (e.g., 1h = 1h)", null=True, blank=True, default="1h = 1h")
     semestre = models.ForeignKey('Semestre', on_delete=models.PROTECT)
 
@@ -79,15 +73,10 @@ class CursoCategoria(models.Model):
     def __str__(self):
         return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
     
-    def limite_horas_formatado(self):
-        fracao_decimal, parte_inteira = modf(float(self.limite_horas))
-        minutos = round(fracao_decimal * 60)
-        return f"{int(parte_inteira)}:{minutos:02d}h"
-    
     def ultrapassou_limite_pelo_aluno(self, aluno):
         atividades = aluno.atividade_set.filter(categoria=self)
-        total_horas = sum(float(a.horas) for a in atividades)
-        return total_horas > float(self.limite_horas)
+        total_horas = sum(a.horas for a in atividades)
+        return total_horas > self.limite_horas
     
 
 
@@ -114,10 +103,10 @@ class Aluno(models.Model):
         for cat in self.curso.get_categorias(semestre=self.semestre_ingresso):
             categoria = cat.categoria
             atividades = self.atividade_set.filter(categoria=cat)
-            soma = sum(float(a.horas) for a in atividades)
+            soma = sum(a.horas for a in atividades)
             try:
                 curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria, semestre=self.semestre_ingresso)
-                limite = float(curso_categoria.limite_horas)
+                limite = curso_categoria.limite_horas
             except CursoCategoria.DoesNotExist:
                 limite = 0
             if limite > 0:
@@ -125,26 +114,16 @@ class Aluno(models.Model):
             else:
                 total += soma
         return total
-    
-    def horas_complementares_validas_formatado(self):
-        fracao_decimal, parte_inteira = modf(float(self.horas_complementares_validas()))
-        minutos = round(fracao_decimal * 60)
-        return f"{int(parte_inteira)}:{minutos:02d}h"
 
 class Atividade(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
     categoria = models.ForeignKey(CursoCategoria, on_delete=models.PROTECT)
     nome = models.CharField(max_length=200)
     descricao = models.TextField(blank=True)
-    horas = models.DecimalField(max_digits=5, decimal_places=2)
+    horas = models.IntegerField(help_text="Duração da atividade em horas")
     data = models.DateField()
     documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.nome} ({self.aluno})"
-    
-    def horas_formatada(self):
-        fracao_decimal, parte_inteira = modf(float(self.horas))
-        minutos = round(fracao_decimal * 60)
-        return f"{int(parte_inteira)}:{minutos:02d}h"

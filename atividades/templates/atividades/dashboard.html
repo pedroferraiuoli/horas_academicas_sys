@@ -4,7 +4,7 @@
 
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div style="justify-self: end;">
+<div class="mt-3" style="justify-self: end;">
     <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info ms-2"><i class="bi bi-plus-circle"></i> Cadastrar Atividade</a>
     <a href="{% url 'listar_atividades' %}" class="btn btn-info ms-2"><i class="bi bi-list"></i> Listar Atividades</a>
 </div>
@@ -14,7 +14,7 @@
 
     </div>
 
-    <p>Curso: {{ aluno.curso }} / Horas complementares requeridas: {{ aluno.curso.horas_requeridas_formatada }}</p>
+    <p>Curso: {{ aluno.curso }} / Horas complementares requeridas: {{ aluno.curso.horas_requeridas }}h</p>
     {% if ultrapassou_limite %}
       <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -22,10 +22,10 @@
       </div>
     {% endif %}
     <div class="mb-4 mt-5">
-      <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }})</span>
+      <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas }}h)</span>
       <div class="progress" style="height: 30px; background-color: #939FB5;">
           <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;">
-            <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas_formatada }}</span>
+            <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas }}h</span>
         </div>
       </div>
     </div>
@@ -48,7 +48,7 @@
           <td>{{ atividade.nome }}</td>
           <td>{{ atividade.categoria.categoria.nome }}</td>
           <td>{{ atividade.data }}</td>
-          <td><span class="badge  bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
+          <td><span class="badge  bg-opacity-75">{{ atividade.horas }}h</span></td>
           <td>
             <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i> Editar</a>
             {% if atividade.documento %}

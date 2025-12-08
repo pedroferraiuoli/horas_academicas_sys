@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <h2 class="main-blue">Alunos do curso: {{ curso.nome }}</h2>
+  <div class="mb-3">
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  <table class="table table-bordered table-sm align-middle rounded">
+    <thead style="color: #fff;">
+      <tr>
+        <th class="orange">NOME</th>
+        <th class="orange">USUÁRIO</th>
+        <th class="orange">E-MAIL</th>
+        <th class="orange">INGRESSO</th>
+        <th class="orange">STATUS</th>
+        <th class="orange">AÇÕES</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in alunos %}
+        {% with aluno=item.aluno %}
+        <tr>
+          <td>{{ aluno.user.get_full_name|default:aluno.user.username }}</td>
+          <td>{{ aluno.user.username }}</td>
+          <td>{{ aluno.user.email }}</td>
+          <td>{{ aluno.semestre_ingresso }}</td>
+           <td>
+          {% if not item.horas_a_validar %}
+            <span class="badge bg-success">Sem pendências</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Aguardando</span>
+          {% endif %}
+        </td>
+          <td>
+            <a href="{% url 'listar_atividades_coordenador' aluno.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i> Ver atividades</a>
+          </td>
+        </tr>
+        {% endwith %}
+      {% empty %}
+        <tr><td colspan="7">Nenhum aluno cadastrado neste curso.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

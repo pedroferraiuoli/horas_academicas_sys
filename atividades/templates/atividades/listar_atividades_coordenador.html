@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <h2 class="main-blue">Atividades de {{ aluno.user.get_full_name|default:aluno.user.username }}</h2>
+  <div class="mb-3">
+    <a href="{% url 'listar_alunos_coordenador' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  <table class="table table-bordered table-sm align-middle rounded">
+    <thead style="color: #fff;">
+      <tr>
+        <th class="orange">NOME</th>
+        <th class="orange">CATEGORIA</th>
+        <th class="orange">HORAS REQUERIDAS</th>
+        <th class="orange">HORAS APROVADAS</th>
+        <th class="orange">DATA</th>
+        <th class="orange">DOCUMENTO</th>
+        <th class="orange">OBS</th>
+        <th class="orange">STATUS</th>
+        <th class="orange">AÇÕES</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for atividade in atividades %}
+      <tr>
+        <td>{{ atividade.nome }}</td>
+        <td>{{ atividade.categoria.categoria.nome }}</td>
+        <td>{{ atividade.horas }}h</td>
+        <td>
+          {% if atividade.horas_aprovadas is not None %}
+            {{ atividade.horas_aprovadas }}h
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td>{{ atividade.data }}</td>
+        <td>
+          {% if atividade.documento %}
+            <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-sm btn-outline-main-blue">Ver</a>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td>
+            {% if atividade.observacoes_para_aprovador %}
+                <button type="button" class="btn btn-sm btn-outline-main-blue" data-bs-toggle="modal" data-bs-target="#obsModal{{ forloop.counter }}">
+                    Ver
+                </button>
+
+                <div class="modal fade" id="obsModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="obsModalLabel{{ forloop.counter }}" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="obsModalLabel{{ forloop.counter }}">Observação do Aluno</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p class="small text-muted mb-0">{{ atividade.observacoes_para_aprovador }}</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            {% else %}
+              —
+            {% endif %}
+        </td>
+        <td>
+          {% if atividade.horas_aprovadas is not None %}
+            <span class="badge bg-success">Aprovado ({{ atividade.horas_aprovadas }}h)</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Aguardando</span>
+          {% endif %}
+        </td>
+        <td>
+            {% if atividade.horas_aprovadas is None %}
+
+              <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
+                <i class="bi bi-check2-circle"></i> Aprovar
+              </button>
+
+            {% else %}
+              <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
+                <i class="bi bi-check2-circle"></i> Editar
+              </button>
+            {% endif %}
+
+
+              <div class="modal fade" id="aprovarModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="aprovarModalLabel{{ forloop.counter }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="aprovarModalLabel{{ forloop.counter }}">Aprovar atividade</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <form action="{% url 'aprovar_horas_atividade' atividade.id %}" method="post">
+                      {% csrf_token %}
+                      <div class="modal-body">
+                        <div class="mb-3">
+                          <label for="horasAprovadas{{ forloop.counter }}" class="form-label">Horas aprovadas</label>
+                          <input id="horasAprovadas{{ forloop.counter }}" name="horas_aprovadas" type="number" min="0" step="1" class="form-control" required placeholder="Ex.: 2">
+                        </div>
+                        <div class="mb-3">
+                          <label for="obsAprovador{{ forloop.counter }}" class="form-label">Observação (opcional)</label>
+                          <textarea id="obsAprovador{{ forloop.counter }}" name="observacao_aprovador" class="form-control" rows="3" placeholder="Comentário para o registro"></textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Salvar aprovação</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">Nenhuma atividade cadastrada para este aluno.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -94,7 +94,7 @@ class AtividadeForm(forms.ModelForm):
 
     class Meta:
         model = Atividade
-        fields = ['categoria', 'nome', 'descricao', 'horas', 'data', 'documento']
+        fields = ['categoria', 'nome', 'descricao', 'horas', 'data', 'documento', 'observacoes_para_aprovador']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }

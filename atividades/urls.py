@@ -45,6 +45,9 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('usuarios/<int:user_id>/ativar-desativar/', views.ativar_desativar_usuario, name='ativar_desativar_usuario'),
     path('associar-categorias-ao-curso/', views.associar_categorias_ao_curso, name='associar_categorias_ao_curso'),
+    path('alunos-coordenador/', views.listar_alunos_coordenador, name='listar_alunos_coordenador'),
+    path('atividades-coordenador/<int:aluno_id>/', views.listar_atividades_coordenador, name='listar_atividades_coordenador'),
+    path('aprovar-horas-atividade/<int:atividade_id>/', views.aprovar_horas_atividade, name='aprovar_horas_atividade'),
 ]
 
 if settings.DEBUG:

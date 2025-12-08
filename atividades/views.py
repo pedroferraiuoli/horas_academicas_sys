@@ -457,6 +457,88 @@ def listar_usuarios_admin(request):
         'coordenadores': coordenadores
     })
 
+
+@login_required
+def listar_alunos_coordenador(request):
+    user = request.user
+    if not user.groups.filter(name='Coordenador').exists():
+        messages.error(request, 'Acesso negado.')
+        return redirect('dashboard')
+    try:
+        coordenador = Coordenador.objects.get(user=user)
+    except Coordenador.DoesNotExist:
+        messages.error(request, 'Perfil de coordenador não encontrado.')
+        return redirect('dashboard')
+
+    curso = coordenador.curso
+    alunos_ = Aluno.objects.filter(curso=curso).select_related('user', 'semestre_ingresso')
+
+    # calcular horas válidas por aluno (pode ser pesado se houver muitos alunos)
+    alunos = []
+    for aluno in alunos_:
+        horas_a_validar = Atividade.objects.filter(aluno=aluno, horas_aprovadas=None).exists()
+
+        alunos.append({'aluno': aluno, 'horas_a_validar': horas_a_validar})
+
+    return render(request, 'atividades/listar_alunos_coordenador.html', {
+        'curso': curso,
+        'alunos': alunos,
+    })
+
+@login_required
+def listar_atividades_coordenador(request, aluno_id):
+    user = request.user
+    if not user.groups.filter(name='Coordenador').exists():
+        messages.error(request, 'Acesso negado.')
+        return redirect('dashboard')
+    try:
+        coordenador = Coordenador.objects.get(user=user)
+    except Coordenador.DoesNotExist:
+        messages.error(request, 'Perfil de coordenador não encontrado.')
+        return redirect('dashboard')
+
+    aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
+    atividades = Atividade.objects.filter(aluno=aluno)
+
+    return render(request, 'atividades/listar_atividades_coordenador.html', {
+        'aluno': aluno,
+        'atividades': atividades,
+    })
+
+@login_required
+def aprovar_horas_atividade(request, atividade_id):
+    user = request.user
+    if not user.groups.filter(name='Coordenador').exists():
+        messages.error(request, 'Acesso negado.')
+        return redirect('dashboard')
+    try:
+        coordenador = Coordenador.objects.get(user=user)
+    except Coordenador.DoesNotExist:
+        messages.error(request, 'Perfil de coordenador não encontrado.')
+        return redirect('dashboard')
+
+    atividade = get_object_or_404(Atividade, id=atividade_id)
+    if atividade.aluno.curso != coordenador.curso:
+        messages.error(request, 'Acesso negado à atividade deste aluno.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        horas_aprovadas = request.POST.get('horas_aprovadas')
+        try:
+            horas_aprovadas = int(horas_aprovadas)
+            if horas_aprovadas < 0 or horas_aprovadas > atividade.horas:
+                raise ValueError
+        except (ValueError, TypeError):
+            messages.warning(request, 'Número inválido de horas aprovadas.')
+            return redirect('listar_atividades_coordenador', aluno_id=atividade.aluno.id)
+
+        atividade.horas_aprovadas = horas_aprovadas
+        atividade.save()
+        messages.success(request, f'Atividade {atividade.nome} aprovada com {horas_aprovadas} horas!')
+        return redirect('listar_atividades_coordenador', aluno_id=atividade.aluno.id)
+
+    return render(request, 'atividades/aprovar_atividade.html', {'atividade': atividade})
+
 @login_required
 @require_POST
 def ativar_desativar_usuario(request, user_id):

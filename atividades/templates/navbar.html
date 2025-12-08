@@ -2,31 +2,30 @@
 {% load static %}
  <!-- Sidebar -->
             {% if user.is_authenticated and user.aluno %}
-            <nav class="d-none d-md-block sidebar h-screen w-[39.3%] overflow-auto">
-                <div class="navbar-list">
-                    <div class="d-flex px-2">
-                        <div class="navbar-head w-[60%]">CATEGORIAS</div>
-                        <div class="navbar-head text-center w-[30%]">CARGA HORÁRIA</div>
-                        <div class="navbar-head text-center w-[10%]">LIMITE</div>
+            <nav class="sidebar">
+                    <div class="row gx-0 sidebar-header">
+                        <div class="col-7">CATEGORIAS</div>
+                        <div class="col-4 text-center">CARGA HORÁRIA</div>
+                        <div class="col-1">LIMITE</div>
                     </div>
-                    {% for categoria in categorias %}
-                        <div class="d-flex navbar-row px-2 {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
-                            <div class="d-flex w-[60%]">
-                                <div class="me-4 py-2 text-2xl">
-                                   {% if forloop.counter %}
-                                        {% if forloop.counter < 10 %}
-                                            0{{ forloop.counter }}
+                    {% for categoria in user.aluno.curso.curso_categorias.all %}
+                        <div class="row gx-0 align-items-center sidebar-row {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
+                            <div class="d-flex col-7">
+                                <div class="me-4 py-2" style="font-size: 1.5rem;">
+                                    {% if categoria.categoria.id %}
+                                        {% if categoria.categoria.id < 10 %}
+                                            0{{ categoria.categoria.id }}
                                         {% else %}
-                                            {{ forloop.counter }}
+                                            {{ categoria.categoria.id }}
                                         {% endif %}
                                     {% endif %}
                                 </div>
                                 <div class="mb-0 text-start py-3 ">{{ categoria.categoria.nome }}</div>
                             </div>
-                            <div class="text-center py-3 small w-[30%]">{{ categoria.equivalencia_horas }}</div>
-                            <div class="text-center py-3 w-[10%]">
+                            <div class="py-3 small col-4 text-center">{{ categoria.equivalencia_horas }}</div>
+                            <div class="py-3 col-1">
                                 <div class="d-flex flex-column align-items-center">
-                                    <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>
+                                    <span class="small fw-bold">{{ categoria.limite_horas }}h</span>
                                     <div class="badge">
                                     <span class="small mt-1">Feitas:</span>
                                     <span class="small mt-1">{{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
@@ -34,11 +33,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="navbar-separator"></div>
+                        <div class="sidebar-separator"></div>
                     {% empty %}
                         <div class="text-muted text-center py-3">Nenhuma categoria</div>
                     {% endfor %}
-                </div>
             </nav>
             {% endif %}
 <script src="{% static 'js/navbar.js' %}"></script>

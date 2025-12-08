@@ -1,4 +1,4 @@
-{% extends 'base_coord.html' %}
+{% extends 'base.html' %}
 {% load atividade_extras %}
 {% load static %}
 
@@ -28,7 +28,9 @@
     <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
     <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
     <a href="{% url 'listar_categorias_curso' %}" class="btn btn-info mb-3">Listar Categorias do Curso</a>
+    <a href="{% url 'listar_alunos_coordenador' %}" class="btn btn-info mb-3">Listar Alunos do Curso</a>
 
+    
     <div class="row mt-4 mb-4 w-100">
       <div class="col-md-4 mb-3">
         <div class="card shadow-sm h-100" style="border-radius: 13px;">

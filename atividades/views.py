@@ -9,11 +9,10 @@ from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, Cu
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
+from .decorators import gestor_required, coordenador_required, aluno_required, gestor_ou_coordenador_required
 
-@login_required
+@gestor_required
 def criar_semestre(request):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     if request.method == 'POST':
         form = SemestreForm(request.POST)
         if form.is_valid():
@@ -31,10 +30,8 @@ def criar_semestre(request):
         form = SemestreForm()
     return render(request, 'atividades/form_semestre.html', {'form': form, 'semestres': Semestre.objects.all()})
 
-@login_required
+@gestor_required
 def editar_semestre(request, semestre_id):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     semestre = get_object_or_404(Semestre, id=semestre_id)
     if request.method == 'POST':
         form = SemestreForm(request.POST, instance=semestre)
@@ -46,10 +43,8 @@ def editar_semestre(request, semestre_id):
         form = SemestreForm(instance=semestre)
     return render(request, 'atividades/form_semestre.html', {'form': form, 'semestre': semestre, 'edit': True})
 
-@login_required
+@gestor_required
 def excluir_semestre(request, semestre_id):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     semestre = get_object_or_404(Semestre, id=semestre_id)
     if request.method == 'POST':
         semestre.delete()
@@ -57,17 +52,13 @@ def excluir_semestre(request, semestre_id):
         return redirect('listar_semestres')
     return render(request, 'atividades/excluir_semestre.html', {'semestre': semestre})
 
-@login_required
+@gestor_required
 def listar_semestres(request):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     semestres = Semestre.objects.all()
     return render(request, 'atividades/listar_semestres.html', {'semestres': semestres})
 
-@login_required
+@gestor_required
 def criar_curso(request):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     if request.method == 'POST':
         form = CursoForm(request.POST)
         if form.is_valid():
@@ -78,21 +69,18 @@ def criar_curso(request):
         form = CursoForm()
     return render(request, 'atividades/form_curso.html', {'form': form})
 
-
-@login_required
+@gestor_ou_coordenador_required
 def editar_curso(request, curso_id):
     user = request.user
     curso = get_object_or_404(Curso, id=curso_id)
-    if user.groups.filter(name='Gestor').exists():
-        pode_editar = True
-    elif user.groups.filter(name='Coordenador').exists():
+    pode_editar = True
+    if user.groups.filter(name='Coordenador').exists():
         try:
             coordenador = Coordenador.objects.get(user=user)
             pode_editar = coordenador.curso.id == curso.id
         except Coordenador.DoesNotExist:
             pode_editar = False
-    else:
-        pode_editar = False
+
     if not pode_editar:
         return redirect('dashboard')
     if request.method == 'POST':
@@ -105,10 +93,8 @@ def editar_curso(request, curso_id):
         form = CursoForm(instance=curso)
     return render(request, 'atividades/form_curso.html', {'form': form, 'curso': curso, 'edit': True})
 
-@login_required
+@gestor_required
 def excluir_curso(request, curso_id):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     curso = get_object_or_404(Curso, id=curso_id)
     if request.method == 'POST':
         curso.delete()
@@ -116,7 +102,7 @@ def excluir_curso(request, curso_id):
         return redirect('listar_cursos')
     return render(request, 'atividades/excluir_curso.html', {'curso': curso})
 
-@login_required
+@gestor_ou_coordenador_required
 def listar_cursos(request):
     user = request.user
     if user.groups.filter(name='Gestor').exists():
@@ -128,17 +114,10 @@ def listar_cursos(request):
         except Coordenador.DoesNotExist:
             messages.error(request, 'Acesso negado.')
             return redirect('dashboard')
-    else:
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
     return render(request, 'atividades/listar_cursos.html', {'cursos': cursos})
 
-@login_required
+@gestor_required
 def criar_categoria(request):
-    user = request.user
-    if not user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
-
     if request.method == 'POST':
         form = CategoriaAtividadeForm(request.POST)
         if form.is_valid():
@@ -149,12 +128,9 @@ def criar_categoria(request):
         form = CategoriaAtividadeForm()
     return render(request, 'atividades/form_categoria.html', {'form': form})
 
-@login_required
+@gestor_required
 def editar_categoria(request, categoria_id):
-    user = request.user
     categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
-    if not user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     if request.method == 'POST':
         form = CategoriaAtividadeForm(request.POST, instance=categoria)
         if form.is_valid():
@@ -165,10 +141,8 @@ def editar_categoria(request, categoria_id):
         form = CategoriaAtividadeForm(instance=categoria)
     return render(request, 'atividades/form_categoria.html', {'form': form, 'categoria': categoria, 'edit': True})
 
-@login_required
+@gestor_required
 def excluir_categoria(request, categoria_id):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
     if request.method == 'POST':
         categoria.delete()
@@ -176,21 +150,14 @@ def excluir_categoria(request, categoria_id):
         return redirect('listar_categorias')
     return render(request, 'atividades/excluir_categoria.html', {'categoria': categoria})
 
-@login_required
+@gestor_required
 def listar_categorias(request):
-    user = request.user
-    if not user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     categorias = CategoriaAtividade.objects.all()
     return render(request, 'atividades/listar_categorias.html', {'categorias': categorias})
 
-@login_required
+@gestor_ou_coordenador_required
 def criar_categoria_curso(request):
-    user = request.user
     coordenador = getattr(request.user, 'coordenador', None)
-    if not (user.groups.filter(name='Gestor').exists() or coordenador):
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
     
     if request.method == 'POST':
         form = CategoriaCursoForm(request.POST)
@@ -209,13 +176,10 @@ def criar_categoria_curso(request):
         form.fields['categoria'].queryset = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas)
     return render(request, 'atividades/form_associar_categoria.html', {'form': form, 'coordenador': coordenador})
 
-@login_required
+@gestor_ou_coordenador_required
 def editar_categoria_curso(request, categoria_id):
-    user = request.user
     categoria = get_object_or_404(CursoCategoria, id=categoria_id)
     coordenador = getattr(request.user, 'coordenador', None)
-    if not (user.groups.filter(name='Gestor').exists() or coordenador):
-        return redirect('dashboard')
     if coordenador and coordenador.curso.id != categoria.curso.id:
         messages.error(request, 'Acesso negado.')
         return redirect('dashboard')
@@ -232,12 +196,9 @@ def editar_categoria_curso(request, categoria_id):
         form.fields['curso'].initial = coordenador.curso
     return render(request, 'atividades/form_associar_categoria.html', {'form': form, 'categoria': categoria, 'edit': True, 'coordenador': coordenador})
 
-@login_required
+@gestor_ou_coordenador_required
 def excluir_categoria_curso(request, categoria_id):
-    user = request.user
     coordenador = getattr(request.user, 'coordenador', None)
-    if not (user.groups.filter(name='Gestor').exists() or coordenador):
-        return redirect('dashboard')
     categoria = get_object_or_404(CursoCategoria, id=categoria_id)
     if coordenador and coordenador.curso.id != categoria.curso.id:
         messages.error(request, 'Acesso negado.')
@@ -248,24 +209,18 @@ def excluir_categoria_curso(request, categoria_id):
         return redirect('listar_categorias_curso')
     return render(request, 'atividades/excluir_categoria.html', {'categoria': categoria})
 
-@login_required
+@gestor_ou_coordenador_required
 def listar_categorias_curso(request):
-    user = request.user
     coordenador = getattr(request.user, 'coordenador', None)
-    if not (user.groups.filter(name='Gestor').exists() or coordenador):
-        return redirect('dashboard')
     if coordenador:
         categorias = CursoCategoria.objects.filter(curso=coordenador.curso)
     else:
         categorias = CursoCategoria.objects.all()
     return render(request, 'atividades/listar_categorias_curso.html', {'categorias': categorias})
 
-@login_required
+@aluno_required
 def cadastrar_atividade(request):
     aluno = getattr(request.user, 'aluno', None)
-    if not aluno:
-        messages.error(request, 'Usuário não possui perfil de aluno.')
-        return redirect('dashboard')
     categoria_id = request.GET.get('categoria')
     initial = {}
     if categoria_id:
@@ -287,7 +242,7 @@ def cadastrar_atividade(request):
     return render(request, 'atividades/form_atividade.html', {'form': form})
 
 
-@login_required
+@aluno_required
 def editar_atividade(request, atividade_id):
     aluno = getattr(request.user, 'aluno', None)
     atividade = get_object_or_404(Atividade, id=atividade_id, aluno=aluno)
@@ -301,7 +256,7 @@ def editar_atividade(request, atividade_id):
         form = AtividadeForm(instance=atividade, aluno=aluno)
     return render(request, 'atividades/form_atividade.html', {'form': form, 'atividade': atividade, 'edit': True})
 
-@login_required
+@aluno_required
 def excluir_atividade(request, atividade_id):
     aluno = getattr(request.user, 'aluno', None)
     atividade = get_object_or_404(Atividade, id=atividade_id, aluno=aluno)
@@ -311,11 +266,9 @@ def excluir_atividade(request, atividade_id):
         return redirect('listar_atividades')
     return render(request, 'atividades/excluir_atividade.html', {'atividade': atividade})
 
-@login_required
+@aluno_required
 def listar_atividades(request):
     aluno = getattr(request.user, 'aluno', None)
-    if not aluno:
-        return redirect('dashboard')
     atividades = Atividade.objects.filter(aluno=aluno)
     categoria_id = request.GET.get('categoria')
     categoria = None
@@ -418,10 +371,8 @@ def alterar_email(request):
         form = AlterarEmailForm(instance=request.user)
     return render(request, 'atividades/alterar_email.html', {'form': form})
 
-@login_required
+@gestor_required
 def criar_usuario_admin(request):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     from .forms import AdminUserForm
     if request.method == 'POST':
         form = AdminUserForm(request.POST)
@@ -445,10 +396,8 @@ def criar_usuario_admin(request):
         form = AdminUserForm()
     return render(request, 'atividades/criar_usuario_admin.html', {'form': form})
 
-@login_required
+@gestor_required
 def listar_usuarios_admin(request):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     from django.contrib.auth.models import User
     gestores = User.objects.filter(groups__name='Gestor')
     coordenadores = User.objects.filter(groups__name='Coordenador')
@@ -458,12 +407,9 @@ def listar_usuarios_admin(request):
     })
 
 
-@login_required
+@coordenador_required
 def listar_alunos_coordenador(request):
     user = request.user
-    if not user.groups.filter(name='Coordenador').exists():
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
     try:
         coordenador = Coordenador.objects.get(user=user)
     except Coordenador.DoesNotExist:
@@ -485,12 +431,9 @@ def listar_alunos_coordenador(request):
         'alunos': alunos,
     })
 
-@login_required
+@coordenador_required
 def listar_atividades_coordenador(request, aluno_id):
     user = request.user
-    if not user.groups.filter(name='Coordenador').exists():
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
     try:
         coordenador = Coordenador.objects.get(user=user)
     except Coordenador.DoesNotExist:
@@ -505,12 +448,9 @@ def listar_atividades_coordenador(request, aluno_id):
         'atividades': atividades,
     })
 
-@login_required
+@coordenador_required
 def aprovar_horas_atividade(request, atividade_id):
     user = request.user
-    if not user.groups.filter(name='Coordenador').exists():
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
     try:
         coordenador = Coordenador.objects.get(user=user)
     except Coordenador.DoesNotExist:
@@ -539,11 +479,9 @@ def aprovar_horas_atividade(request, atividade_id):
 
     return render(request, 'atividades/aprovar_atividade.html', {'atividade': atividade})
 
-@login_required
+@gestor_required
 @require_POST
 def ativar_desativar_usuario(request, user_id):
-    if not request.user.groups.filter(name='Gestor').exists():
-        return redirect('dashboard')
     from django.contrib.auth.models import User
     user = User.objects.get(id=user_id)
     user.is_active = not user.is_active

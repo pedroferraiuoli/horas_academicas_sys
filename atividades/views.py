@@ -577,29 +577,34 @@ def associar_categorias_ao_curso(request):
     curso = None
     cursos = None
     semestres = Semestre.objects.all()
+    categorias_disponiveis = []
+    
+    if not user.groups.filter(name__in=['Coordenador', 'Gestor']).exists():
+        messages.error(request, 'Acesso negado.')
+        return redirect('dashboard')
+    
     if coordenador:
         curso = coordenador.curso
     elif user.groups.filter(name='Gestor').exists():
         cursos = Curso.objects.all()
-        if request.method == 'POST':
-            curso_id = request.POST.get('curso_id')
-            try:
-                curso = Curso.objects.get(id=curso_id)
-            except Curso.DoesNotExist:
-                curso = None
-            semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
-    else:
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
 
-    categorias_vinculadas = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True) if curso else []
-    categorias_disponiveis = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas) if curso else []
+    if request.method == 'POST' and not curso:
+        curso_id = request.POST.get('curso_id')
+        try:
+            curso = Curso.objects.get(id=curso_id)
+        except Curso.DoesNotExist:
+            curso = None
+        semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
 
-    if request.method == 'POST' and curso:
-        # Verifica se o POST tem apenas curso selecionado (sem categorias)
+    elif request.method == 'POST' and curso:
+
+        semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
+        categorias_vinculadas = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True) if curso else []
+        categorias_disponiveis = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas) if curso else []
+
         tem_categoria = any(request.POST.get(f'cat_{categoria.id}') for categoria in categorias_disponiveis)
         if not tem_categoria:
-            # Apenas curso selecionado, renderiza novamente com as categorias
+
             return render(request, 'atividades/form_associar_categorias.html', {
                 'categorias': categorias_disponiveis,
                 'curso_nome': curso.nome if curso else '',
@@ -614,16 +619,18 @@ def associar_categorias_ao_curso(request):
             if request.POST.get(f'cat_{categoria.id}'):
                 limite = request.POST.get(f'horas_{categoria.id}') or 0
                 try:
-                    limite = float(limite)
+                    limite = int(limite)
                 except ValueError:
                     limite = 0
-                CursoCategoria.objects.create(
-                    curso=curso,
-                    categoria=categoria,
-                    limite_horas=limite,
-                    semestre=semestre
-                )
-                adicionadas += 1
+                
+                if limite > 0:
+                    CursoCategoria.objects.create(
+                        curso=curso,
+                        categoria=categoria,
+                        limite_horas=limite,
+                        semestre=semestre
+                    )
+                    adicionadas += 1
         if adicionadas:
             messages.success(request, f'{adicionadas} categoria(s) associada(s) ao curso!')
         else:

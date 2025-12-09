@@ -20,6 +20,7 @@
                   <li><span class="dropdown-item-text"><strong>Email:</strong> {{ user.email }}</span></li>
                   {% if user.aluno %}
                     <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
+                    <li><span class="dropdown-item-text"><strong>Semestre de ingresso:</strong> {{ user.aluno.semestre_ingresso }}</span></li>
                   {% endif %}
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="{% url 'password_change' %}">Trocar senha</a></li>

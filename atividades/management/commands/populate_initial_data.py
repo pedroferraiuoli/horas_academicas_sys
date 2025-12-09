@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
-from atividades.models import Curso, CategoriaAtividade, CursoCategoria
+from atividades.models import Curso, CategoriaAtividade, CursoCategoria, Aluno, Coordenador
 
 class Command(BaseCommand):
     help = 'Popula o sistema com dados iniciais: usuários, cursos, categorias e associações.'
@@ -73,29 +73,33 @@ class Command(BaseCommand):
 
         # CursoCategoria (associação)
         import random
-        semestre = Semestre.objects.filter(nome='2025.2').first()
         for curso in cursos:
             for categoria in categorias:
-                limite_horas = random.randint(10, 60)
-                CursoCategoria.objects.get_or_create(
-                    curso=curso,
-                    categoria=categoria,
-                    defaults={
-                        'limite_horas': limite_horas,
-                        'equivalencia_horas': '1h = 1h',
-                        'semestre': semestre
-                    }
-                )
+                for semestre in Semestre.objects.all():
+                    print('Associando', curso.nome, '->', categoria.nome, 'no semestre', semestre.nome)
+                    limite_horas = random.randint(10, 60)
+                    CursoCategoria.objects.get_or_create(
+                        curso=curso,
+                        categoria=categoria,
+                        limite_horas=limite_horas,
+                        equivalencia_horas= '1h = 1h',
+                        semestre=semestre
+                    )
 
         # Usuários e perfis
         # Aluno
-        aluno_user, created = User.objects.get_or_create(username='aluno', defaults={'email': 'aluno@example.com'})
-        if created:
-            aluno_user.set_password('senha123')
-            aluno_user.save()
-        aluno_curso = cursos[0]  # Sistemas de Informação
-        from atividades.models import Aluno, Coordenador
-        aluno_obj, _ = Aluno.objects.get_or_create(user=aluno_user, curso=aluno_curso, semestre_ingresso=semestre)
+        aluno_curso = cursos[0]
+        for semestre in Semestre.objects.all():
+            aux = 0 
+            while aux < 30:
+                print('Criando aluno para semestre', semestre.nome, 'número', aux+1)
+                user_name = f'aluno{aux+1}_{semestre.nome.replace(".", "_")}'
+                aluno_user, created = User.objects.get_or_create(username=user_name, defaults={'email': f'{user_name}@example.com'})
+                if created:
+                    aluno_user.set_password('senha123')
+                    aluno_user.save()
+                aluno_obj, _ = Aluno.objects.get_or_create(user=aluno_user, curso=aluno_curso, semestre_ingresso=semestre)
+                aux += 1
 
         # Coordenador
         coord_user, created = User.objects.get_or_create(username='coordenador', defaults={'email': 'coordenador@example.com'})

@@ -27,11 +27,11 @@
     <h5 class="main-blue">{{ user.coordenador.curso.nome }}</h5>
     <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
     <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
-    <a href="{% url 'listar_categorias_curso' %}" class="btn btn-info mb-3">Listar Categorias do Curso</a>
+    <a href="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Categorias do Curso</a>
     <a href="{% url 'listar_alunos_coordenador' %}" class="btn btn-info mb-3">Listar Alunos do Curso</a>
 
-    
     <div class="row mt-4 mb-4 w-100">
+
       <div class="col-md-4 mb-3">
         <div class="card shadow-sm h-100" style="border-radius: 13px;">
           <div class="card-body text-center">
@@ -40,23 +40,16 @@
           </div>
         </div>
       </div>
+
       <div class="col-md-4 mb-3">
         <div class="card shadow-sm h-100" style="border-radius: 13px;">
           <div class="card-body text-center">
             <div class="main-blue" style="font-size: 2.5rem; font-weight: 700;">{{ stats.media_horas|floatformat:0|default:"0" }}</div>
-            <div class="orange" style="font-size: 1.1rem; font-weight: 600;">Média de horas por aluno</div>
+            <div class="orange" style="font-size: 1.1rem; font-weight: 600;">Média de horas aprovadas por aluno</div>
           </div>
         </div>
       </div>
-      <div class="col-md-4 mb-3">
-        <div class="card shadow-sm h-100" style="border-radius: 13px;">
-          <div class="card-body text-center">
-            <div class="main-blue" style="font-size: 1.2rem; font-weight: 700;">{{ stats.cat_mais_horas|default:"-" }}</div>
-            <div class="orange" style="font-size: 1.1rem; font-weight: 600;">Categoria com mais horas</div>
-            <div class="text-muted" style="font-size: 0.95rem;">Total: {{ stats.cat_mais_horas_valor|floatformat:0|default:"0" }}h</div>
-          </div>
-        </div>
-      </div>
+
     </div>
 
   </div>

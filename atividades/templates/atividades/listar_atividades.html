@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load atividade_extras %}
 {% block content %}
-<h2 class="text-main-blue">Minhas Atividades</h2>
+<h2 class="text-main-blue mt-3">Minhas Atividades</h2>
 {% if categoria_filtrada %}
   <div class="alert alert-warning">Filtrando por categoria: <b>{{ categoria_filtrada.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-blue ms-2">Remover filtro</a></div>
 {% endif %}
@@ -12,6 +12,7 @@
        <th class="orange">NOME</th>
           <th class="orange">CATEGORIA</th>
           <th class="orange">HORAS</th>
+          <th class="orange">APROVADAS</th>
           <th class="orange">DATA</th>
           <th class="orange">AÇÕES</th>
     </tr>
@@ -21,7 +22,14 @@
     <tr>
       <td>{{ atividade.nome }}</td>
       <td>{{ atividade.categoria.categoria.nome }}</td>
-      <td><span class="badge bg-opacity-75">{{ atividade.horas_formatada }}</span></td>
+      <td><span class="badge bg-opacity-75">{{ atividade.horas }}h</span></td>
+      <td>
+        {% if atividade.horas_aprovadas is not None %}
+          <span class="badge bg-success ">{{ atividade.horas_aprovadas }}h</span>
+        {% else %}
+          <span class="badge bg-warning text-dark">Aguardando</span>
+        {% endif %}
+      </td>
       <td>{{ atividade.data }}</td>
       <td>
           <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i> Editar</a>

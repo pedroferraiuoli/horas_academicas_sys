@@ -10,6 +10,16 @@ class Semestre(models.Model):
     def __str__(self):
         return self.nome
     
+    @staticmethod
+    def get_semestre_atual():
+        from django.utils import timezone
+        hoje = timezone.now().date()
+        semestre_atual = Semestre.objects.filter(
+            data_inicio__lte=hoje,
+            data_fim__gte=hoje
+        ).first()
+        return semestre_atual
+    
     def duplicate_categories_from(self, source_semestre):
         if source_semestre is None or source_semestre.id == self.id:
             return 0
@@ -95,7 +105,7 @@ class Aluno(models.Model):
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} ({self.semestre_ingresso})"
 
-    def horas_complementares_validas(self):
+    def horas_complementares_validas(self, apenas_aprovadas=None):
         total = 0
         if not self.curso:
             return 0
@@ -103,7 +113,10 @@ class Aluno(models.Model):
         for cat in self.curso.get_categorias(semestre=self.semestre_ingresso):
             categoria = cat.categoria
             atividades = self.atividade_set.filter(categoria=cat)
-            soma = sum(a.horas for a in atividades)
+            if apenas_aprovadas:
+                soma = sum(a.horas_aprovadas or 0 for a in atividades if a.horas_aprovadas is not None)
+            else:
+                soma = sum(a.horas for a in atividades)
             try:
                 curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria, semestre=self.semestre_ingresso)
                 limite = curso_categoria.limite_horas

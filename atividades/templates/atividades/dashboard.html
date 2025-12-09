@@ -22,7 +22,7 @@
       </div>
     {% endif %}
     <div class="mb-4 mt-5">
-      <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }} / {{ aluno.curso.horas_requeridas }}h)</span>
+      <span class="fw-bold ">{{progresso_percentual}}% ({{ total_horas }}h / {{ aluno.curso.horas_requeridas }}h)</span>
       <div class="progress" style="height: 30px; background-color: #939FB5;">
           <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;">
             <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas }}h</span>
@@ -39,6 +39,7 @@
           <th class="orange">CATEGORIA</th>
           <th class="orange">DATA</th>
           <th class="orange">HORAS</th>
+          <th class="orange">APROVADAS</th>
           <th class="orange">AÇÕES</th>
         </tr>
       </thead>
@@ -49,6 +50,13 @@
           <td>{{ atividade.categoria.categoria.nome }}</td>
           <td>{{ atividade.data }}</td>
           <td><span class="badge  bg-opacity-75">{{ atividade.horas }}h</span></td>
+          <td>
+            {% if atividade.horas_aprovadas is not None %}
+              <span class="badge bg-success ">{{ atividade.horas_aprovadas }}h</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Aguardando</span>
+            {% endif %}
+          </td>
           <td>
             <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i> Editar</a>
             {% if atividade.documento %}

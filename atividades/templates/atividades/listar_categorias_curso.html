@@ -1,16 +1,37 @@
-{% extends 'base_coord.html' %}
+{% extends 'base.html' %}
 {% block content %}
 <div class="container">
 <h2 class="main-blue">Categorias de Atividade</h2>
+{% if semestre_selecionado %}
+  <div class="alert alert-warning">Filtrando por semestre: <b>{{ semestre_selecionado.nome }}</b> <a href="{% url 'listar_categorias_curso' %}" class="btn btn-sm btn-outline-main-blue ms-2">Remover filtro</a></div>
+{% endif %}
 <div class="mb-3">
 <a href="{% url 'criar_categoria' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Categoria</a>
 <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
 </div>
+
+<!-- Filtro por semestre -->
+<div class="mb-3">
+  <form method="get" class="row g-2 align-items-center">
+    <div class="col-auto">
+      <label for="semestre" class="form-label visually-hidden">Semestre</label>
+      <select id="semestre" name="semestre" class="form-select form-select-sm">
+        <option value="">Todos os semestres</option>
+        {% for s in semestres %}
+          <option value="{{ s.id }}" {% if s == semestre_selecionado %}selected{% endif %}>{{ s.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-sm btn-outline-main-blue">Filtrar</button>
+    </div>
+  </form>
+</div>
+
 <table class="table table-bordered table-sm align-middle rounded">
   <thead style="color: #fff;">
     <tr>
       <th class="orange">NOME</th>
-      <th class="orange">CURSO</th>
       <th class="orange">LIMITE DE HORAS</th>
       <th class="orange">AÇÕES</th>
     </tr>
@@ -18,9 +39,8 @@
   <tbody>
     {% for categoria in categorias %}
     <tr>
-      <td>{{ categoria.categoria.nome }}</td>
-      <td><span class="badge bg-opacity-75">{{ categoria.curso.nome }}</span></td>
-      <td><span class="badge bg-opacity-75">{{ categoria.limite_horas_formatado }}</span></td>
+      <td>{{ categoria.categoria.nome }} ({{categoria.semestre}})</td>
+      <td><span class="badge bg-opacity-75">{{ categoria.limite_horas }}h</span></td>
       <td>
         <a href="{% url 'editar_categoria_curso' categoria.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i> Editar</a>
         <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}" style="display:inline;">

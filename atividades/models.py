@@ -84,9 +84,18 @@ class CursoCategoria(models.Model):
         return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
     
     def ultrapassou_limite_pelo_aluno(self, aluno):
-        atividades = aluno.atividade_set.filter(categoria=self)
+        atividades = aluno.atividades.filter(categoria=self)
         total_horas = sum(a.horas for a in atividades)
         return total_horas > self.limite_horas
+    
+    @staticmethod
+    def get_curso_categorias(curso=None, semestre=None):
+        qs = CursoCategoria.objects.all()
+        if curso:
+            qs = qs.filter(curso=curso)
+        if semestre:
+            qs = qs.filter(semestre=semestre)
+        return qs
     
 
 
@@ -112,7 +121,7 @@ class Aluno(models.Model):
         # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
         for cat in self.curso.get_categorias(semestre=self.semestre_ingresso):
             categoria = cat.categoria
-            atividades = self.atividade_set.filter(categoria=cat)
+            atividades = self.atividades.filter(categoria=cat)
             if apenas_aprovadas:
                 soma = sum(a.horas_aprovadas or 0 for a in atividades if a.horas_aprovadas is not None)
             else:
@@ -129,7 +138,7 @@ class Aluno(models.Model):
         return total
 
 class Atividade(models.Model):
-    aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
+    aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='atividades')
     categoria = models.ForeignKey(CursoCategoria, on_delete=models.PROTECT)
     nome = models.CharField(max_length=200)
     descricao = models.TextField(blank=True, null=True)

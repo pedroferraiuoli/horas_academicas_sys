@@ -3,14 +3,19 @@
 
 {% block content %}
 <div class="container">
+  {% if aluno %}
   <h2 class="main-blue">Atividades de {{ aluno.user.get_full_name|default:aluno.user.username }}</h2>
+  {% endif %}
   <div class="mb-3">
-    <a href="{% url 'listar_alunos_coordenador' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+    <a href="javascript:history.back()" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
   </div>
 
   <table class="table table-bordered table-sm align-middle rounded">
     <thead style="color: #fff;">
       <tr>
+        {% if not aluno %}
+        <th class="orange">ALUNO</th>
+        {% endif %}
         <th class="orange">NOME</th>
         <th class="orange">CATEGORIA</th>
         <th class="orange">HORAS REQUERIDAS</th>
@@ -25,6 +30,9 @@
     <tbody>
       {% for atividade in atividades %}
       <tr>
+        {% if not aluno %}
+        <td>{{ atividade.aluno.user.get_full_name|default:atividade.aluno.user.username }}</td>
+        {% endif %}
         <td>{{ atividade.nome }}</td>
         <td>{{ atividade.categoria.categoria.nome }}</td>
         <td>{{ atividade.horas }}h</td>
@@ -57,7 +65,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                       </div>
                       <div class="modal-body">
-                        <p class="small text-muted mb-0">{{ atividade.observacoes_para_aprovador }}</p>
+                        <p class="small text-muted mb-0 w-50">{{ atividade.observacoes_para_aprovador }}</p>
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>

@@ -1,15 +1,15 @@
 from django.views.decorators.http import require_POST
-from .forms import AlterarEmailForm, CategoriaCursoForm
-from .forms import CursoForm
-from .forms import CategoriaAtividadeForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .forms import UserRegistrationForm, AtividadeForm, SemestreForm
+from .forms import UserRegistrationForm, AtividadeForm, SemestreForm, CategoriaAtividadeForm, CursoForm, AlterarEmailForm, CategoriaCursoForm
 from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Semestre
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from .decorators import gestor_required, coordenador_required, aluno_required, gestor_ou_coordenador_required
+from .filters import AlunosFilter, CursoCategoriaFilter
+from django.db.models import Exists, OuterRef, Value, BooleanField
+
 
 @gestor_required
 def criar_semestre(request):
@@ -212,23 +212,17 @@ def excluir_categoria_curso(request, categoria_id):
 @gestor_ou_coordenador_required
 def listar_categorias_curso(request):
     coordenador = getattr(request.user, 'coordenador', None)
-    semestres = Semestre.objects.all().order_by('-data_inicio', '-id')
-    semestre_id = request.GET.get('semestre')
-    semestre = Semestre.objects.filter(id=semestre_id).first() if semestre_id else None
-
     if coordenador:
-        # coordenador vê apenas categorias do seu curso, opcionalmente filtradas por semestre
-        if semestre:
-            categorias = CursoCategoria.objects.filter(curso=coordenador.curso, semestre=semestre)
-        else:
-            categorias = CursoCategoria.objects.filter(curso=coordenador.curso)
+        base_qs = CursoCategoria.objects.filter(curso=coordenador.curso)
     else:
-        categorias = CursoCategoria.objects.filter(semestre=semestre) if semestre else CursoCategoria.objects.all()
+        base_qs = CursoCategoria.objects.all()
+
+    filtro = CursoCategoriaFilter(request.GET or None, queryset=base_qs)
+    categorias = filtro.qs
 
     context = {
         'categorias': categorias,
-        'semestres': semestres,
-        'semestre_selecionado': semestre,
+        'filter': filtro,
     }
     return render(request, 'atividades/listar_categorias_curso.html', context)
 
@@ -303,7 +297,7 @@ def dashboard(request):
     ultrapassou_limite = False
     if hasattr(request.user, 'aluno'):
         aluno = request.user.aluno
-        atividades = aluno.atividade_set.all()
+        atividades = aluno.atividades.all()
         total_horas = aluno.horas_complementares_validas(apenas_aprovadas=True)
         horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
         if horas_requeridas > 0:
@@ -334,14 +328,13 @@ def dashboard(request):
             curso = coordenador.curso
             alunos = curso.aluno_set.all()
             num_alunos = alunos.count()
-            total_horas_alunos = 0
-            for aluno in alunos:
-                horas = aluno.horas_complementares_validas(apenas_aprovadas=True)
-                total_horas_alunos += horas
-            media_horas = (total_horas_alunos / num_alunos) if num_alunos > 0 else 0
+            atividades_pendentes = Atividade.objects.filter(aluno__in=alunos, horas_aprovadas=None)
+            atividades_pendentes_count = atividades_pendentes.count()
+            alunos_com_pendencias = atividades_pendentes.values('aluno').distinct().count()  
             stats = {
                 'num_alunos': num_alunos,
-                'media_horas': media_horas,
+                'alunos_com_pendencias': alunos_com_pendencias,
+                'atividades_pendentes': atividades_pendentes_count,
             }
     return render(request, 'atividades/dashboard_gestor.html', {
         'grupo': grupo,
@@ -423,22 +416,37 @@ def listar_alunos_coordenador(request):
         return redirect('dashboard')
 
     curso = coordenador.curso
-    alunos_ = Aluno.objects.filter(curso=curso).select_related('user', 'semestre_ingresso')
 
-    # calcular horas válidas por aluno (pode ser pesado se houver muitos alunos)
+    pendencias_subquery = Atividade.objects.filter(
+        aluno=OuterRef('pk'),
+        horas_aprovadas__isnull=True,
+    )
+
+    alunos_base = (
+        Aluno.objects.filter(curso=curso)
+        .annotate(
+            tem_pendencia=Exists(pendencias_subquery)
+        )
+        .select_related('user', 'semestre_ingresso')
+        .order_by('-tem_pendencia', 'user__first_name')
+    )
+
+    filtro = AlunosFilter(request.GET, queryset=alunos_base)
+    alunos_filtrados = filtro.qs
+
     alunos = []
-    for aluno in alunos_:
-        horas_a_validar = Atividade.objects.filter(aluno=aluno, horas_aprovadas=None).exists()
-
-        alunos.append({'aluno': aluno, 'horas_a_validar': horas_a_validar})
+    for aluno in alunos_filtrados:
+        alunos.append({'aluno': aluno, 'horas_a_validar': aluno.tem_pendencia})
 
     return render(request, 'atividades/listar_alunos_coordenador.html', {
         'curso': curso,
         'alunos': alunos,
+        'filter': filtro,
     })
 
 @coordenador_required
-def listar_atividades_coordenador(request, aluno_id):
+def listar_atividades_coordenador(request):
+    aluno_id = request.GET.get('aluno_id', None)
     user = request.user
     try:
         coordenador = Coordenador.objects.get(user=user)
@@ -446,11 +454,13 @@ def listar_atividades_coordenador(request, aluno_id):
         messages.error(request, 'Perfil de coordenador não encontrado.')
         return redirect('dashboard')
 
-    aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
-    atividades = Atividade.objects.filter(aluno=aluno)
+    if aluno_id:
+        aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
+        atividades = Atividade.objects.filter(aluno=aluno)
+    else: atividades = Atividade.objects.filter(horas_aprovadas__isnull=True, aluno__curso=coordenador.curso)
 
     return render(request, 'atividades/listar_atividades_coordenador.html', {
-        'aluno': aluno,
+        'aluno': aluno if aluno_id else None,
         'atividades': atividades,
     })
 
@@ -476,12 +486,12 @@ def aprovar_horas_atividade(request, atividade_id):
                 raise ValueError
         except (ValueError, TypeError):
             messages.warning(request, 'Número inválido de horas aprovadas.')
-            return redirect('listar_atividades_coordenador', aluno_id=atividade.aluno.id)
+            return redirect('listar_atividades_coordenador')
 
         atividade.horas_aprovadas = horas_aprovadas
         atividade.save()
         messages.success(request, f'Atividade {atividade.nome} aprovada com {horas_aprovadas} horas!')
-        return redirect('listar_atividades_coordenador', aluno_id=atividade.aluno.id)
+        return redirect('listar_atividades_coordenador')
 
     return render(request, 'atividades/aprovar_atividade.html', {'atividade': atividade})
 

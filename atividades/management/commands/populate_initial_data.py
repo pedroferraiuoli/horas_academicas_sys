@@ -102,14 +102,14 @@ class Command(BaseCommand):
                 aux += 1
 
         # Coordenador
-        coord_user, created = User.objects.get_or_create(username='coordenador', defaults={'email': 'coordenador@example.com'})
-        if created:
-            coord_user.set_password('senha123')
-            coord_user.save()
-        coord_user.groups.add(grupos['Coordenador'])
-        coord_curso = cursos[0]  # Sistemas de Informação
-        coord_obj, _ = Coordenador.objects.get_or_create(user=coord_user, curso=coord_curso)
-
+        for curso in cursos:
+            coord_user, created = User.objects.get_or_create(username=f'coord_{curso.nome.replace(" ", "_").lower()}', defaults={'email': f'coord_{curso.nome.replace(" ", "_").lower()}@example.com'})
+            if created:
+                coord_user.set_password('senha123')
+                coord_user.save()
+            coord_user.groups.add(grupos['Coordenador'])
+            coord_obj, _ = Coordenador.objects.get_or_create(user=coord_user, curso=curso)
+            
         # Gestor
         gestor_user, created = User.objects.get_or_create(username='gestor', defaults={'email': 'gestor@example.com'})
         if created:

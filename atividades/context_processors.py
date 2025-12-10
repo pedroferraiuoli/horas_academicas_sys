@@ -13,4 +13,4 @@ def categorias_do_usuario(request):
     categorias_qs = aluno.curso.get_categorias(semestre=aluno.semestre_ingresso)
     categorias_qs = categorias_qs.select_related('categoria')
 
-    return {'categorias': categorias_qs}
+    return {'categorias_context': categorias_qs}

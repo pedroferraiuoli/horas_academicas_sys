@@ -103,7 +103,7 @@ class AtividadeForm(forms.ModelForm):
         aluno = kwargs.pop('aluno', None)
         super().__init__(*args, **kwargs)
         if aluno:
-            categorias = aluno.curso.curso_categorias.all()
+            categorias = CursoCategoria.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):

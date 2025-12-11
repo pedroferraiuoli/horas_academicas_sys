@@ -35,7 +35,8 @@ body {
     background-color: var(--main-orange) !important;
 }
 
-.main {
+.main,
+.main-nosidebar {
     background-color: var(--bg-light);
     background-image: url('./images/logo2fundo.png');
     background-repeat: no-repeat;
@@ -44,11 +45,6 @@ body {
 }
 
 .main-nosidebar {
-    background-color: var(--bg-light);
-    background-image: url('./images/logo2fundo.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 200px;
     min-height: 100vh;
 }
 

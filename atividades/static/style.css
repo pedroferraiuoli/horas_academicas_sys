@@ -35,18 +35,15 @@ body {
     background-color: var(--main-orange) !important;
 }
 
-.main,
-.main-nosidebar {
+.main {
     background-color: var(--bg-light);
     background-image: url('./images/logo2fundo.png');
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 200px;
-}
-
-.main-nosidebar {
     min-height: 100vh;
 }
+
 
 .main-login {
     width: 100% !important;
@@ -162,6 +159,7 @@ body {
     text-transform: uppercase;
     padding-bottom: 0.5rem;
     border-bottom: 3px solid var(--main-orange);
+    padding: 1rem;
 }
 
 /* Botão toggle da sidebar (mobile) - Fixed position */
@@ -219,24 +217,6 @@ body {
     transform: rotate(90deg);
 }
 
-/* Overlay backdrop */
-.sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.active {
-    display: block;
-    opacity: 1;
-}
 
 /* Sidebar items - novo layout */
 .sidebar-item {
@@ -332,13 +312,14 @@ body {
         position: fixed;
         top: 0;
         left: -100%;
-        width: 85%;
-        max-width: 400px;
+        width: 100%;
+        max-width: 100%;
         height: 100vh;
         z-index: 1050;
         box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
         transition: left 0.3s ease;
-        padding-top: 60px;
+        padding: 60px 15px 15px 15px;
+        overflow-y: auto;
     }
     
     .sidebar.active {
@@ -354,14 +335,14 @@ body {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
         margin-left: 0 !important;
-        padding-top: 70px !important; /* Espaço para o botão toggle */
     }
 }
 
 @media (max-width: 768px) {
     .sidebar {
-        width: 90%;
-        max-width: 350px;
+        width: 100%;
+        max-width: 100%;
+        padding: 60px 12px 12px 12px;
     }
     
     .sidebar-item {
@@ -385,8 +366,9 @@ body {
 
 @media (max-width: 480px) {
     .sidebar {
-        width: 95%;
-        max-width: none;
+        width: 100%;
+        max-width: 100%;
+        padding: 60px 10px 10px 10px;
     }
     
     .sidebar-toggle-btn {
@@ -451,7 +433,6 @@ body {
 
 .table {
     border-color: var(--main-blue);
-}
     background-color: var(--main-blue);
     color: white;
     border: none;
@@ -842,10 +823,15 @@ header button:hover {
 @media (max-width: 992px) {
     .sidebar {
         width: 100%;
-        height: auto;
-        position: relative;
         margin-bottom: 1rem;
-        max-height: 400px;
+        max-height: 100vh !important;
+        overflow: auto !important;
+    }
+
+    .sidebar-content {
+        padding: 1rem;
+        max-height: 100vh;
+        overflow: auto;
     }
     
     main.d-flex {
@@ -1244,8 +1230,7 @@ header button:hover {
 
 /* Ajuste de background para mobile */
 @media (max-width: 768px) {
-    .main,
-    .main-nosidebar {
+    .main {
         background-size: 150px;
     }
 }

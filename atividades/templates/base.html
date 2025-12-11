@@ -18,9 +18,9 @@
 
 <main class="
     {% if user.is_authenticated and user.aluno %}
-        d-flex
+        d-flex main
     {% elif user.is_authenticated and not user.aluno %}
-        main-nosidebar
+        main
     {% else %}
         main-login
     {% endif %}

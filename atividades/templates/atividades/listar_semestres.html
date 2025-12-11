@@ -6,6 +6,7 @@
 <a href="{% url 'criar_semestre' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Novo Semestre</a>
 <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
 </div>
+<div class="table-responsive">
 <table class="table table-bordered table-sm align-middle rounded">
   <thead style="color: #fff;">
     <tr>
@@ -31,5 +32,6 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
 </div>
 {% endblock %}

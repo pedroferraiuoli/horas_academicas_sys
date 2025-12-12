@@ -81,6 +81,8 @@ body {
 .login-card {
     background-color: var(--background-card);
     border-radius: 30px !important;
+    border: none;
+    margin-bottom: 1rem;
 }
 
 .form-control-login {
@@ -152,6 +154,7 @@ body {
     padding: 1rem;
 }
 
+/* nao sendo ultilizado */
 .sidebar-title {
     color: var(--main-orange);
     font-weight: 700;
@@ -572,6 +575,64 @@ body {
     margin-top: 1rem !important;
 }
 
+/* Form Atividade */
+.form-atividade-card {
+    border-radius: 10px;
+    border: none;
+    background: var(--main-bg) !important;
+}
+
+.form-atividade-header {
+    background: var(--main-bg);
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+}
+
+.form-atividade-title {
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.form-atividade-body {
+    background: var(--main-bg);
+    border-radius: 0 0 10px 10px;
+}
+
+.form-atividade-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.form-atividade-btn {
+    font-weight: 500;
+    border-radius: 30px;
+    padding: 0.5rem 1.5rem;
+}
+
+.form-atividade-btn-save {
+    font-weight: 600;
+    border-radius: 30px;
+    padding: 0.5rem 2.5rem;
+}
+
+.form-atividade-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    gap: 1rem;
+}
+
+.form-atividade-body .form-control {
+    background-color: var(--main-bg);
+}
+
+.form-atividade-body .form-select {
+    background-color: var(--main-bg);
+}
+
 /* Textos secundários */
 .text-main-green {
     color: var(--main-green) !important;
@@ -725,11 +786,6 @@ header button:hover {
     opacity: 0.7;
 }
 
-
-.login-card {
-    border: none;
-}
-
 @media (max-width: 992px) {
     .register-container {
         flex-direction: column;
@@ -742,8 +798,205 @@ header button:hover {
 }
 
 /* ========================================
+   LAYOUT RESPONSIVO DE ATIVIDADES
+   ======================================== */
+
+
+/* Container da lista */
+.atividades-list {
+    margin-bottom: 1.5rem;
+}
+
+/* Item de atividade */
+.atividade-item {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.atividade-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Linha principal - Desktop: tabela / Mobile: card */
+.atividade-main {
+    display: grid;
+    grid-template-columns: 1.5fr 1.5fr 0.8fr 1fr 1fr 2.3fr;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid transparent;
+}
+
+.atividade-main[aria-expanded="true"] {
+    border-bottom-color: var(--main-orange);
+}
+
+/* Colunas */
+.ativ-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ativ-label {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--main-blue);
+    text-transform: uppercase;
+}
+
+.ativ-value {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Esconder em desktop */
+.desktop-only {
+    display: flex;
+}
+
+.mobile-only {
+    display: none;
+}
+
+/* Detalhes colapsáveis */
+.atividade-details {
+    background: var(--bg-light);
+    border-top: 2px solid var(--main-orange);
+}
+
+.details-content {
+    padding: 1rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.detail-row:last-of-type {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--main-blue);
+    font-size: 0.85rem;
+}
+
+.detail-value {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.detail-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--main-orange);
+}
+
+/* ========================================
    RESPONSIVIDADE MOBILE
    ======================================== */
+
+@media (max-width: 768px) {
+    /* Ajustar grid para mobile */
+    .atividade-main {
+        grid-template-columns: 1fr 1fr 0.8fr;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        cursor: pointer;
+    }
+    
+    /* Mostrar labels em mobile */
+    .ativ-label {
+        display: block;
+    }
+    
+    .ativ-value {
+        font-size: 0.85rem;
+    }
+    
+    /* Esconder colunas desktop */
+    .desktop-only {
+        display: none !important;
+    }
+    
+    /* Mostrar botão toggle */
+    .mobile-only {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* Ajustar detalhes */
+    .details-content {
+        padding: 0.75rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .detail-value {
+        width: 100%;
+    }
+    
+    .detail-value .btn {
+        width: auto;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .atividade-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 0.6rem;
+    }
+    
+    /* Reorganizar em 2 colunas */
+    .ativ-nome {
+        grid-column: 1 / -1;
+    }
+    
+    .ativ-toggle {
+        grid-column: 2 / 3;
+        justify-self: end;
+    }
+    
+    .ativ-label {
+        font-size: 0.7rem;
+    }
+    
+    .ativ-value {
+        font-size: 0.8rem;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+    }
+    
+    .detail-value {
+        font-size: 0.8rem;
+    }
+}
+
+/* ========================================
+   FIM DO LAYOUT DE ATIVIDADES
+   ======================================== */
+
 
 /* Header Responsivo */
 .header-logo {
@@ -1043,12 +1296,9 @@ header button:hover {
         max-width: 100%;
     }
     
-    .form-atividade-card .row .w-50 {
-        width: 100% !important;
-    }
-    
     .form-atividade-title {
         font-size: 1.2rem;
+        letter-spacing: 0.5px;
     }
     
     .form-atividade-label {
@@ -1057,36 +1307,130 @@ header button:hover {
     
     .form-atividade-btn,
     .form-atividade-btn-save {
-        font-size: 0.85rem;
-        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+        padding: 0.4rem 1.2rem;
+    }
+    
+    .form-atividade-actions {
+        flex-direction: column;
+        margin-top: 2rem;
+    }
+    
+    .form-atividade-actions .btn {
+        width: 100%;
     }
 }
 
 @media (max-width: 480px) {
     .form-atividade-title {
         font-size: 1rem;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
     }
     
     .form-atividade-label {
+        font-size: 0.9rem;
+    }
+    
+    .form-atividade-btn,
+    .form-atividade-btn-save {
         font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .form-atividade-btn .btn-text,
+    .form-atividade-btn-save .btn-text {
+        display: none;
+    }
+    
+    .form-atividade-actions {
+        margin-top: 1.5rem;
     }
 }
 
 /* Login Responsivo */
+
+/* Classes do Login */
+.login-wrapper {
+    min-height: 100vh;
+}
+
+.login-left-side {
+    max-width: 56%;
+}
+
+.login-logo-top {
+    width: 80%;
+}
+
+.login-logo-bottom {
+    width: 21%;
+    margin-top: 7rem;
+}
+
+.login-text {
+    margin-top: 7rem;
+}
+
+.login-text-bold {
+    font-weight: 600;
+}
+
+.login-title {
+    font-size: 5rem;
+    font-weight: 600;
+    margin-top: 4rem;
+}
+
+.login-form-content {
+    padding: 0 1rem 0 1rem;
+}
+
+.login-label {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.login-submit-btn {
+    font-size: 1.5rem;
+    font-weight: 500;
+    gap: 1rem;
+}
+
+.login-links {
+    border-bottom: 1px solid white;
+    padding-bottom: 1rem;
+}
+
+.login-bottom-logo {
+    margin-top: 4rem;
+    width: 30%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login-bottom-logo img {
+    width: 100%;
+}
+
+/* Media Queries */
 @media (max-width: 992px) {
     .login-card {
         max-width: 90%;
-        margin: 0 auto;
     }
     
-    .d-flex > .d-flex:first-child {
+    .login-left-side {
         max-width: 100% !important;
     }
 }
 
 @media (max-width: 768px) {
-    .main-login .d-flex {
+    .login-wrapper {
         flex-direction: column !important;
+    }
+    
+    .login-left-side {
+        max-width: 100% !important;
     }
     
     .login-border {
@@ -1098,8 +1442,13 @@ header button:hover {
         text-align: center;
     }
     
-    .div-login img {
+    .login-logo-top {
         width: 60% !important;
+    }
+    
+    .login-logo-bottom {
+        width: 40% !important;
+        margin-top: 3rem !important;
     }
     
     .login-text {
@@ -1111,30 +1460,214 @@ header button:hover {
         width: 100% !important;
         max-width: 500px;
         margin-top: 2rem;
+        align-self: center;
     }
     
-    .login-card .text-center {
+    .login-title {
         font-size: 3rem !important;
         margin-top: 2rem !important;
     }
+    
+    .login-bottom-logo {
+        width: 40%;
+        margin-top: 2rem;
+    }
+    
 }
 
 @media (max-width: 480px) {
+    .login-logo-top {
+        width: 70% !important;
+    }
+    
+    .login-logo-bottom {
+        width: 25% !important;
+        margin-top: 2rem !important;
+    }
+    
     .login-text {
         font-size: 1.4rem;
         margin-top: 2rem !important;
     }
     
-    .login-card .text-center {
+    .login-title {
         font-size: 2.5rem !important;
     }
     
-    .div-login img:last-child {
-        margin-top: 3rem !important;
+    .login-label {
+        font-size: 1.2rem !important;
+    }
+    
+    .login-submit-btn {
+        font-size: 1.2rem !important;
+    }
+    
+    .login-bottom-logo {
+        width: 50%;
+        margin-top: 1.5rem;
     }
 }
 
 /* Dashboard Responsivo */
+
+/* Dashboard Header e Ações */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-welcome {
+    font-weight: 600;
+    margin: 0;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-course-info {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+/* Barra de Progresso */
+.dashboard-progress-section {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-percentage {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--main-blue);
+}
+
+.progress-hours {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.dashboard-progress-bar {
+    height: 35px;
+    background-color: #939FB5;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dashboard-progress-bar .progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    transition: width 0.6s ease;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dashboard-welcome {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+    
+    .dashboard-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dashboard-actions .btn {
+        flex: 1;
+        min-width: 140px;
+    }
+    
+    .dashboard-course-info {
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    
+    .progress-percentage {
+        font-size: 1.3rem;
+    }
+    
+    .progress-hours {
+        font-size: 0.95rem;
+    }
+    
+    .dashboard-progress-bar {
+        height: 30px;
+    }
+    
+    .dashboard-progress-bar .progress-bar span {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-welcome {
+        font-size: 1.3rem;
+    }
+    
+    .dashboard-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .dashboard-actions .btn {
+        width: 100%;
+        min-width: auto;
+        justify-content: center;
+    }
+    
+    .dashboard-actions .btn .btn-text {
+        display: inline;
+    }
+    
+    .dashboard-course-info {
+        font-size: 0.85rem;
+    }
+    
+    .progress-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .progress-percentage {
+        font-size: 1.2rem;
+    }
+    
+    .progress-hours {
+        font-size: 0.85rem;
+    }
+    
+    .dashboard-progress-bar {
+        height: 25px;
+    }
+    
+    .dashboard-progress-bar .progress-bar span {
+        font-size: 0.75rem;
+    }
+}
+
+/* Dashboard - Responsivo Antigo (manter compatibilidade) */
 @media (max-width: 768px) {
     .progress {
         height: 25px !important;
@@ -1300,10 +1833,6 @@ header button:hover {
 
 /* Cards responsivos */
 @media (max-width: 768px) {
-    .card {
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
-    }
     
     .card-body {
         padding: 1rem;
@@ -1324,12 +1853,12 @@ header button:hover {
         padding: 1rem;
     }
     
-    .login-card .form-label {
-        font-size: 1.2rem !important;
+    .login-form-content {
+        padding: 0 0.5rem;
     }
     
-    .login-card button[type="submit"] {
-        font-size: 1.2rem !important;
+    .login-logo-bottom {
+        width: 20% !important;
     }
 }
 
@@ -1380,4 +1909,4 @@ header button:hover {
     h5 {
         font-size: 1rem;
     }
-}
+}on June 26, 2027

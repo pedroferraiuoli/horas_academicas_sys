@@ -1,51 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% block content %}
-<style>
-  .form-atividade-card {
-    border-radius: 10px;
-    border: none;
-    background: var(--main-bg) !important;
-  }
-  .form-atividade-header {
-    background: var(--main-bg);
-    border-bottom: 0;
-    border-radius: 10px 10px 0 0;
-  }
-  .form-atividade-title {
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  .form-atividade-body {
-    background: var(--main-bg);
-    border-radius: 0 0 10px 10px;
-  }
-  .form-atividade-label {
-    font-size: 1.1rem;
-    font-weight: 600;
-  }
-  .form-atividade-btn {
-    font-weight: 500;
-    border-radius: 30px;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  .form-atividade-btn-save {
-    font-weight: 600;
-    border-radius: 30px;
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  .form-control, .form-select {
-    background-color: var(--main-bg);
-  }
-</style>
 <div class="card shadow-sm mx-auto mt-4 form-card mb-4 form-atividade-card">
   <div class="card-header form-atividade-header">
     {% if edit %}
@@ -60,9 +15,9 @@
       <div class="row g-4">
         {% for field in form.visible_fields %}
           {% if field.name == 'descricao' %}
-              <div class="w-100">
+              <div class="col-12">
           {% else %}
-              <div class='w-50'>
+              <div class="col-12 col-md-6">
           {% endif %}
             <label for="{{ field.id_for_label }}" class="form-label main-blue form-atividade-label">{{ field.label }}{% if field.field.required %} <span class="orange">*</span>{% endif %}</label>
             <div class="input-group">
@@ -81,9 +36,9 @@
           </div>
         {% endfor %}
       </div>
-      <div class="d-flex justify-content-between align-items-center mt-5">
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue form-atividade-btn"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>
-        <button type="submit" class="btn bg-orange text-white form-atividade-btn-save"><i class="bi bi-save"></i> Salvar</button>
+      <div class="form-atividade-actions">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue form-atividade-btn"><i class="bi bi-arrow-left"></i> <span class="btn-text">Voltar ao painel</span></a>
+        <button type="submit" class="btn bg-orange text-white form-atividade-btn-save"><i class="bi bi-save"></i> <span class="btn-text">Salvar</span></button>
       </div>
     </form>
   </div>

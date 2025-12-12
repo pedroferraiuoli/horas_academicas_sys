@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from .decorators import gestor_required, coordenador_required, aluno_required, gestor_ou_coordenador_required
-from .filters import AlunosFilter, CursoCategoriaFilter
+from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
 from django.db.models import Exists, OuterRef, Value, BooleanField
 
 
@@ -278,6 +278,9 @@ def excluir_atividade(request, atividade_id):
 def listar_atividades(request):
     aluno = getattr(request.user, 'aluno', None)
     atividades = Atividade.objects.filter(aluno=aluno)
+    filtro = AtividadesFilter(request.GET or None, queryset=atividades, request=request)
+    atividades = filtro.qs
+
     categoria_id = request.GET.get('categoria')
     categoria = None
     if categoria_id:
@@ -286,7 +289,7 @@ def listar_atividades(request):
             atividades = atividades.filter(categoria=categoria)
         except CursoCategoria.DoesNotExist:
             categoria = None
-    return render(request, 'atividades/listar_atividades.html', {'atividades': atividades, 'categoria_filtrada': categoria})
+    return render(request, 'atividades/listar_atividades.html', {'atividades': atividades, 'categoria_filtrada': categoria, 'filter': filtro})
 
 @login_required
 def dashboard(request):

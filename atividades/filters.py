@@ -53,5 +53,63 @@ class AlunosFilter(django_filters.FilterSet):
             return queryset.filter(tem_pendencia=False)
 
         return queryset
+    
+class AtividadesFilter(django_filters.FilterSet):
+
+    status = django_filters.ChoiceFilter(
+        choices=(
+            ('1', 'Aprovadas'),
+            ('0', 'Aguardando'),
+        ),
+        label='Status',
+        method='filter_atividades_status',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Todas"
+    )
+
+    categoria = django_filters.ModelChoiceFilter(
+        queryset=CursoCategoria.objects.none(),
+        label='Categorias',
+        empty_label='Todas',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    class Meta:
+        model = Atividade
+        fields = ['status', 'categoria']
+
+    @property
+    def aluno(self):
+        req = getattr(self, 'request', None)
+        if req and req.user.is_authenticated:
+            return getattr(req.user, 'aluno', None)
+        return None
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        aluno = self.aluno
+
+        if aluno:
+            self.filters['categoria'].queryset = CursoCategoria.objects.filter(
+                curso=aluno.curso,
+                semestre=aluno.semestre_ingresso
+            )
+
+
+    def filter_atividades_status(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        # Aprovadas
+        if value == '1':
+            return queryset.filter(horas_aprovadas__isnull=False)
+
+        # Aguardando
+        if value == '0':
+            return queryset.filter(horas_aprovadas__isnull=True)
+
+        return queryset
 
 

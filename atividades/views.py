@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.models import Group
 from .decorators import gestor_required, coordenador_required, aluno_required, gestor_ou_coordenador_required
 from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
-from django.db.models import Exists, OuterRef, Value, BooleanField
+from django.db.models import Exists, OuterRef
 
 
 @gestor_required

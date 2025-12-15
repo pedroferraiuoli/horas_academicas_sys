@@ -726,6 +726,10 @@ header button:hover {
     align-items: center;
 }
 
+.modal-dialog-centered {
+    justify-content: center;
+}
+
 .modal-content {
     max-width: 80%;
     max-height: 90%;
@@ -734,6 +738,18 @@ header button:hover {
 
 .modal-content img {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.modal-body {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.modal-body p {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .close {
@@ -825,6 +841,26 @@ header button:hover {
 .atividade-main {
     display: grid;
     grid-template-columns: 1.5fr 1.5fr 0.8fr 1fr 1fr 2.3fr;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid transparent;
+}
+
+.atividade-coordenador-main {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 0.8fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid transparent;
+}
+
+.categorias-coordenador-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.5fr 1fr;
     gap: 1rem;
     padding: 1rem;
     align-items: center;
@@ -968,6 +1004,10 @@ header button:hover {
     
     /* Reorganizar em 2 colunas */
     .ativ-nome {
+        grid-column: 1 / -1;
+    }
+    
+    .ativ-aluno {
         grid-column: 1 / -1;
     }
     

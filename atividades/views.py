@@ -1,3 +1,4 @@
+from django.views import View
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -9,151 +10,191 @@ from django.contrib.auth.models import Group
 from .decorators import gestor_required, coordenador_required, aluno_required, gestor_ou_coordenador_required
 from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
 from django.db.models import Exists, OuterRef
+from django.views.generic import TemplateView
+from .services import CursoService, SemestreService
+from .mixins import GestorRequiredMixin, GestorOuCoordenadorRequiredMixin
 
 
-@gestor_required
-def criar_semestre(request):
-    if request.method == 'POST':
+class CriarCursoView(GestorRequiredMixin, View):
+    template_name = 'atividades/form_curso.html'
+
+    def get(self, request):
+        form = CursoForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = CursoForm(request.POST)
+        if form.is_valid():
+            curso_instance = form.save() 
+            messages.success(request, f'Curso {curso_instance.nome} criado com sucesso!')
+            return redirect('dashboard')
+        
+        return render(request, self.template_name, {'form': form})
+
+class EditarCursoView(GestorOuCoordenadorRequiredMixin, View):
+    template_name = 'atividades/form_curso.html'
+
+    def dispatch(self, request, curso_id, *args, **kwargs):
+        self.pode_editar, self.curso = CursoService.verificar_acesso_edicao(request.user, curso_id)
+
+        if not self.pode_editar:
+            return redirect('dashboard')
+            
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        form = CursoForm(instance=self.curso)
+        return render(request, self.template_name, {'form': form, 'curso': self.curso, 'edit': True})
+
+    def post(self, request):
+        form = CursoForm(request.POST, instance=self.curso)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Curso {self.curso.nome} atualizado com sucesso!')
+            return redirect('listar_cursos')
+            
+        return render(request, self.template_name, {'form': form, 'curso': self.curso, 'edit': True})
+
+class ExcluirCursoView(GestorRequiredMixin, View):
+    template_name = 'atividades/excluir_curso.html'
+
+    def dispatch(self, request, curso_id, *args, **kwargs):
+        self.curso = get_object_or_404(Curso, id=curso_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return render(request, self.template_name, {'curso': self.curso})
+
+    def post(self, request):
+        self.curso.delete()
+        messages.success(request, f'Curso {self.curso.nome} excluído com sucesso!')
+        return redirect('listar_cursos')
+
+class ListarCursosView(GestorOuCoordenadorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_cursos.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cursos'] = CursoService.listar_cursos_para_usuario(self.request.user)
+        return context
+
+class CriarSemestreView(GestorRequiredMixin, View):
+    template_name = 'atividades/form_semestre.html'
+
+    def get(self, request):
+        form = SemestreForm()
+        semestres = Semestre.objects.all()
+        return render(request, self.template_name, {'form': form, 'semestres': semestres})
+
+    def post(self, request):
         form = SemestreForm(request.POST)
         if form.is_valid():
-            semestre = form.save()
-            copiar_de_id = request.POST.get('copiar_de')
-            if copiar_de_id and copiar_de_id != 'Nenhum':
-                source_semestre = Semestre.objects.filter(id=copiar_de_id).first()
-                if source_semestre:
-                    semestre.duplicate_categories_from(source_semestre)
+            form.save()
+            semestre = SemestreService.criar_semestre_com_copia(form, request.POST.get('copiar_de'))
             messages.success(request, f'Semestre {semestre.nome} criado com sucesso!')
             return redirect('dashboard')
-        else:
-            messages.error(request, 'Por favor, corrija os erros abaixo.')
-    else:
-        form = SemestreForm()
-    return render(request, 'atividades/form_semestre.html', {'form': form, 'semestres': Semestre.objects.all()})
+        
+        messages.error(request, 'Por favor, corrija os erros abaixo.')
+        semestres = Semestre.objects.all()
+        return render(request, self.template_name, {'form': form, 'semestres': semestres})
 
-@gestor_required
-def editar_semestre(request, semestre_id):
-    semestre = get_object_or_404(Semestre, id=semestre_id)
-    if request.method == 'POST':
+class EditarSemestreView(GestorRequiredMixin, View):
+    template_name = 'atividades/form_semestre.html'
+
+    def get(self, request, semestre_id):
+        semestre = get_object_or_404(Semestre, id=semestre_id)
+        form = SemestreForm(instance=semestre)
+        return render(request, self.template_name, {'form': form, 'semestre': semestre, 'edit': True})
+
+    def post(self, request, semestre_id):
+        semestre = get_object_or_404(Semestre, id=semestre_id)
         form = SemestreForm(request.POST, instance=semestre)
         if form.is_valid():
             semestre = form.save()
             messages.success(request, f'Semestre {semestre.nome} atualizado com sucesso!')
             return redirect('listar_semestres')
-    else:
-        form = SemestreForm(instance=semestre)
-    return render(request, 'atividades/form_semestre.html', {'form': form, 'semestre': semestre, 'edit': True})
+        
+        return render(request, self.template_name, {'form': form, 'semestre': semestre, 'edit': True})
+    
+class ExcluirSemestreView(GestorRequiredMixin, View):
+    template_name = 'atividades/excluir_semestre.html'
 
-@gestor_required
-def excluir_semestre(request, semestre_id):
-    semestre = get_object_or_404(Semestre, id=semestre_id)
-    if request.method == 'POST':
-        semestre.delete()
-        messages.success(request, f'Semestre {semestre.nome} excluído com sucesso!')
+    def dispatch(self, request, semestre_id, *args, **kwargs):
+        self.semestre = get_object_or_404(Semestre, id=semestre_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return render(request, self.template_name, {'semestre': self.semestre})
+
+    def post(self, request):
+        self.semestre.delete()
+        messages.success(request, f'Semestre {self.semestre.nome} excluído com sucesso!')
         return redirect('listar_semestres')
-    return render(request, 'atividades/excluir_semestre.html', {'semestre': semestre})
+    
+class ListarSemestresView(GestorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_semestres.html'
 
-@gestor_required
-def listar_semestres(request):
-    semestres = Semestre.objects.all()
-    return render(request, 'atividades/listar_semestres.html', {'semestres': semestres})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['semestres'] = Semestre.objects.all()
+        return context
 
-@gestor_required
-def criar_curso(request):
-    if request.method == 'POST':
-        form = CursoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Curso {form.instance.nome} criado com sucesso!')
-            return redirect('dashboard')
-    else:
-        form = CursoForm()
-    return render(request, 'atividades/form_curso.html', {'form': form})
+class CriarCategoriaView(GestorRequiredMixin, View):
+    template_name = 'atividades/form_categoria.html'
 
-@gestor_ou_coordenador_required
-def editar_curso(request, curso_id):
-    user = request.user
-    curso = get_object_or_404(Curso, id=curso_id)
-    pode_editar = True
-    if user.groups.filter(name='Coordenador').exists():
-        try:
-            coordenador = Coordenador.objects.get(user=user)
-            pode_editar = coordenador.curso.id == curso.id
-        except Coordenador.DoesNotExist:
-            pode_editar = False
+    def get(self, request):
+        form = CategoriaAtividadeForm()
+        return render(request, self.template_name, {'form': form})
 
-    if not pode_editar:
-        return redirect('dashboard')
-    if request.method == 'POST':
-        form = CursoForm(request.POST, instance=curso)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Curso {curso.nome} atualizado com sucesso!')
-            return redirect('listar_cursos')
-    else:
-        form = CursoForm(instance=curso)
-    return render(request, 'atividades/form_curso.html', {'form': form, 'curso': curso, 'edit': True})
-
-@gestor_required
-def excluir_curso(request, curso_id):
-    curso = get_object_or_404(Curso, id=curso_id)
-    if request.method == 'POST':
-        curso.delete()
-        messages.success(request, f'Curso {curso.nome} excluído com sucesso!')
-        return redirect('listar_cursos')
-    return render(request, 'atividades/excluir_curso.html', {'curso': curso})
-
-@gestor_ou_coordenador_required
-def listar_cursos(request):
-    user = request.user
-    if user.groups.filter(name='Gestor').exists():
-        cursos = Curso.objects.all()
-    elif user.groups.filter(name='Coordenador').exists():
-        try:
-            coordenador = Coordenador.objects.get(user=user)
-            cursos = Curso.objects.filter(id=coordenador.curso.id)
-        except Coordenador.DoesNotExist:
-            messages.error(request, 'Acesso negado.')
-            return redirect('dashboard')
-    return render(request, 'atividades/listar_cursos.html', {'cursos': cursos})
-
-@gestor_required
-def criar_categoria(request):
-    if request.method == 'POST':
+    def post(self, request):
         form = CategoriaAtividadeForm(request.POST)
         if form.is_valid():
             categoria = form.save()
             messages.success(request, f'Categoria {categoria.nome} criada com sucesso!')
             return redirect('dashboard')
-    else:
-        form = CategoriaAtividadeForm()
-    return render(request, 'atividades/form_categoria.html', {'form': form})
+        
+        return render(request, self.template_name, {'form': form})
 
-@gestor_required
-def editar_categoria(request, categoria_id):
-    categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
-    if request.method == 'POST':
+class EditarCategoriaView(GestorRequiredMixin, View):
+    template_name = 'atividades/form_categoria.html'
+
+    def get(self, request, categoria_id):
+        categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
+        form = CategoriaAtividadeForm(instance=categoria)
+        return render(request, self.template_name, {'form': form, 'categoria': categoria, 'edit': True})
+
+    def post(self, request, categoria_id):
+        categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
         form = CategoriaAtividadeForm(request.POST, instance=categoria)
         if form.is_valid():
             form.save()
             messages.success(request, f'Categoria {categoria.nome} atualizada com sucesso!')
             return redirect('listar_categorias')
-    else:
-        form = CategoriaAtividadeForm(instance=categoria)
-    return render(request, 'atividades/form_categoria.html', {'form': form, 'categoria': categoria, 'edit': True})
+        
+        return render(request, self.template_name, {'form': form, 'categoria': categoria, 'edit': True})
+    
+class ExcluirCategoriaView(GestorRequiredMixin, View):
+    template_name = 'atividades/excluir_categoria.html'
 
-@gestor_required
-def excluir_categoria(request, categoria_id):
-    categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
-    if request.method == 'POST':
-        categoria.delete()
-        messages.success(request, f'Categoria {categoria.nome} excluída com sucesso!')
+    def dispatch(self, request, *args, **kwargs):
+        self.categoria = get_object_or_404(CategoriaAtividade, id=kwargs['categoria_id'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return render(request, self.template_name, {'categoria': self.categoria})
+
+    def post(self, request):
+        self.categoria.delete()
+        messages.success(request, f'Categoria {self.categoria.nome} excluída com sucesso!')
         return redirect('listar_categorias')
-    return render(request, 'atividades/excluir_categoria.html', {'categoria': categoria})
 
-@gestor_required
-def listar_categorias(request):
-    categorias = CategoriaAtividade.objects.all()
-    return render(request, 'atividades/listar_categorias.html', {'categorias': categorias})
+class ListarCategoriasView(GestorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_categorias.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categorias'] = CategoriaAtividade.objects.all()
+        return context
 
 @gestor_ou_coordenador_required
 def criar_categoria_curso(request):

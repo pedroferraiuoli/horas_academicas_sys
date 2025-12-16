@@ -19,37 +19,6 @@ class Semestre(models.Model):
             data_fim__gte=hoje
         ).first()
         return semestre_atual
-    
-    def duplicate_categories_from(self, source_semestre):
-        if source_semestre is None or source_semestre.id == self.id:
-            return 0
-
-        to_create = []
-        with transaction.atomic():
-            origem_qs = CursoCategoria.objects.filter(semestre=source_semestre).select_related('categoria', 'curso')
-            cursos_por_id = {}
-            for cc in origem_qs:
-                cursos_por_id.setdefault(cc.curso_id, []).append(cc)
-
-            for curso_id, curso_categorias in cursos_por_id.items():
-                # ids já existentes no semestre destino para este curso
-                existing_cat_ids = set(
-                    CursoCategoria.objects.filter(curso_id=curso_id, semestre=self).values_list('categoria_id', flat=True)
-                )
-                for cc in curso_categorias:
-                    if cc.categoria_id in existing_cat_ids:
-                        continue
-                    to_create.append(CursoCategoria(
-                        curso_id=curso_id,
-                        categoria_id=cc.categoria_id,
-                        limite_horas=cc.limite_horas,
-                        equivalencia_horas=cc.equivalencia_horas,
-                        semestre=self
-                    ))
-
-            if to_create:
-                CursoCategoria.objects.bulk_create(to_create)
-        return len(to_create)
 
 class CategoriaAtividade(models.Model):
     nome = models.CharField(max_length=100)
@@ -97,8 +66,6 @@ class CursoCategoria(models.Model):
             qs = qs.filter(semestre=semestre)
         return qs
     
-
-
 class Coordenador(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='coordenador')
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT)

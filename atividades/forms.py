@@ -1,4 +1,6 @@
 from django.contrib.auth.models import Group
+
+from atividades.selectors import CursoCategoriaSelectors, SemestreSelectors
 from .models import Curso, CursoCategoria
 from .models import CategoriaAtividade
 from django.contrib.auth.forms import AuthenticationForm
@@ -86,8 +88,26 @@ class CategoriaCursoForm(forms.ModelForm):
         model = CursoCategoria
         fields = ['curso', 'categoria', 'limite_horas', 'semestre']
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if not user:
+            return
+
+        coordenador = getattr(user, 'coordenador', None)
+
+        if coordenador:
+            self.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso_id)
+            self.fields['curso'].initial = coordenador.curso
+
+            semestre_atual = SemestreSelectors.get_semestre_atual()
+
+            self.fields['categoria'].queryset = (CursoCategoriaSelectors.categorias_disponiveis_para_associar(
+                    coordenador.curso,
+                    semestre_atual
+                )
+            )
 
 
 class AtividadeForm(forms.ModelForm):

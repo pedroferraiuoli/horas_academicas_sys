@@ -1,6 +1,6 @@
 from django.db.models import QuerySet, Prefetch, Q
 from typing import Optional, List
-from .models import Atividade, Aluno, Curso, Coordenador, Semestre
+from .models import Atividade, Aluno, CategoriaAtividade, Curso, Coordenador, CursoCategoria, Semestre
 from django.utils import timezone
 
 class AtividadeSelectors:
@@ -92,3 +92,33 @@ class SemestreSelectors:
             )
         except Semestre.DoesNotExist:
             return None
+        
+class CursoCategoriaSelectors:
+    
+    @staticmethod
+    def get_curso_categorias_por_semestre(curso: Curso, semestre: Semestre) -> QuerySet['CursoCategoria']:
+        """Busca categorias de um curso em um semestre específico"""
+        return CursoCategoria.objects.filter(
+            curso=curso,
+            semestre=semestre
+        ).select_related('categoria').order_by('categoria__nome')
+    
+    @staticmethod
+    def categorias_disponiveis_para_associar(curso, semestre):
+        """Retorna categorias que ainda não estão associadas ao curso no semestre"""
+        CursoCategoria_qs = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True)
+        disponiveis = CategoriaAtividade.objects.exclude(id__in=CursoCategoria_qs)
+        return disponiveis.order_by('nome')
+    
+    @staticmethod
+    def get_curso_categorias_usuario(user) -> QuerySet['CursoCategoria']:
+        """Retorna categorias de curso visíveis para o usuário"""
+        if user.groups.filter(name='Gestor').exists():
+            return CursoCategoria.objects.select_related('curso', 'categoria', 'semestre').all()
+        elif user.groups.filter(name='Coordenador').exists():
+            try:
+                coordenador = Coordenador.objects.get(user=user)
+                return CursoCategoria.objects.select_related('curso', 'categoria', 'semestre').filter(curso=coordenador.curso)
+            except Coordenador.DoesNotExist:
+                return CursoCategoria.objects.none()
+        return CursoCategoria.objects.none()

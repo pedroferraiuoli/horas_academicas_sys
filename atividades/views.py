@@ -2,16 +2,18 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+
+from atividades.selectors import CursoCategoriaSelectors
 from .forms import UserRegistrationForm, AtividadeForm, SemestreForm, CategoriaAtividadeForm, CursoForm, AlterarEmailForm, CategoriaCursoForm
 from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Semestre
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
-from .decorators import gestor_required, coordenador_required, aluno_required, gestor_ou_coordenador_required
+from .decorators import gestor_required, coordenador_required, aluno_required
 from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
 from django.db.models import Exists, OuterRef
 from django.views.generic import TemplateView
-from .services import CursoService, SemestreService
+from .services import SemestreService
 from .mixins import GestorRequiredMixin, GestorOuCoordenadorRequiredMixin
 
 
@@ -31,15 +33,11 @@ class CriarCursoView(GestorRequiredMixin, View):
         
         return render(request, self.template_name, {'form': form})
 
-class EditarCursoView(GestorOuCoordenadorRequiredMixin, View):
+class EditarCursoView(GestorRequiredMixin, View):
     template_name = 'atividades/form_curso.html'
 
     def dispatch(self, request, curso_id, *args, **kwargs):
-        self.pode_editar, self.curso = CursoService.verificar_acesso_edicao(request.user, curso_id)
-
-        if not self.pode_editar:
-            return redirect('dashboard')
-            
+        self.curso = get_object_or_404(Curso, id=curso_id)       
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -70,12 +68,12 @@ class ExcluirCursoView(GestorRequiredMixin, View):
         messages.success(request, f'Curso {self.curso.nome} excluído com sucesso!')
         return redirect('listar_cursos')
 
-class ListarCursosView(GestorOuCoordenadorRequiredMixin, TemplateView):
+class ListarCursosView(GestorRequiredMixin, TemplateView):
     template_name = 'atividades/listar_cursos.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cursos'] = CursoService.listar_cursos_para_usuario(self.request.user)
+        context['cursos'] = Curso.objects.all()
         return context
 
 class CriarSemestreView(GestorRequiredMixin, View):
@@ -195,77 +193,83 @@ class ListarCategoriasView(GestorRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['categorias'] = CategoriaAtividade.objects.all()
         return context
-
-@gestor_ou_coordenador_required
-def criar_categoria_curso(request):
-    coordenador = getattr(request.user, 'coordenador', None)
     
-    if request.method == 'POST':
-        form = CategoriaCursoForm(request.POST)
+class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
+    template_name = 'atividades/form_associar_categoria.html'
+
+    def get(self, request):
+        coordenador = getattr(request.user, 'coordenador', None)
+        form = CategoriaCursoForm(user=request.user)
+        return render(request, self.template_name, {'form': form, 'coordenador': coordenador})
+
+    def post(self, request):
+        coordenador = getattr(request.user, 'coordenador', None)
+        form = CategoriaCursoForm(request.POST, user=request.user)
         if form.is_valid():
             categoria = form.save()
             messages.success(request, f'Categoria {categoria.categoria.nome} associada a {categoria.curso.nome} com sucesso!')
             return redirect('dashboard')
-        else:
-            messages.warning(request, f'Erro ao associar categoria')
-    else:
-        form = CategoriaCursoForm()
-    if coordenador:
-        form.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso.id)
-        form.fields['curso'].initial = coordenador.curso
-        categorias_vinculadas = CursoCategoria.objects.filter(curso=coordenador.curso).values_list('categoria_id', flat=True)
-        form.fields['categoria'].queryset = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas)
-    return render(request, 'atividades/form_associar_categoria.html', {'form': form, 'coordenador': coordenador})
 
-@gestor_ou_coordenador_required
-def editar_categoria_curso(request, categoria_id):
-    categoria = get_object_or_404(CursoCategoria, id=categoria_id)
-    coordenador = getattr(request.user, 'coordenador', None)
-    if coordenador and coordenador.curso.id != categoria.curso.id:
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
-    if request.method == 'POST':
-        form = CategoriaCursoForm(request.POST, instance=categoria)
+        return render(request, self.template_name, {'form': form, 'coordenador': coordenador})
+    
+class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
+    template_name = 'atividades/form_associar_categoria.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.categoria = get_object_or_404(CursoCategoria, id=kwargs['categoria_id'])
+        self.coordenador = getattr(request.user, 'coordenador', None)
+        if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+            messages.error(request, 'Acesso negado.')
+            return redirect('dashboard')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        form = CategoriaCursoForm(instance=self.categoria, user=request.user)
+        return render(request, self.template_name, {'form': form, 'categoria': self.categoria, 'edit': True, 'coordenador': self.coordenador})
+    
+    def post(self, request):
+        form = CategoriaCursoForm(request.POST, instance=self.categoria, user=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Categoria {categoria.categoria.nome} atualizada com sucesso!')
+            messages.success(request, f'Categoria {self.categoria.categoria.nome} atualizada com sucesso!')
             return redirect('listar_categorias')
-    else:
-        form = CategoriaCursoForm(instance=categoria)
-    if coordenador:
-        form.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso.id)
-        form.fields['curso'].initial = coordenador.curso
-    return render(request, 'atividades/form_associar_categoria.html', {'form': form, 'categoria': categoria, 'edit': True, 'coordenador': coordenador})
+        
+        return render(request, self.template_name, {'form': form, 'categoria': self.categoria, 'edit': True, 'coordenador': self.coordenador})
 
-@gestor_ou_coordenador_required
-def excluir_categoria_curso(request, categoria_id):
-    coordenador = getattr(request.user, 'coordenador', None)
-    categoria = get_object_or_404(CursoCategoria, id=categoria_id)
-    if coordenador and coordenador.curso.id != categoria.curso.id:
-        messages.error(request, 'Acesso negado.')
-        return redirect('dashboard')
-    if request.method == 'POST':
+class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
+    template_name = 'atividades/excluir_categoria.html'
+
+    def get(self, request, categoria_id):
+        coordenador = getattr(request.user, 'coordenador', None)
+        categoria = get_object_or_404(CursoCategoria, id=categoria_id)
+        if coordenador and coordenador.curso.id != categoria.curso.id:
+            messages.error(request, 'Acesso negado.')
+            return redirect('dashboard')
+        return render(request, self.template_name, {'categoria': categoria})
+
+    def post(self, request, categoria_id):
+        coordenador = getattr(request.user, 'coordenador', None)
+        categoria = get_object_or_404(CursoCategoria, id=categoria_id)
+        if coordenador and coordenador.curso.id != categoria.curso.id:
+            messages.error(request, 'Acesso negado.')
+            return redirect('dashboard')
         categoria.delete()
         messages.success(request, f'Categoria {categoria.categoria.nome} desassociada com sucesso!')
         return redirect('listar_categorias_curso')
-    return render(request, 'atividades/excluir_categoria.html', {'categoria': categoria})
 
-@gestor_ou_coordenador_required
-def listar_categorias_curso(request):
-    coordenador = getattr(request.user, 'coordenador', None)
-    if coordenador:
-        base_qs = CursoCategoria.objects.filter(curso=coordenador.curso)
-    else:
-        base_qs = CursoCategoria.objects.all()
+class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_categorias_curso.html'
 
-    filtro = CursoCategoriaFilter(request.GET or None, queryset=base_qs)
-    categorias = filtro.qs
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        base_qs = CursoCategoriaSelectors.get_curso_categorias_usuario(self.request.user)
 
-    context = {
-        'categorias': categorias,
-        'filter': filtro,
-    }
-    return render(request, 'atividades/listar_categorias_curso.html', context)
+        filtro = CursoCategoriaFilter(self.request.GET or None, queryset=base_qs)
+        categorias = filtro.qs
+
+        context['categorias'] = categorias
+        context['filter'] = filtro
+        return context
 
 @aluno_required
 def cadastrar_atividade(request):

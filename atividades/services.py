@@ -4,36 +4,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Q
 from .models import Curso, Coordenador, CursoCategoria, Semestre
 from django.db import transaction
-
-class CursoService:
-    
-    @staticmethod
-    def listar_cursos_para_usuario(user):
-        if user.groups.filter(name='Gestor').exists():
-            return Curso.objects.all()
-        elif user.groups.filter(name='Coordenador').exists():
-            try:
-                coordenador = Coordenador.objects.get(user=user)
-                return Curso.objects.filter(id=coordenador.curso.id)
-            except Coordenador.DoesNotExist:
-                return Curso.objects.none()
-        return Curso.objects.none()
-
-    @staticmethod
-    def verificar_acesso_edicao(user, curso_id):
-        curso = get_object_or_404(Curso, id=curso_id)
-        if user.groups.filter(name='Gestor').exists():
-            return True, curso
-        
-        if user.groups.filter(name='Coordenador').exists():
-            try:
-                coordenador = Coordenador.objects.get(user=user)
-                pode_editar = coordenador.curso.id == curso.id
-                return pode_editar, curso
-            except Coordenador.DoesNotExist:
-                return False, curso
-        
-        return False, curso
     
 class SemestreService:
 
@@ -78,3 +48,4 @@ class SemestreService:
                 CursoCategoria.objects.bulk_create(to_create)
                 return True
         return False
+    

@@ -57,15 +57,6 @@ class CursoCategoria(models.Model):
         total_horas = sum(a.horas for a in atividades)
         return total_horas > self.limite_horas
     
-    @staticmethod
-    def get_curso_categorias(curso=None, semestre=None):
-        qs = CursoCategoria.objects.all()
-        if curso:
-            qs = qs.filter(curso=curso)
-        if semestre:
-            qs = qs.filter(semestre=semestre)
-        return qs
-    
 class Coordenador(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='coordenador')
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT)

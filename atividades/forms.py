@@ -119,12 +119,18 @@ class AtividadeForm(forms.ModelForm):
             'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }
 
-    def __init__(self, *args, **kwargs):
-        aluno = kwargs.pop('aluno', None)
+    def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         if aluno:
-            categorias = CursoCategoria.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
+
+        if categoria_id:
+            try:
+                categoria = CursoCategoria.objects.get(id=categoria_id)
+                self.fields['categoria'].initial = categoria
+            except CursoCategoria.DoesNotExist:
+                pass
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
     username = forms.CharField(label='Usuário ou Email')

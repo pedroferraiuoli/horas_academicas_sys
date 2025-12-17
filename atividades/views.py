@@ -2,19 +2,18 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
-from atividades.selectors import AtividadeSelectors, CursoCategoriaSelectors
+from atividades.selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, CursoSelectors, SemestreSelectors
 from .forms import UserRegistrationForm, AtividadeForm, SemestreForm, CategoriaAtividadeForm, CursoForm, AlterarEmailForm, CategoriaCursoForm
 from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Semestre
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.models import Group
-from .decorators import gestor_required, coordenador_required, aluno_required
+from .decorators import gestor_required, coordenador_required
 from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
 from django.db.models import Exists, OuterRef
 from django.views.generic import TemplateView
-from .services import SemestreService
-from .mixins import AlunoRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin
+from .services import RegisterService, SemestreService
+from .mixins import AlunoRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin, LoginRequiredMixin
 
 
 class CriarCursoView(GestorRequiredMixin, View):
@@ -351,92 +350,128 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         context['filter'] = filtro
         return context
 
-@login_required
-def dashboard(request):
-    aluno = None
-    total_horas = 0
-    progresso_percentual = 0
-    atividades_recentes = []
-    ultrapassou_limite = False
-    if hasattr(request.user, 'aluno'):
-        aluno = request.user.aluno
-        atividades = aluno.atividades.all()
-        total_horas = aluno.horas_complementares_validas(apenas_aprovadas=True)
+class DashboardView(LoginRequiredMixin, TemplateView):
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+
+        if hasattr(user, 'aluno'):
+            self.dashboard_type = 'aluno'
+            self.template_name = 'atividades/dashboard.html'
+        elif user.groups.filter(name='Coordenador').exists():
+            self.dashboard_type = 'coordenador'
+            self.template_name = 'atividades/dashboard_gestor.html'
+        else:
+            self.dashboard_type = 'gestor'
+            self.template_name = 'atividades/dashboard_gestor.html'
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.dashboard_type == 'aluno':
+            context.update(self.get_aluno_context())
+        else:
+            context.update(self.get_gestor_context())
+
+        return context
+    
+    def get_aluno_context(self):
+        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
+
+        total_horas = AlunoSelectors.horas_complementares_validas(aluno, apenas_aprovadas=True)
         horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
+
+        progresso = 0
         if horas_requeridas > 0:
-            progresso_percentual = min(100, round((float(total_horas) / float(horas_requeridas)) * 100))
-        atividades_recentes = atividades.order_by('-criado_em')[:5]
+            progresso = min(100, round((total_horas / horas_requeridas) * 100))
 
-        categorias = aluno.curso.get_categorias(semestre=aluno.semestre_ingresso) if aluno.curso else []
-        for categoria in categorias:
-            if categoria.ultrapassou_limite_pelo_aluno(aluno):
-                ultrapassou_limite = True
-                break
+        atividades_recentes = AtividadeSelectors.get_atividades_recentes_aluno(aluno, limite=5)
 
-        return render(request, 'atividades/dashboard.html', {
+        ultrapassou_limite = False
+        if aluno.curso:
+            categorias = CursoSelectors.get_categorias_do_curso(aluno.curso, semestre=aluno.semestre_ingresso)
+            ultrapassou_limite = any(
+                c.ultrapassou_limite_pelo_aluno(aluno)
+                for c in categorias
+            )
+
+        return {
             'aluno': aluno,
-            'total_horas': total_horas if aluno else None,
-            'progresso_percentual': progresso_percentual,
+            'total_horas': total_horas,
+            'progresso_percentual': progresso,
             'atividades_recentes': atividades_recentes,
             'ultrapassou_limite': ultrapassou_limite,
-        })
+        }
 
-    # Dashboard para gestor ou coordenador
-    grupo = request.user.groups.all().first().name if request.user.groups.exists() else ''
-    stats = {}
-    semestre_atual = Semestre.get_semestre_atual()
-    if grupo == 'Coordenador':
-        coordenador = getattr(request.user, 'coordenador', None)
-        if coordenador:
-            curso = coordenador.curso
-            alunos = curso.aluno_set.all()
-            num_alunos = alunos.count()
-            atividades_pendentes = Atividade.objects.filter(aluno__in=alunos, horas_aprovadas=None)
-            atividades_pendentes_count = atividades_pendentes.count()
-            alunos_com_pendencias = atividades_pendentes.values('aluno').distinct().count()  
-            stats = {
-                'num_alunos': num_alunos,
-                'alunos_com_pendencias': alunos_com_pendencias,
-                'atividades_pendentes': atividades_pendentes_count,
-            }
-    return render(request, 'atividades/dashboard_gestor.html', {
-        'grupo': grupo,
-        'stats': stats,
-        'semestre_atual': semestre_atual,
-    })
 
-def register(request):
-    if request.method == 'POST':
+    def get_gestor_context(self):
+        user = self.request.user
+        grupo = user.groups.first().name if user.groups.exists() else ''
+        semestre_atual = SemestreSelectors.get_semestre_atual()
+
+        stats = {}
+
+        if grupo == 'Coordenador':
+            coordenador = getattr(user, 'coordenador', None)
+            if coordenador:
+                curso = coordenador.curso
+                alunos = curso.alunos.all()
+                alunos_com_pendencias = AlunoSelectors.get_alunos_com_pendencias(curso)
+                atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes_curso(curso)
+                stats = {
+                    'num_alunos': alunos.count(),
+                    'alunos_com_pendencias':alunos_com_pendencias,
+                    'atividades_pendentes': atividades_pendentes,
+                }
+
+        return {
+            'grupo': grupo,
+            'stats': stats,
+            'semestre_atual': semestre_atual,
+        }
+    
+class RegisterView(View):
+    template_name = 'atividades/register.html'
+
+    def get(self, request):
+        form = UserRegistrationForm()
+        return render(request, self.template_name, {'form': form})
+    
+    def post(self, request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            curso = form.cleaned_data['curso']
-            semestre = form.cleaned_data['semestre']
-            Aluno.objects.create(user=user, curso=curso, semestre_ingresso=semestre)
+            RegisterService.register_user_with_aluno(form)
             messages.success(request, 'Registro realizado com sucesso!')
             return redirect('login')
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'atividades/register.html', {'form': form})
+        return render(request, self.template_name, {'form': form})
+    
+class AlterarEmailView(LoginRequiredMixin, View):
+    template_name = 'atividades/alterar_email.html'
 
-@login_required
-def alterar_email(request):
-    if request.method == 'POST':
+    def get(self, request):
+        form = AlterarEmailForm(instance=request.user)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
         form = AlterarEmailForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'E-mail alterado com sucesso!')
             return redirect('dashboard')
-    else:
-        form = AlterarEmailForm(instance=request.user)
-    return render(request, 'atividades/alterar_email.html', {'form': form})
+        return render(request, self.template_name, {'form': form})
 
-@gestor_required
-def criar_usuario_admin(request):
-    from .forms import AdminUserForm
-    if request.method == 'POST':
+class CriarUsuarioAdminView(GestorRequiredMixin, View):
+    template_name = 'atividades/criar_usuario_admin.html'
+
+    def get(self, request):
+        from .forms import AdminUserForm
+        form = AdminUserForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        from .forms import AdminUserForm
         form = AdminUserForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -454,20 +489,19 @@ def criar_usuario_admin(request):
                 Coordenador.objects.create(user=user, curso=curso)
             messages.success(request, 'Usuário criado com sucesso!')
             return redirect('dashboard')
-    else:
-        form = AdminUserForm()
-    return render(request, 'atividades/criar_usuario_admin.html', {'form': form})
+        return render(request, self.template_name, {'form': form})
+    
+class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_usuarios.html'
 
-@gestor_required
-def listar_usuarios_admin(request):
-    from django.contrib.auth.models import User
-    gestores = User.objects.filter(groups__name='Gestor')
-    coordenadores = User.objects.filter(groups__name='Coordenador')
-    return render(request, 'atividades/listar_usuarios_admin.html', {
-        'gestores': gestores,
-        'coordenadores': coordenadores
-    })
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from django.contrib.auth.models import User
+        gestores = User.objects.filter(groups__name='Gestor')
+        coordenadores = User.objects.filter(groups__name='Coordenador')
+        context['gestores'] = gestores
+        context['coordenadores'] = coordenadores
+        return context
 
 @coordenador_required
 def listar_alunos_coordenador(request):

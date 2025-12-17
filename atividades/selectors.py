@@ -28,7 +28,7 @@ class AtividadeSelectors:
             'categoria__categoria',
             'categoria__curso',
             'categoria__semestre'
-        ).order_by('-criado_em')
+        ).order_by('-created_at')
     
     @staticmethod
     def get_atividades_recentes_aluno(aluno: Aluno, limite: int = 5) -> List[Atividade]:
@@ -47,6 +47,14 @@ class AtividadeSelectors:
             'aluno__user',
             'categoria__categoria'
         ).order_by('criado_em')
+    
+    @staticmethod
+    def get_num_atividades_pendentes_curso(curso: Curso) -> int:
+        """Conta atividades pendentes de aprovação de um curso"""
+        return Atividade.objects.filter(
+            aluno__curso=curso,
+            horas_aprovadas__isnull=True
+        ).count()
     
     @staticmethod
     def get_atividades_by_coordenador(
@@ -122,3 +130,72 @@ class CursoCategoriaSelectors:
             except Coordenador.DoesNotExist:
                 return CursoCategoria.objects.none()
         return CursoCategoria.objects.none()
+    
+class AlunoSelectors:
+
+    @staticmethod
+    def get_aluno_by_user(user) -> Optional[Aluno]:
+        """Busca Aluno associado a um usuário"""
+        try:
+            return Aluno.objects.select_related('curso', 'semestre_ingresso').get(user=user)
+        except Aluno.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_alunos_com_pendencias(curso=None) -> QuerySet[Aluno]:
+        """Retorna alunos que possuem atividades com horas não aprovadas"""
+        from django.db.models import OuterRef, Exists
+
+        pendencias_subquery = Atividade.objects.filter(
+            aluno=OuterRef('pk'),
+            horas_aprovadas__isnull=True,
+        )
+
+        if curso is None:
+            return (
+                Aluno.objects
+                .annotate(tem_pendencia=Exists(pendencias_subquery))
+                .filter(tem_pendencia=True)
+            ).count()
+        
+        return (
+            Aluno.objects
+            .filter(curso=curso)
+            .annotate(tem_pendencia=Exists(pendencias_subquery))
+            .filter(tem_pendencia=True)
+        ).count
+    
+    def get_num_alunos_com_pendencias(curso):
+        return AlunoSelectors.get_alunos_com_pendencias(curso).count()
+    
+    @staticmethod
+    def horas_complementares_validas(aluno, apenas_aprovadas=None):
+        total = 0
+        if not aluno.curso:
+            return 0
+        # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
+        for cat in CursoSelectors.get_categorias_do_curso(aluno.curso, semestre=aluno.semestre_ingresso):
+            categoria = cat.categoria
+            atividades = aluno.atividades.filter(categoria=cat)
+            if apenas_aprovadas:
+                soma = sum(a.horas_aprovadas or 0 for a in atividades if a.horas_aprovadas is not None)
+            else:
+                soma = sum(a.horas for a in atividades)
+            try:
+                curso_categoria = CursoCategoria.objects.get(curso=aluno.curso, categoria=categoria, semestre=aluno.semestre_ingresso)
+                limite = curso_categoria.limite_horas
+            except CursoCategoria.DoesNotExist:
+                limite = 0
+            if limite > 0:
+                total += min(soma, limite)
+            else:
+                total += soma
+        return total
+    
+class CursoSelectors:
+
+    @staticmethod
+    def get_categorias_do_curso(curso, semestre=None):
+        if semestre:
+            return curso.curso_categorias.filter(semestre=semestre).select_related('categoria').all()
+        return curso.curso_categorias.select_related('categoria').all()

@@ -2,10 +2,10 @@
 {% load atividade_extras %}
 {% block content %}
 <h2 class="text-main-blue mt-3">Minhas Atividades</h2>
-{% if categoria_filtrada %}
-  <div class="alert alert-warning">Filtrando por categoria: <b>{{ categoria_filtrada.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-blue ms-2">Remover filtro</a></div>
+{% if filter.form.categoria.value %}
+  <div class="alert alert-warning">Filtrando por categoria: <b>{{ filter.form.cleaned_data.categoria.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-blue ms-2">Remover filtro</a></div>
 {% endif %}
-<a href="{% url 'cadastrar_atividade' %}?categoria={{ categoria_filtrada.id }}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
+<a href="{% url 'cadastrar_atividade' %}?categoria={{ filter.form.categoria.value }}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
 
 <form method="get" class="mb-3">
   <div class="row g-2 align-items-center">

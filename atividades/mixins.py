@@ -34,3 +34,11 @@ class AlunoRequiredMixin(UserPassesTestMixin):
     def handle_no_permission(self):
         messages.warning(self.request, 'Acesso negado.')
         return redirect('dashboard')
+    
+class LoginRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_authenticated
+    
+    def handle_no_permission(self):
+        messages.warning(self.request, 'Por favor, faça login para continuar.')
+        return redirect('login')

@@ -2,7 +2,7 @@ from gettext import translation
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Q
-from .models import Curso, Coordenador, CursoCategoria, Semestre
+from .models import Aluno, Curso, Coordenador, CursoCategoria, Semestre
 from django.db import transaction
     
 class SemestreService:
@@ -48,4 +48,18 @@ class SemestreService:
                 CursoCategoria.objects.bulk_create(to_create)
                 return True
         return False
-    
+
+class RegisterService:
+
+    def register_user_with_aluno(form):
+        user = form.save(commit=False)
+        user.set_password(form.cleaned_data['password'])
+        user.save()
+
+        Aluno.objects.create(
+            user=user,
+            curso=form.cleaned_data['curso'],
+            semestre_ingresso=form.cleaned_data['semestre'],
+        )
+
+        return user

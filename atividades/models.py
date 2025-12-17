@@ -1,45 +1,35 @@
-from math import modf
-from django.db import models, transaction
+from django.db import models
 from django.contrib.auth.models import User
 
-class Semestre(models.Model):
+class BaseModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, editable=False)
+
+    class Meta:
+        abstract = True
+
+class Semestre(BaseModel):
     nome = models.CharField(max_length=20)
     data_inicio = models.DateField(null=True, blank=True)
     data_fim = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.nome
-    
-    @staticmethod
-    def get_semestre_atual():
-        from django.utils import timezone
-        hoje = timezone.now().date()
-        semestre_atual = Semestre.objects.filter(
-            data_inicio__lte=hoje,
-            data_fim__gte=hoje
-        ).first()
-        return semestre_atual
 
-class CategoriaAtividade(models.Model):
+class CategoriaAtividade(BaseModel):
     nome = models.CharField(max_length=100)
 
     def __str__(self):
         return self.nome
 
-class Curso(models.Model):
+class Curso(BaseModel):
     nome = models.CharField(max_length=100)
     horas_requeridas = models.IntegerField(help_text="Horas totais necessárias para conclusão do curso")
 
     def __str__(self):
         return self.nome
     
-    def get_categorias(self, semestre=None):
-        if semestre:
-            return self.curso_categorias.filter(semestre=semestre).select_related('categoria').all()
-        return self.curso_categorias.select_related('categoria').all()
-    
-    
-class CursoCategoria(models.Model):
+class CursoCategoria(BaseModel):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
     categoria = models.ForeignKey('CategoriaAtividade', on_delete=models.CASCADE, related_name='curso_categorias')
     limite_horas = models.IntegerField(help_text="Limite máximo de horas para esta categoria neste curso")
@@ -57,16 +47,16 @@ class CursoCategoria(models.Model):
         total_horas = sum(a.horas for a in atividades)
         return total_horas > self.limite_horas
     
-class Coordenador(models.Model):
+class Coordenador(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='coordenador')
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} - Coordenador de {self.curso.nome}"
 
-class Aluno(models.Model):
+class Aluno(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
+    curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name='alunos')
     semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
@@ -95,7 +85,7 @@ class Aluno(models.Model):
                 total += soma
         return total
 
-class Atividade(models.Model):
+class Atividade(BaseModel):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='atividades')
     categoria = models.ForeignKey(CursoCategoria, on_delete=models.PROTECT)
     nome = models.CharField(max_length=200)
@@ -105,7 +95,6 @@ class Atividade(models.Model):
     horas_aprovadas = models.IntegerField(null=True, blank=True)
     data = models.DateField()
     documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.nome} ({self.aluno})"

@@ -10,7 +10,7 @@ def categorias_do_usuario(request):
     if not aluno or not aluno.curso:
         return {}
 
-    categorias_qs = CursoCategoriaSelectors.get_curso_categorias_por_semestre(
+    categorias_qs = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(
         curso=aluno.curso,
         semestre=aluno.semestre_ingresso
     ).select_related('categoria')

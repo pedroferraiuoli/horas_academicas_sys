@@ -172,13 +172,3 @@ class CategoriaCursoDiretaForm(forms.Form):
     limite_horas = forms.IntegerField(label='Limite de horas', min_value=0)
     semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre')
 
-    def save(self, coordenador):
-        categoria = CategoriaAtividade.objects.create(nome=self.cleaned_data['nome'])
-        curso_categoria = CursoCategoria.objects.create(
-            curso=coordenador.curso,
-            categoria=categoria,
-            limite_horas=self.cleaned_data['limite_horas'],
-            semestre=self.cleaned_data['semestre']
-        )
-        return curso_categoria
-

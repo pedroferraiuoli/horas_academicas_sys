@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
@@ -43,8 +44,12 @@ class CursoCategoria(BaseModel):
         return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
     
     def ultrapassou_limite_pelo_aluno(self, aluno):
-        atividades = aluno.atividades.filter(categoria=self)
-        total_horas = sum(a.horas for a in atividades)
+        total_horas = (
+            aluno.atividades
+            .filter(categoria=self)
+            .aggregate(total=Sum('horas'))['total']
+            or 0
+        )
         return total_horas > self.limite_horas
     
 class Coordenador(BaseModel):
@@ -61,28 +66,30 @@ class Aluno(BaseModel):
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} ({self.semestre_ingresso})"
-
-    def horas_complementares_validas(self, apenas_aprovadas=None):
+    
+    def horas_complementares_validas(self, apenas_aprovadas=False):
         total = 0
         if not self.curso:
             return 0
-        # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
-        for cat in self.curso.get_categorias(semestre=self.semestre_ingresso):
-            categoria = cat.categoria
-            atividades = self.atividades.filter(categoria=cat)
+        
+        from atividades.selectors import CursoCategoriaSelectors
+        categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(
+            self.curso,
+            semestre=self.semestre_ingresso
+        )
+
+        for curso_categoria in categorias:
+            atividades = self.atividades.filter(categoria=curso_categoria)
+
             if apenas_aprovadas:
                 soma = sum(a.horas_aprovadas or 0 for a in atividades if a.horas_aprovadas is not None)
             else:
                 soma = sum(a.horas for a in atividades)
-            try:
-                curso_categoria = CursoCategoria.objects.get(curso=self.curso, categoria=categoria, semestre=self.semestre_ingresso)
-                limite = curso_categoria.limite_horas
-            except CursoCategoria.DoesNotExist:
-                limite = 0
-            if limite > 0:
-                total += min(soma, limite)
-            else:
-                total += soma
+
+            limite = curso_categoria.limite_horas or 0
+
+            total += min(soma, limite) if limite > 0 else soma
+
         return total
 
 class Atividade(BaseModel):

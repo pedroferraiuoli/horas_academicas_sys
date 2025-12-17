@@ -18,7 +18,7 @@ urlpatterns = [
     path('categorias-curso/', views.ListarCategoriasCursoView.as_view(), name='listar_categorias_curso'),
     path('categorias-curso/<int:categoria_id>/editar/', views.EditarCategoriaCursoView.as_view(), name='editar_categoria_curso'),
     path('categorias-curso/<int:categoria_id>/excluir/', views.ExcluirCategoriaCursoView.as_view(), name='excluir_categoria_curso'),
-    path('criar-categoria-curso-direta/', views.criar_categoria_curso_direta, name='criar_categoria_curso_direta'),
+    path('criar-categoria-curso-direta/', views.CriarCategoriaCursoDiretaView.as_view(), name='criar_categoria_curso_direta'),
     path('criar-curso/', views.CriarCursoView.as_view(), name='criar_curso'),
     path('cursos/', views.ListarCursosView.as_view(), name='listar_cursos'),
     path('cursos/<int:curso_id>/editar/', views.EditarCursoView.as_view(), name='editar_curso'),
@@ -44,10 +44,10 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='atividades/password_reset_complete.html'), name='password_reset_complete'),
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('usuarios/<int:user_id>/ativar-desativar/', views.ativar_desativar_usuario, name='ativar_desativar_usuario'),
-    path('associar-categorias-ao-curso/', views.associar_categorias_ao_curso, name='associar_categorias_ao_curso'),
-    path('alunos-coordenador/', views.listar_alunos_coordenador, name='listar_alunos_coordenador'),
-    path('atividades-coordenador/', views.listar_atividades_coordenador, name='listar_atividades_coordenador'),
-    path('aprovar-horas-atividade/<int:atividade_id>/', views.aprovar_horas_atividade, name='aprovar_horas_atividade'),
+    path('associar-categorias-ao-curso/', views.AssociarCategoriasCursoView.as_view(), name='associar_categorias_ao_curso'),
+    path('alunos-coordenador/', views.ListarAlunosCoordenadorView.as_view(), name='listar_alunos_coordenador'),
+    path('atividades-coordenador/', views.ListarAtividadesCoordenadorView.as_view(), name='listar_atividades_coordenador'),
+    path('aprovar-horas-atividade/<int:atividade_id>/', views.AprovarHorasAtividadeView.as_view(), name='aprovar_horas_atividade'),
 ]
 
 if settings.DEBUG:

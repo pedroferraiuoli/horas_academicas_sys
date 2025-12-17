@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, Prefetch, Q
+from django.db.models import QuerySet, OuterRef, Exists
 from typing import Optional, List
 from .models import Atividade, Aluno, CategoriaAtividade, Curso, Coordenador, CursoCategoria, Semestre
 from django.utils import timezone
@@ -22,9 +22,7 @@ class AtividadeSelectors:
     @staticmethod
     def get_atividades_aluno(aluno: Aluno) -> QuerySet[Atividade]:
         """Busca todas atividades de um aluno"""
-        return Atividade.objects.filter(
-            aluno=aluno
-        ).select_related(
+        return aluno.atividades.all().select_related(
             'categoria__categoria',
             'categoria__curso',
             'categoria__semestre'
@@ -46,43 +44,11 @@ class AtividadeSelectors:
         ).select_related(
             'aluno__user',
             'categoria__categoria'
-        ).order_by('criado_em')
+        ).order_by('created_at')
     
     @staticmethod
     def get_num_atividades_pendentes_curso(curso: Curso) -> int:
         """Conta atividades pendentes de aprovação de um curso"""
-        return Atividade.objects.filter(
-            aluno__curso=curso,
-            horas_aprovadas__isnull=True
-        ).count()
-    
-    @staticmethod
-    def get_atividades_by_coordenador(
-        coordenador: Coordenador,
-        aluno: Optional[Aluno] = None,
-        apenas_pendentes: bool = False
-    ) -> QuerySet[Atividade]:
-        """
-        Busca atividades que o coordenador pode visualizar
-        """
-        qs = Atividade.objects.filter(
-            aluno__curso=coordenador.curso
-        ).select_related(
-            'aluno__user',
-            'categoria__categoria'
-        )
-        
-        if aluno:
-            qs = qs.filter(aluno=aluno)
-        
-        if apenas_pendentes:
-            qs = qs.filter(horas_aprovadas__isnull=True)
-        
-        return qs.order_by('-criado_em')
-    
-    @staticmethod
-    def count_atividades_pendentes_curso(curso: Curso) -> int:
-        """Conta atividades pendentes de um curso"""
         return Atividade.objects.filter(
             aluno__curso=curso,
             horas_aprovadas__isnull=True
@@ -104,7 +70,7 @@ class SemestreSelectors:
 class CursoCategoriaSelectors:
     
     @staticmethod
-    def get_curso_categorias_por_semestre(curso: Curso, semestre: Semestre) -> QuerySet['CursoCategoria']:
+    def get_curso_categorias_por_semestre_curso(curso: Curso, semestre: Semestre) -> QuerySet['CursoCategoria']:
         """Busca categorias de um curso em um semestre específico"""
         return CursoCategoria.objects.filter(
             curso=curso,
@@ -112,7 +78,12 @@ class CursoCategoriaSelectors:
         ).select_related('categoria').order_by('categoria__nome')
     
     @staticmethod
-    def categorias_disponiveis_para_associar(curso, semestre):
+    def get_curso_categorias_por_curso(curso) -> QuerySet['CursoCategoria']:
+        """Busca todas as categorias de um curso"""
+        return curso.curso_categorias.select_related('categoria').all()
+    
+    @staticmethod
+    def get_curso_categorias_disponiveis_para_associar(curso, semestre):
         """Retorna categorias que ainda não estão associadas ao curso no semestre"""
         CursoCategoria_qs = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True)
         disponiveis = CategoriaAtividade.objects.exclude(id__in=CursoCategoria_qs)
@@ -134,68 +105,100 @@ class CursoCategoriaSelectors:
 class AlunoSelectors:
 
     @staticmethod
+    def _with_pendencia_annotation(qs):
+        pendencias_subquery = Atividade.objects.filter(
+            aluno=OuterRef('pk'),
+            horas_aprovadas__isnull=True,
+        )
+        return qs.annotate(
+            tem_pendencia=Exists(pendencias_subquery)
+        )
+
+    @staticmethod
     def get_aluno_by_user(user) -> Optional[Aluno]:
-        """Busca Aluno associado a um usuário"""
         try:
             return Aluno.objects.select_related('curso', 'semestre_ingresso').get(user=user)
         except Aluno.DoesNotExist:
             return None
         
     @staticmethod
-    def get_alunos_com_pendencias(curso=None) -> QuerySet[Aluno]:
-        """Retorna alunos que possuem atividades com horas não aprovadas"""
-        from django.db.models import OuterRef, Exists
-
-        pendencias_subquery = Atividade.objects.filter(
-            aluno=OuterRef('pk'),
-            horas_aprovadas__isnull=True,
-        )
-
-        if curso is None:
-            return (
-                Aluno.objects
-                .annotate(tem_pendencia=Exists(pendencias_subquery))
-                .filter(tem_pendencia=True)
-            ).count()
-        
+    def get_alunos_com_pendencias_por_curso(curso) -> QuerySet[Aluno]:
+        qs = Aluno.objects.filter(curso=curso)
         return (
-            Aluno.objects
-            .filter(curso=curso)
-            .annotate(tem_pendencia=Exists(pendencias_subquery))
+            AlunoSelectors._with_pendencia_annotation(qs)
             .filter(tem_pendencia=True)
-        ).count
-    
-    def get_num_alunos_com_pendencias(curso):
-        return AlunoSelectors.get_alunos_com_pendencias(curso).count()
+        )
     
     @staticmethod
-    def horas_complementares_validas(aluno, apenas_aprovadas=None):
-        total = 0
-        if not aluno.curso:
-            return 0
-        # Para cada categoria vinculada ao curso, busca o vínculo CursoCategoria
-        for cat in CursoSelectors.get_categorias_do_curso(aluno.curso, semestre=aluno.semestre_ingresso):
-            categoria = cat.categoria
-            atividades = aluno.atividades.filter(categoria=cat)
-            if apenas_aprovadas:
-                soma = sum(a.horas_aprovadas or 0 for a in atividades if a.horas_aprovadas is not None)
-            else:
-                soma = sum(a.horas for a in atividades)
-            try:
-                curso_categoria = CursoCategoria.objects.get(curso=aluno.curso, categoria=categoria, semestre=aluno.semestre_ingresso)
-                limite = curso_categoria.limite_horas
-            except CursoCategoria.DoesNotExist:
-                limite = 0
-            if limite > 0:
-                total += min(soma, limite)
-            else:
-                total += soma
-        return total
+    def get_num_alunos_com_pendencias_por_curso(curso):
+        return AlunoSelectors.get_alunos_com_pendencias_por_curso(curso).count()
     
-class CursoSelectors:
+    @staticmethod
+    def get_num_alunos_por_curso(curso):
+        return curso.alunos.all().count()
+    
+    @staticmethod
+    def get_alunos_por_curso_order_by_pendencia(curso):
+        qs = Aluno.objects.filter(curso=curso).select_related(
+            'user', 'semestre_ingresso'
+        )
+        return (
+            AlunoSelectors._with_pendencia_annotation(qs)
+            .order_by('-tem_pendencia', 'user__first_name')
+        )
+    
+class UserSelectors:
 
     @staticmethod
-    def get_categorias_do_curso(curso, semestre=None):
-        if semestre:
-            return curso.curso_categorias.filter(semestre=semestre).select_related('categoria').all()
-        return curso.curso_categorias.select_related('categoria').all()
+    def is_user_coordenador(user) -> bool:
+        """Verifica se o usuário é um coordenador"""
+        return user.groups.filter(name='Coordenador').exists()
+    
+    @staticmethod
+    def is_user_gestor(user) -> bool:
+        """Verifica se o usuário é um gestor"""
+        return user.groups.filter(name='Gestor').exists()
+    
+    @staticmethod
+    def is_user_aluno(user) -> bool:
+        """Verifica se o usuário é um aluno"""
+        return hasattr(user, 'aluno')
+    
+    @staticmethod
+    def get_coordenador_by_user(user) -> Optional[Coordenador]:
+        """Retorna o coordenador associado ao usuário, se existir"""
+        try:
+            return Coordenador.objects.select_related('curso').get(user=user)
+        except Coordenador.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_gestor_users() -> QuerySet:
+        """Retorna todos os usuários que são gestores"""
+        from django.contrib.auth.models import User, Group
+
+        gestor_group = Group.objects.get(name='Gestor')
+        return User.objects.filter(groups=gestor_group)
+    
+    @staticmethod
+    def get_coordenador_users() -> QuerySet:
+        """Retorna todos os usuários que são coordenadores"""
+        from django.contrib.auth.models import User, Group
+
+        coordenador_group = Group.objects.get(name='Coordenador')
+        return User.objects.filter(groups=coordenador_group)
+    
+    @staticmethod
+    def get_user_groups(user) -> List[str]:
+        """Retorna os nomes dos grupos aos quais o usuário pertence"""
+        if not user.is_authenticated:
+            return []
+        if hasattr(user, 'aluno'):
+            return ['Aluno']
+        return list(user.groups.values_list('name', flat=True))
+    
+    @staticmethod
+    def get_user_primary_group(user) -> Optional[str]:
+        """Retorna o nome do primeiro grupo do usuário, se existir"""
+        groups = UserSelectors.get_user_groups(user)
+        return groups[0] if groups else None

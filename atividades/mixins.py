@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import UserPassesTestMixin
+from atividades.selectors import UserSelectors
 
 class GestorRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.groups.filter(name='Gestor').exists()
+        return UserSelectors.is_user_gestor(self.request.user)
     
     def handle_no_permission(self):
         messages.warning(self.request, 'Acesso negado.')
@@ -13,7 +14,7 @@ class GestorRequiredMixin(UserPassesTestMixin):
 class GestorOuCoordenadorRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         user = self.request.user
-        return user.groups.filter(name='Gestor').exists() or user.groups.filter(name='Coordenador').exists()
+        return UserSelectors.is_user_gestor(user) or UserSelectors.is_user_coordenador(user)
     
     def handle_no_permission(self):
         messages.warning(self.request, 'Acesso negado.')
@@ -21,7 +22,7 @@ class GestorOuCoordenadorRequiredMixin(UserPassesTestMixin):
     
 class CoordenadorRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.groups.filter(name='Coordenador').exists()
+        return UserSelectors.is_user_coordenador(self.request.user)
     
     def handle_no_permission(self):
         messages.warning(self.request, 'Acesso negado.')
@@ -29,7 +30,7 @@ class CoordenadorRequiredMixin(UserPassesTestMixin):
     
 class AlunoRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return getattr(self.request.user, 'aluno', None) is not None
+        return UserSelectors.is_user_aluno(self.request.user)
     
     def handle_no_permission(self):
         messages.warning(self.request, 'Acesso negado.')

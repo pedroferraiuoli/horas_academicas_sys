@@ -2,19 +2,17 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from atividades.selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, CursoSelectors, SemestreSelectors
-from .forms import UserRegistrationForm, AtividadeForm, SemestreForm, CategoriaAtividadeForm, CursoForm, AlterarEmailForm, CategoriaCursoForm
+from atividades.selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, SemestreSelectors, UserSelectors
+from .forms import AdminUserForm, CategoriaCursoDiretaForm, UserRegistrationForm, AtividadeForm, SemestreForm, CategoriaAtividadeForm, CursoForm, AlterarEmailForm, CategoriaCursoForm
 from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Semestre
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.models import Group
 from .decorators import gestor_required, coordenador_required
 from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
 from django.db.models import Exists, OuterRef
 from django.views.generic import TemplateView
-from .services import RegisterService, SemestreService
-from .mixins import AlunoRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin, LoginRequiredMixin
-
+from .services import AtividadeService, CursoCategoriaService, UserService, SemestreService
+from .mixins import AlunoRequiredMixin, CoordenadorRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin, LoginRequiredMixin
 
 class CriarCursoView(GestorRequiredMixin, View):
     template_name = 'atividades/form_curso.html'
@@ -87,7 +85,7 @@ class CriarSemestreView(GestorRequiredMixin, View):
         form = SemestreForm(request.POST)
         if form.is_valid():
             form.save()
-            semestre = SemestreService.criar_semestre_com_copia(form, request.POST.get('copiar_de'))
+            semestre = SemestreService.criar_semestre_com_copia(form=form, copiar_de_id=request.POST.get('copiar_de'))
             messages.success(request, f'Semestre {semestre.nome} criado com sucesso!')
             return redirect('dashboard')
         
@@ -173,8 +171,8 @@ class EditarCategoriaView(GestorRequiredMixin, View):
 class ExcluirCategoriaView(GestorRequiredMixin, View):
     template_name = 'atividades/excluir_categoria.html'
 
-    def dispatch(self, request, *args, **kwargs):
-        self.categoria = get_object_or_404(CategoriaAtividade, id=kwargs['categoria_id'])
+    def dispatch(self, request, categoria_id, *args, **kwargs):
+        self.categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -197,12 +195,12 @@ class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
     template_name = 'atividades/form_associar_categoria.html'
 
     def get(self, request):
-        coordenador = getattr(request.user, 'coordenador', None)
+        coordenador = UserSelectors.get_coordenador_by_user(request.user)
         form = CategoriaCursoForm(user=request.user)
         return render(request, self.template_name, {'form': form, 'coordenador': coordenador})
 
     def post(self, request):
-        coordenador = getattr(request.user, 'coordenador', None)
+        coordenador = UserSelectors.get_coordenador_by_user(request.user)
         form = CategoriaCursoForm(request.POST, user=request.user)
         if form.is_valid():
             categoria = form.save()
@@ -214,9 +212,9 @@ class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
 class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
     template_name = 'atividades/form_associar_categoria.html'
 
-    def dispatch(self, request, *args, **kwargs):
-        self.categoria = get_object_or_404(CursoCategoria, id=kwargs['categoria_id'])
-        self.coordenador = getattr(request.user, 'coordenador', None)
+    def dispatch(self, request, categoria_id, *args, **kwargs):
+        self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
+        self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
         if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
@@ -238,22 +236,23 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
 class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
     template_name = 'atividades/excluir_categoria.html'
 
-    def get(self, request, categoria_id):
-        coordenador = getattr(request.user, 'coordenador', None)
-        categoria = get_object_or_404(CursoCategoria, id=categoria_id)
-        if coordenador and coordenador.curso.id != categoria.curso.id:
-            messages.warning(request, 'Acesso negado.')
-            return redirect('dashboard')
-        return render(request, self.template_name, {'categoria': categoria})
+    def dispatch(self, request, categoria_id, *args, **kwargs):
+        self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
+        self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
+        return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, categoria_id):
-        coordenador = getattr(request.user, 'coordenador', None)
-        categoria = get_object_or_404(CursoCategoria, id=categoria_id)
-        if coordenador and coordenador.curso.id != categoria.curso.id:
+    def get(self, request):
+        if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
-        categoria.delete()
-        messages.success(request, f'Categoria {categoria.categoria.nome} desassociada com sucesso!')
+        return render(request, self.template_name, {'categoria': self.categoria})
+
+    def post(self, request):
+        if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+            messages.warning(request, 'Acesso negado.')
+            return redirect('dashboard')
+        self.categoria.delete()
+        messages.success(request, f'Categoria {self.categoria.categoria.nome} desassociada com sucesso!')
         return redirect('listar_categorias_curso')
 
 class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
@@ -274,10 +273,7 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'atividades/form_atividade.html'
 
     def dispatch(self, request, *args, **kwargs):
-        self.aluno = getattr(request.user, 'aluno', None)
-        if not self.aluno:
-            messages.warning(request, 'Acesso negado.')
-            return redirect('dashboard')
+        self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -299,10 +295,7 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'atividades/form_atividade.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
-        self.aluno = getattr(request.user, 'aluno', None)
-        if not self.aluno:
-            messages.warning(request, 'Acesso negado.')
-            return redirect('dashboard')
+        self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
         self.atividade = get_object_or_404(Atividade, id=atividade_id, aluno=self.aluno)
         return super().dispatch(request, *args, **kwargs)
 
@@ -322,10 +315,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
     template_name = 'atividades/excluir_atividade.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
-        self.aluno = getattr(request.user, 'aluno', None)
-        if not self.aluno:
-            messages.warning(request, 'Acesso negado.')
-            return redirect('dashboard')
+        self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
         self.atividade = get_object_or_404(Atividade, id=atividade_id, aluno=self.aluno)
         return super().dispatch(request, *args, **kwargs)
 
@@ -342,7 +332,7 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        aluno = getattr(self.request.user, 'aluno', None)
+        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
         atividades = AtividadeSelectors.get_atividades_aluno(aluno)
         filtro = AtividadesFilter(self.request.GET or None, queryset=atividades, request=self.request)
         atividades_filtradas = filtro.qs
@@ -355,13 +345,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         user = request.user
 
-        if hasattr(user, 'aluno'):
+        if UserSelectors.is_user_aluno(user):
             self.dashboard_type = 'aluno'
             self.template_name = 'atividades/dashboard.html'
-        elif user.groups.filter(name='Coordenador').exists():
+        elif UserSelectors.is_user_coordenador(user):
             self.dashboard_type = 'coordenador'
             self.template_name = 'atividades/dashboard_gestor.html'
-        else:
+        elif UserSelectors.is_user_gestor(user):
             self.dashboard_type = 'gestor'
             self.template_name = 'atividades/dashboard_gestor.html'
 
@@ -380,7 +370,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_aluno_context(self):
         aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
 
-        total_horas = AlunoSelectors.horas_complementares_validas(aluno, apenas_aprovadas=True)
+        total_horas = aluno.horas_complementares_validas(apenas_aprovadas=True)
         horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
 
         progresso = 0
@@ -391,7 +381,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         ultrapassou_limite = False
         if aluno.curso:
-            categorias = CursoSelectors.get_categorias_do_curso(aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CursoCategoriaSelectors.get_curso_categorias_por_curso(aluno.curso)
             ultrapassou_limite = any(
                 c.ultrapassou_limite_pelo_aluno(aluno)
                 for c in categorias
@@ -408,7 +398,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_gestor_context(self):
         user = self.request.user
-        grupo = user.groups.first().name if user.groups.exists() else ''
+        grupo = UserSelectors.get_user_primary_group(user)
         semestre_atual = SemestreSelectors.get_semestre_atual()
 
         stats = {}
@@ -417,11 +407,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             coordenador = getattr(user, 'coordenador', None)
             if coordenador:
                 curso = coordenador.curso
-                alunos = curso.alunos.all()
-                alunos_com_pendencias = AlunoSelectors.get_alunos_com_pendencias(curso)
+                alunos = AlunoSelectors.get_num_alunos_por_curso(curso)
+                alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias_por_curso(curso)
                 atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes_curso(curso)
                 stats = {
-                    'num_alunos': alunos.count(),
+                    'num_alunos': alunos,
                     'alunos_com_pendencias':alunos_com_pendencias,
                     'atividades_pendentes': atividades_pendentes,
                 }
@@ -442,7 +432,7 @@ class RegisterView(View):
     def post(self, request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            RegisterService.register_user_with_aluno(form)
+            UserService.register_user_with_aluno(form=form)
             messages.success(request, 'Registro realizado com sucesso!')
             return redirect('login')
         return render(request, self.template_name, {'form': form})
@@ -466,27 +456,13 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
     template_name = 'atividades/criar_usuario_admin.html'
 
     def get(self, request):
-        from .forms import AdminUserForm
         form = AdminUserForm()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        from .forms import AdminUserForm
         form = AdminUserForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            tipo = form.cleaned_data['tipo']
-            if tipo == 'gestor':
-                grupo = Group.objects.get(name='Gestor')
-                user.groups.add(grupo)
-            elif tipo == 'coordenador':
-                grupo = Group.objects.get(name='Coordenador')
-                user.groups.add(grupo)
-                curso = form.cleaned_data['curso']
-                from .models import Coordenador
-                Coordenador.objects.create(user=user, curso=curso)
+            UserService.criar_usuario_admin(form=form)
             messages.success(request, 'Usuário criado com sucesso!')
             return redirect('dashboard')
         return render(request, self.template_name, {'form': form})
@@ -496,203 +472,156 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from django.contrib.auth.models import User
-        gestores = User.objects.filter(groups__name='Gestor')
-        coordenadores = User.objects.filter(groups__name='Coordenador')
+        gestores = UserSelectors.get_gestor_users()
+        coordenadores = UserSelectors.get_coordenador_users()
         context['gestores'] = gestores
         context['coordenadores'] = coordenadores
         return context
+    
+class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_alunos_coordenador.html'
 
-@coordenador_required
-def listar_alunos_coordenador(request):
-    user = request.user
-    try:
-        coordenador = Coordenador.objects.get(user=user)
-    except Coordenador.DoesNotExist:
-        messages.warning(request, 'Perfil de coordenador não encontrado.')
-        return redirect('dashboard')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        coordenador = UserSelectors.get_coordenador_by_user(user)
+        curso = coordenador.curso
 
-    curso = coordenador.curso
+        alunos_base = AlunoSelectors.get_alunos_por_curso_order_by_pendencia(curso)
 
-    pendencias_subquery = Atividade.objects.filter(
-        aluno=OuterRef('pk'),
-        horas_aprovadas__isnull=True,
-    )
+        filtro = AlunosFilter(self.request.GET, queryset=alunos_base)
+        alunos_filtrados = filtro.qs
 
-    alunos_base = (
-        Aluno.objects.filter(curso=curso)
-        .annotate(
-            tem_pendencia=Exists(pendencias_subquery)
-        )
-        .select_related('user', 'semestre_ingresso')
-        .order_by('-tem_pendencia', 'user__first_name')
-    )
+        context['curso'] = curso
+        context['alunos'] = alunos_filtrados
+        context['filter'] = filtro
+        return context
+    
+class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
+    template_name = 'atividades/listar_atividades_coordenador.html'
 
-    filtro = AlunosFilter(request.GET, queryset=alunos_base)
-    alunos_filtrados = filtro.qs
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        coordenador = UserSelectors.get_coordenador_by_user(user)
+        curso = coordenador.curso
+        aluno_id = self.request.GET.get('aluno_id', None)
 
-    alunos = []
-    for aluno in alunos_filtrados:
-        alunos.append({'aluno': aluno, 'horas_a_validar': aluno.tem_pendencia})
+        if aluno_id:
+            aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
+            atividades = AtividadeSelectors.get_atividades_aluno(aluno)
+        else: 
+            atividades = AtividadeSelectors.get_atividades_pendentes_curso(curso)
 
-    return render(request, 'atividades/listar_alunos_coordenador.html', {
-        'curso': curso,
-        'alunos': alunos,
-        'filter': filtro,
-    })
+        filtro = AtividadesFilter(self.request.GET, queryset=atividades, request=self.request)
+        atividades_filtradas = filtro.qs
 
-@coordenador_required
-def listar_atividades_coordenador(request):
-    aluno_id = request.GET.get('aluno_id', None)
-    user = request.user
-    try:
-        coordenador = Coordenador.objects.get(user=user)
-    except Coordenador.DoesNotExist:
-        messages.warning(request, 'Perfil de coordenador não encontrado.')
-        return redirect('dashboard')
+        context['aluno'] = aluno if aluno_id else None
+        context['atividades'] = atividades_filtradas
+        context['filter'] = filtro
+        return context
+    
+class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
+    template_name = 'atividades/aprovar_atividade.html'
 
-    if aluno_id:
-        aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
-        atividades = Atividade.objects.filter(aluno=aluno)
-    else: atividades = Atividade.objects.filter(horas_aprovadas__isnull=True, aluno__curso=coordenador.curso)
+    def dispatch(self, request, atividade_id, *args, **kwargs):
+        self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
+        self.atividade = get_object_or_404(Atividade, id=atividade_id)
+        if self.atividade.aluno.curso != self.coordenador.curso:
+            messages.warning(request, 'Acesso negado à atividade deste aluno.')
+            return redirect('dashboard')
 
-    return render(request, 'atividades/listar_atividades_coordenador.html', {
-        'aluno': aluno if aluno_id else None,
-        'atividades': atividades,
-    })
+        return super().dispatch(request, *args, **kwargs)
 
-@coordenador_required
-def aprovar_horas_atividade(request, atividade_id):
-    user = request.user
-    try:
-        coordenador = Coordenador.objects.get(user=user)
-    except Coordenador.DoesNotExist:
-        messages.warning(request, 'Perfil de coordenador não encontrado.')
-        return redirect('dashboard')
+    def get(self, request):
+        return render(request, self.template_name, {'atividade': self.atividade})
 
-    atividade = get_object_or_404(Atividade, id=atividade_id)
-    if atividade.aluno.curso != coordenador.curso:
-        messages.warning(request, 'Acesso negado à atividade deste aluno.')
-        return redirect('dashboard')
-
-    if request.method == 'POST':
+    def post(self, request):
         horas_aprovadas = request.POST.get('horas_aprovadas')
         try:
             horas_aprovadas = int(horas_aprovadas)
-            if horas_aprovadas < 0 or horas_aprovadas > atividade.horas:
-                raise ValueError
-        except (ValueError, TypeError):
-            messages.warning(request, 'Número inválido de horas aprovadas.')
+            AtividadeService.aprovar_horas(atividade=self.atividade, horas_aprovadas=horas_aprovadas)
+        except ValueError as e:
+            messages.warning(request, str(e))
             return redirect('listar_atividades_coordenador')
 
-        atividade.horas_aprovadas = horas_aprovadas
-        atividade.save()
-        messages.success(request, f'Atividade {atividade.nome} aprovada com {horas_aprovadas} horas!')
+        messages.success(request, f'Atividade {self.atividade.nome} aprovada com {horas_aprovadas} horas!')
         return redirect('listar_atividades_coordenador')
 
-    return render(request, 'atividades/aprovar_atividade.html', {'atividade': atividade})
-
 @gestor_required
-@require_POST
 def ativar_desativar_usuario(request, user_id):
-    from django.contrib.auth.models import User
-    user = User.objects.get(id=user_id)
-    user.is_active = not user.is_active
-    user.save()
-    if user.groups.filter(name='Coordenador').exists():
-        return redirect('listar_usuarios_admin')
-    return redirect('dashboard')
+    user = UserService.toggle_user_active_status(user_id=user_id)
+    return redirect('listar_usuarios_admin')
 
-@login_required
-def criar_categoria_curso_direta(request):
-    user = request.user
-    coordenador = getattr(user, 'coordenador', None)
-    if not coordenador:
-        messages.warning(request, 'Acesso negado.')
-        return redirect('dashboard')
-    from .forms import CategoriaCursoDiretaForm
-    if request.method == 'POST':
+class CriarCategoriaCursoDiretaView(CoordenadorRequiredMixin, View):
+    template_name = 'atividades/form_categoria_curso_direta.html'
+
+    def get(self, request):
+        coordenador = UserSelectors.get_coordenador_by_user(request.user)
+        form = CategoriaCursoDiretaForm()
+        return render(request, self.template_name, {'form': form, 'curso_nome': coordenador.curso.nome})
+
+    def post(self, request):
+        coordenador = UserSelectors.get_coordenador_by_user(request.user)
         form = CategoriaCursoDiretaForm(request.POST)
         if form.is_valid():
-            curso_categoria = form.save(coordenador)
+            curso_categoria = form.save()
+            CursoCategoriaService.create_categoria_curso(form=form, coordenador=coordenador)
             messages.success(request, f'Categoria {curso_categoria.categoria.nome} criada e vinculada ao curso {curso_categoria.curso.nome}!')
             return redirect('dashboard')
-    else:
-        form = CategoriaCursoDiretaForm()
-    return render(request, 'atividades/form_categoria_curso_direta.html', {'form': form, 'curso_nome': coordenador.curso.nome})
-
-@login_required
-def associar_categorias_ao_curso(request):
-    user = request.user
-    coordenador = getattr(user, 'coordenador', None)
-    curso = None
-    cursos = None
-    semestres = Semestre.objects.all()
-    categorias_disponiveis = []
+        return render(request, self.template_name, {'form': form, 'curso_nome': coordenador.curso.nome})
     
-    if not user.groups.filter(name__in=['Coordenador', 'Gestor']).exists():
-        messages.warning(request, 'Acesso negado.')
-        return redirect('dashboard')
-    
-    if coordenador:
-        curso = coordenador.curso
-    elif user.groups.filter(name='Gestor').exists():
-        cursos = Curso.objects.all()
+class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
+    template_name = 'atividades/form_associar_categorias.html'
 
-    if request.method == 'POST' and not curso:
-        curso_id = request.POST.get('curso_id')
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+
+        self.coordenador = UserSelectors.get_coordenador_by_user(user)
+        self.cursos = Curso.objects.all() if UserSelectors.is_user_gestor(user) else None
+        self.curso = self.coordenador.curso if self.coordenador else None
+        self.semestres = Semestre.objects.all()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return render(request, self.template_name, self.get_context())
+
+    def post(self, request):
+        if not self.curso:
+            self.curso = get_object_or_404(Curso, id=request.POST.get('curso_id'))
+
+        semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
+
         try:
-            curso = Curso.objects.get(id=curso_id)
-        except Curso.DoesNotExist:
-            curso = None
-        semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
+            adicionadas = CursoCategoriaService.associar_categorias(
+                curso=self.curso,
+                semestre=semestre,
+                dados_post=request.POST
+            )
+        except ValueError as e:
+            messages.warning(request, str(e))
+            return render(request, self.template_name, self.get_context(
+                curso=self.curso,
+                semestre=semestre
+            ))
 
-    elif request.method == 'POST' and curso:
-
-        semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
-        categorias_vinculadas = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True) if curso else []
-        categorias_disponiveis = CategoriaAtividade.objects.exclude(id__in=categorias_vinculadas) if curso else []
-
-        tem_categoria = any(request.POST.get(f'cat_{categoria.id}') for categoria in categorias_disponiveis)
-        if not tem_categoria:
-
-            return render(request, 'atividades/form_associar_categorias.html', {
-                'categorias': categorias_disponiveis,
-                'curso_nome': curso.nome if curso else '',
-                'cursos': cursos,
-                'curso_selecionado': curso.id if curso else '',
-                'curso_required': True if user.groups.filter(name='Gestor').exists() else False,
-                'semestres': semestres,
-                'semestre_selecionado': request.POST.get('semestre_id', '')
-            })
-        adicionadas = 0
-        for categoria in categorias_disponiveis:
-            if request.POST.get(f'cat_{categoria.id}'):
-                limite = request.POST.get(f'horas_{categoria.id}') or 0
-                try:
-                    limite = int(limite)
-                except ValueError:
-                    limite = 0
-                
-                if limite > 0:
-                    CursoCategoria.objects.create(
-                        curso=curso,
-                        categoria=categoria,
-                        limite_horas=limite,
-                        semestre=semestre
-                    )
-                    adicionadas += 1
-        if adicionadas:
-            messages.success(request, f'{adicionadas} categoria(s) associada(s) ao curso!')
-        else:
-            messages.warning(request, 'Nenhuma categoria selecionada.')
+        messages.success(request, f'{adicionadas} categoria(s) associada(s) ao curso!')
         return redirect('dashboard')
+    
+    def get_context(self, curso=None, semestre=None):
+        curso = curso or self.curso
 
-    return render(request, 'atividades/form_associar_categorias.html', {
-        'categorias': categorias_disponiveis,
-        'curso_nome': curso.nome if curso else '',
-        'cursos': cursos,
-        'curso_selecionado': curso.id if curso else '',
-        'curso_required': True if user.groups.filter(name='Gestor').exists() else False,
-        'semestres': semestres,
-    })
+        categorias = []
+        if curso and semestre:
+            categorias = CursoCategoriaSelectors.get_curso_categorias_disponiveis_para_associar(semestre=semestre, curso=curso)
+
+        return {
+            'categorias': categorias,
+            'curso_nome': curso.nome if curso else '',
+            'curso_selecionado': curso.id if curso else '',
+            'curso_required': self.cursos is not None,
+            'cursos': self.cursos,
+            'semestres': self.semestres,
+            'semestre_selecionado': semestre.id if semestre else '',
+        }

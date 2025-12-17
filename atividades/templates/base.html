@@ -19,6 +19,8 @@
 <main class="
     {% if user.is_authenticated and user.aluno %}
         d-flex main
+    {% elif user.is_authenticated and user.coordenador %}
+        d-flex main
     {% elif user.is_authenticated and not user.aluno %}
         main
     {% else %}
@@ -28,11 +30,15 @@
     
     {% if user.is_authenticated and user.aluno %}
         {% include 'navbar.html' %}
+    {% elif user.is_authenticated and user.coordenador %}
+        {% include 'navbar_coordenador.html' %}
     {% endif %}
 
     <div class="
         px-4 
         {% if user.is_authenticated and user.aluno %}
+            flex-grow-1 main
+        {% elif user.is_authenticated and user.coordenador %}
             flex-grow-1 main
         {% elif user.is_authenticated %}
             pt-2

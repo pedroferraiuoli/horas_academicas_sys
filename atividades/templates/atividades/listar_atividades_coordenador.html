@@ -15,49 +15,65 @@
     {% for atividade in atividades %}
     <div class="atividade-item" id="atividade-{{ atividade.id }}">
       <!-- Desktop: linha de tabela / Mobile: card compacto -->
-      <div class="atividade-coordenador-main" data-bs-toggle="collapse" data-bs-target="#collapse-coord-{{ atividade.id }}" aria-expanded="false">
-        {% if not aluno %}
-        <div class="ativ-col ativ-aluno">
-          <span class="ativ-label">Aluno</span>
-          <span class="ativ-value">{{ atividade.aluno.user.get_full_name|default:atividade.aluno.user.username }}</span>
-        </div>
-        {% endif %}
-        <div class="ativ-col ativ-nome">
-          <span class="ativ-label">Nome</span>
-          <span class="ativ-value">{{ atividade.nome }}</span>
-        </div>
-        <div class="ativ-col ativ-categoria desktop-only">
-          <span class="ativ-label">Categoria</span>
-          <span class="ativ-value">{{ atividade.categoria.categoria.nome }}</span>
-        </div>
-        <div class="ativ-col ativ-horas">
-          <span class="ativ-label">Horas</span>
-          <span class="ativ-value"><span class="badge bg-opacity-75">{{ atividade.horas }}h</span></span>
-        </div>
-        <div class="ativ-col ativ-status">
-          <span class="ativ-label">Status</span>
-          <span class="ativ-value">
-            {% if atividade.horas_aprovadas is not None %}
-              <span class="badge bg-success">{{ atividade.horas_aprovadas }}h</span>
-            {% else %}
-              <span class="badge bg-warning text-dark">Aguardando</span>
-            {% endif %}
-          </span>
-        </div>
-        <div class="ativ-col ativ-data desktop-only">
-          <span class="ativ-label">Data</span>
-          <span class="ativ-value">{{ atividade.data }}</span>
-        </div>
-        <div class="ativ-col ativ-actions desktop-only">
-          <span class="ativ-label">Ações</span>
-          <span class="ativ-value">
-            {% if atividade.documento %}
-              <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i> Doc</a>
-            {% endif %}
-            <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
-              <i class="bi bi-check2-circle"></i> {% if atividade.horas_aprovadas is None %}Aprovar{% else %}Editar{% endif %}
-            </button>
-          </span>
+      <div class="atividade-main" data-bs-toggle="collapse" data-bs-target="#collapse-coord-{{ atividade.id }}" aria-expanded="false">
+        <div class="row g-2">
+          {% if not aluno %}
+          <div class="col-lg-2 col-12">
+            <div class="ativ-col">
+              <span class="ativ-label">Aluno</span>
+              <span class="ativ-value">{{ atividade.aluno.user.get_full_name|default:atividade.aluno.user.username }}</span>
+            </div>
+          </div>
+          {% endif %}
+          <div class="col-lg-2 col-6">
+            <div class="ativ-col">
+              <span class="ativ-label">Nome</span>
+              <span class="ativ-value">{{ atividade.nome }}</span>
+            </div>
+          </div>
+          <div class="col-lg-2 desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">Categoria</span>
+              <span class="ativ-value">{{ atividade.categoria.categoria.nome }}</span>
+            </div>
+          </div>
+          <div class="col-lg-1 col-3">
+            <div class="ativ-col">
+              <span class="ativ-label">Horas</span>
+              <span class="ativ-value"><span class="badge bg-opacity-75">{{ atividade.horas }}h</span></span>
+            </div>
+          </div>
+          <div class="col-lg-1 col-3">
+            <div class="ativ-col">
+              <span class="ativ-label">Status</span>
+              <span class="ativ-value">
+                {% if atividade.horas_aprovadas is not None %}
+                  <span class="badge bg-success">{{ atividade.horas_aprovadas }}h</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Aguardando</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="col-lg-2 desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">Data</span>
+              <span class="ativ-value">{{ atividade.data }}</span>
+            </div>
+          </div>
+          <div class="col-lg-2 desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">Ações</span>
+              <div class="ativ-actions">
+                {% if atividade.documento %}
+                  <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i></a>
+                {% endif %}
+                <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
+                  <i class="bi bi-check2-circle"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -172,4 +188,6 @@
     {% endfor %}
   </div>
 </div>
+
+<script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

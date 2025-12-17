@@ -20,7 +20,7 @@
                         {% for categoria in categorias_context %}
                             <div class="sidebar-item {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
                                 <div class="sidebar-item-header">
-                                    <div class="sidebar-item-number">{{ categoria.categoria.id|stringformat:"02d" }}</div>
+                                    <div class="sidebar-item-number">{{ forloop.counter|stringformat:"02d" }}</div>
                                     <div class="sidebar-item-name">{{ categoria.categoria.nome }}</div>
                                 </div>
                                 <div class="sidebar-item-info">

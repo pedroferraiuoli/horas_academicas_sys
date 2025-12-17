@@ -17,7 +17,6 @@
       {{ filter.form.tem_horas_a_validar }}
     </div>
     <div class="col-12 col-md-3 filtros-buttons">
-      <button type="submit" class="btn btn-sm btn-outline-main-blue"><i class="bi bi-funnel"></i> Filtrar</button>
       <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
     </div>
   </form>
@@ -29,37 +28,51 @@
     <div class="atividade-item" id="aluno-{{ aluno.id }}">
       <!-- Desktop: linha de tabela / Mobile: card compacto -->
       <div class="atividade-main" data-bs-toggle="collapse" data-bs-target="#collapse-aluno-{{ aluno.id }}" aria-expanded="false">
-        <div class="ativ-col ativ-nome">
-          <span class="ativ-label">Nome</span>
-          <span class="ativ-value">{{ aluno.user.get_full_name|default:aluno.user.username }}</span>
-        </div>
-        <div class="ativ-col ativ-usuario desktop-only">
-          <span class="ativ-label">Usuário</span>
-          <span class="ativ-value">{{ aluno.user.username }}</span>
-        </div>
-        <div class="ativ-col ativ-email desktop-only">
-          <span class="ativ-label">E-mail</span>
-          <span class="ativ-value">{{ aluno.user.email }}</span>
-        </div>
-        <div class="ativ-col ativ-ingresso">
-          <span class="ativ-label">Ingresso</span>
-          <span class="ativ-value">{{ aluno.semestre_ingresso }}</span>
-        </div>
-        <div class="ativ-col ativ-status">
-          <span class="ativ-label">Status</span>
-          <span class="ativ-value">
-            {% if not aluno.tem_pendencia %}
-              <span class="badge bg-success">OK</span>
-            {% else %}
-              <span class="badge bg-warning text-dark">Pendente</span>
-            {% endif %}
-          </span>
-        </div>
-        <div class="ativ-col ativ-actions desktop-only">
-          <span class="ativ-label">Ações</span>
-          <span class="ativ-value">
-            <a href="{% url 'listar_atividades_coordenador' %}?aluno_id={{ aluno.id }}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i> Ver atividades</a>
-          </span>
+        <div class="row g-2">
+          <div class="col-lg-3 col-6">
+            <div class="ativ-col">
+              <span class="ativ-label">Nome</span>
+              <span class="ativ-value">{{ aluno.user.get_full_name|default:aluno.user.username }}</span>
+            </div>
+          </div>
+          <div class="col-lg-2 desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">Usuário</span>
+              <span class="ativ-value">{{ aluno.user.username }}</span>
+            </div>
+          </div>
+          <div class="col-lg-3 desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">E-mail</span>
+              <span class="ativ-value">{{ aluno.user.email }}</span>
+            </div>
+          </div>
+          <div class="col-lg-1 col-3">
+            <div class="ativ-col">
+              <span class="ativ-label">Ingresso</span>
+              <span class="ativ-value">{{ aluno.semestre_ingresso }}</span>
+            </div>
+          </div>
+          <div class="col-lg-1 col-3">
+            <div class="ativ-col">
+              <span class="ativ-label">Status</span>
+              <span class="ativ-value">
+                {% if not aluno.tem_pendencia %}
+                  <span class="badge bg-success">OK</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Pendente</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="col-lg-2 desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">Ações</span>
+              <div class="ativ-actions">
+                <a href="{% url 'listar_atividades_coordenador' %}?aluno_id={{ aluno.id }}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i></a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -89,4 +102,7 @@
     {% endfor %}
   </div>
 </div>
+
+<script src="{% static 'js/filtros.js' %}"></script>
+<script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

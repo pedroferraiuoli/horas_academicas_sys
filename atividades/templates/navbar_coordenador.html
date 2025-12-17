@@ -1,0 +1,129 @@
+{% load atividade_extras %}
+{% load static %}
+ <!-- Sidebar Coordenador -->
+{% if user.is_authenticated and user.coordenador %}
+
+<!-- Toggle button for mobile - Fixed position -->
+<button class="sidebar-toggle-btn d-lg-none" type="button" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+</button>
+
+<nav class="sidebar" id="sidebarMenu">
+    <!-- Close button for mobile -->
+    <button class="sidebar-close-btn d-lg-none" onclick="closeSidebar()">
+        <i class="bi bi-x-lg"></i>
+    </button>
+    
+    <div class="sidebar-content">
+        <!-- Info do Curso -->
+        <div class="sidebar-header mb-4">
+            <div class="sidebar-item-header">
+                <div class="sidebar-item-name" style="font-size: 1.1rem; color: #FF6B35;">{{ user.coordenador.curso.nome }}</div>
+            </div>
+        </div>
+
+        <!-- Menu de navegação -->
+        <div class="sidebar-item {% if request.path == '/dashboard/' %}active{% endif %}" data-url="{% url 'dashboard' %}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-house-door me-2"></i>
+                <div class="sidebar-item-name">Dashboard</div>
+            </div>
+        </div>
+
+        <div class="sidebar-item {% if 'listar_alunos' in request.path %}active{% endif %}" data-url="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-people me-2"></i>
+                <div class="sidebar-item-name">Alunos do Curso</div>
+            </div>
+            {% if stats.num_alunos %}
+            <div class="sidebar-item-info">
+                <div class="info-group">
+                    <span class="info-label">Total:</span>
+                    <span class="info-value badge bg-primary">{{ stats.num_alunos }}</span>
+                </div>
+                {% if stats.alunos_com_pendencias %}
+                <div class="info-group">
+                    <span class="info-label">Com pendências:</span>
+                    <span class="info-value badge bg-warning">{{ stats.alunos_com_pendencias|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="sidebar-item {% if 'listar_atividades_coordenador' in request.path %}active{% endif %}" data-url="{% url 'listar_atividades_coordenador' %}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-clipboard-check me-2"></i>
+                <div class="sidebar-item-name">Validar Atividades</div>
+            </div>
+            {% if stats.atividades_pendentes %}
+            <div class="sidebar-item-info">
+                <div class="info-group">
+                    <span class="info-label">Pendentes:</span>
+                    <span class="info-value badge bg-danger">{{ stats.atividades_pendentes|floatformat:0 }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+
+        <!-- Seção de Categorias -->
+        <div class="sidebar-section-title mb-2">
+            <small class="text-muted">CATEGORIAS</small>
+        </div>
+
+        <div class="sidebar-item {% if 'listar_categorias_curso' in request.path %}active{% endif %}" data-url="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-list-ul me-2"></i>
+                <div class="sidebar-item-name">Listar Categorias</div>
+            </div>
+        </div>
+
+        <div class="sidebar-item {% if 'associar_categorias' in request.path %}active{% endif %}" data-url="{% url 'associar_categorias_ao_curso' %}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-link-45deg me-2"></i>
+                <div class="sidebar-item-name">Associar Categorias</div>
+            </div>
+        </div>
+
+        <div class="sidebar-item {% if 'criar_categoria_curso_direta' in request.path %}active{% endif %}" data-url="{% url 'criar_categoria_curso_direta' %}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-plus-circle me-2"></i>
+                <div class="sidebar-item-name">Criar Categoria</div>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Fechar ao clicar em um item (mobile)
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (window.innerWidth < 992) {
+                closeSidebar();
+            }
+        });
+    });
+});
+</script>
+<script src="{% static 'js/navbar.js' %}"></script>

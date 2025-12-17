@@ -544,9 +544,11 @@ class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
         messages.success(request, f'Atividade {self.atividade.nome} aprovada com {horas_aprovadas} horas!')
         return redirect('listar_atividades_coordenador')
 
-@gestor_required
 def ativar_desativar_usuario(request, user_id):
-    user = UserService.toggle_user_active_status(user_id=user_id)
+    if not UserSelectors.is_user_gestor(request.user):
+        messages.warning(request, 'Acesso negado.')
+        return redirect('login')
+    UserService.toggle_user_active_status(user_id=user_id)
     return redirect('listar_usuarios_admin')
 
 class CriarCategoriaCursoDiretaView(CoordenadorRequiredMixin, View):

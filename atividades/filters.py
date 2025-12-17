@@ -1,4 +1,6 @@
 import django_filters
+
+from atividades.selectors import AlunoSelectors, CursoCategoriaSelectors
 from .models import Atividade, CursoCategoria, Semestre, Aluno
 from django import forms
 from django.db.models import Exists, OuterRef, Q
@@ -38,14 +40,8 @@ class AlunosFilter(django_filters.FilterSet):
         if not value:
             return queryset
 
-        # subquery: existe atividade desse aluno com horas_aprovadas IS NULL ?
-        pendencias_qs = Atividade.objects.filter(
-            aluno_id=OuterRef('pk'),
-            horas_aprovadas__isnull=True
-        )
-
         # anota cada aluno com booleano tem_pendencia
-        queryset = queryset.annotate(tem_pendencia=Exists(pendencias_qs))
+        queryset = AlunoSelectors._with_pendencia_annotation(queryset)
 
         if str(value) == '1':
             return queryset.filter(tem_pendencia=True)
@@ -82,7 +78,7 @@ class AtividadesFilter(django_filters.FilterSet):
     def aluno(self):
         req = getattr(self, 'request', None)
         if req and req.user.is_authenticated:
-            return getattr(req.user, 'aluno', None)
+            return AlunoSelectors.get_aluno_by_user(req.user)
         return None
 
 
@@ -92,8 +88,8 @@ class AtividadesFilter(django_filters.FilterSet):
         aluno = self.aluno
 
         if aluno:
-            self.filters['categoria'].queryset = CursoCategoria.objects.filter(
-                curso=aluno.curso,
+            self.filters['categoria'].queryset = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(
+                aluno.curso,
                 semestre=aluno.semestre_ingresso
             )
 

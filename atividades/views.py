@@ -1,15 +1,11 @@
 from django.views import View
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from atividades.selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, SemestreSelectors, UserSelectors
 from .forms import AdminUserForm, CategoriaCursoDiretaForm, UserRegistrationForm, AtividadeForm, SemestreForm, CategoriaAtividadeForm, CursoForm, AlterarEmailForm, CategoriaCursoForm
-from .models import Aluno, Atividade, Curso, CategoriaAtividade, Coordenador, CursoCategoria, Semestre
+from .models import Aluno, Atividade, Curso, CategoriaAtividade, CursoCategoria, Semestre
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
-from .decorators import gestor_required, coordenador_required
 from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
-from django.db.models import Exists, OuterRef
 from django.views.generic import TemplateView
 from .services import AtividadeService, CursoCategoriaService, UserService, SemestreService
 from .mixins import AlunoRequiredMixin, CoordenadorRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin, LoginRequiredMixin

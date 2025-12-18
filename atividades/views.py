@@ -1,3 +1,6 @@
+import logging
+import os
+from pathlib import Path
 from django.views import View
 from django.shortcuts import render, redirect
 from atividades.selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, SemestreSelectors, UserSelectors
@@ -9,6 +12,11 @@ from .filters import AlunosFilter, AtividadesFilter, CursoCategoriaFilter
 from django.views.generic import TemplateView
 from .services import AtividadeService, CursoCategoriaService, UserService, SemestreService
 from .mixins import AlunoRequiredMixin, CoordenadorRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin, LoginRequiredMixin
+from django.conf import settings
+
+# Loggers para operações críticas
+business_logger = logging.getLogger('atividades.business')
+security_logger = logging.getLogger('atividades.security')
 
 class CriarCursoView(GestorRequiredMixin, View):
     template_name = 'forms/form_curso.html'
@@ -20,7 +28,8 @@ class CriarCursoView(GestorRequiredMixin, View):
     def post(self, request):
         form = CursoForm(request.POST)
         if form.is_valid():
-            curso_instance = form.save() 
+            curso_instance = form.save()
+            business_logger.warning(f"CURSO CRIADO: {curso_instance.nome} | User: {request.user.username}")
             messages.success(request, f'Curso {curso_instance.nome} criado com sucesso!')
             return redirect('dashboard')
         
@@ -41,6 +50,7 @@ class EditarCursoView(GestorRequiredMixin, View):
         form = CursoForm(request.POST, instance=self.curso)
         if form.is_valid():
             form.save()
+            business_logger.warning(f"CURSO EDITADO: {self.curso.nome} | User: {request.user.username}")
             messages.success(request, f'Curso {self.curso.nome} atualizado com sucesso!')
             return redirect('listar_cursos')
             
@@ -57,8 +67,10 @@ class ExcluirCursoView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'curso': self.curso})
 
     def post(self, request):
+        curso_nome = self.curso.nome
         self.curso.delete()
-        messages.success(request, f'Curso {self.curso.nome} excluído com sucesso!')
+        business_logger.warning(f"CURSO EXCLUÍDO: {curso_nome} | User: {request.user.username}")
+        messages.success(request, f'Curso {curso_nome} excluído com sucesso!')
         return redirect('listar_cursos')
 
 class ListarCursosView(GestorRequiredMixin, TemplateView):
@@ -80,8 +92,9 @@ class CriarSemestreView(GestorRequiredMixin, View):
     def post(self, request):
         form = SemestreForm(request.POST)
         if form.is_valid():
-            form.save()
-            semestre = SemestreService.criar_semestre_com_copia(form=form, copiar_de_id=request.POST.get('copiar_de'))
+            semestre = form.save()
+            SemestreService.criar_semestre_com_copia(form=semestre, copiar_de_id=request.POST.get('copiar_de'))
+            business_logger.warning(f"SEMESTRE CRIADO: {semestre.nome} | User: {request.user.username}")
             messages.success(request, f'Semestre {semestre.nome} criado com sucesso!')
             return redirect('dashboard')
         
@@ -102,6 +115,7 @@ class EditarSemestreView(GestorRequiredMixin, View):
         form = SemestreForm(request.POST, instance=semestre)
         if form.is_valid():
             semestre = form.save()
+            business_logger.warning(f"SEMESTRE EDITADO: {semestre.nome} | User: {request.user.username}")
             messages.success(request, f'Semestre {semestre.nome} atualizado com sucesso!')
             return redirect('listar_semestres')
         
@@ -118,8 +132,10 @@ class ExcluirSemestreView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'semestre': self.semestre})
 
     def post(self, request):
+        semestre_nome = self.semestre.nome
         self.semestre.delete()
-        messages.success(request, f'Semestre {self.semestre.nome} excluído com sucesso!')
+        business_logger.warning(f"SEMESTRE EXCLUÍDO: {semestre_nome} | User: {request.user.username}")
+        messages.success(request, f'Semestre {semestre_nome} excluído com sucesso!')
         return redirect('listar_semestres')
     
 class ListarSemestresView(GestorRequiredMixin, TemplateView):
@@ -141,6 +157,7 @@ class CriarCategoriaView(GestorRequiredMixin, View):
         form = CategoriaAtividadeForm(request.POST)
         if form.is_valid():
             categoria = form.save()
+            business_logger.warning(f"CATEGORIA CRIADA: {categoria.nome} | User: {request.user.username}")
             messages.success(request, f'Categoria {categoria.nome} criada com sucesso!')
             return redirect('dashboard')
         
@@ -159,6 +176,7 @@ class EditarCategoriaView(GestorRequiredMixin, View):
         form = CategoriaAtividadeForm(request.POST, instance=categoria)
         if form.is_valid():
             form.save()
+            business_logger.warning(f"CATEGORIA EDITADA: {categoria.nome} | User: {request.user.username}")
             messages.success(request, f'Categoria {categoria.nome} atualizada com sucesso!')
             return redirect('listar_categorias')
         
@@ -175,8 +193,10 @@ class ExcluirCategoriaView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'categoria': self.categoria})
 
     def post(self, request):
+        categoria_nome = self.categoria.nome
         self.categoria.delete()
-        messages.success(request, f'Categoria {self.categoria.nome} excluída com sucesso!')
+        business_logger.warning(f"CATEGORIA EXCLUÍDA: {categoria_nome} | User: {request.user.username}")
+        messages.success(request, f'Categoria {categoria_nome} excluída com sucesso!')
         return redirect('listar_categorias')
 
 class ListarCategoriasView(GestorRequiredMixin, TemplateView):
@@ -200,6 +220,10 @@ class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         form = CategoriaCursoForm(request.POST, user=request.user)
         if form.is_valid():
             categoria = form.save()
+            business_logger.warning(
+                f"CURSO-CATEGORIA CRIADA: {categoria.categoria.nome} -> {categoria.curso.nome} | "
+                f"User: {request.user.username}"
+            )
             messages.success(request, f'Categoria {categoria.categoria.nome} associada a {categoria.curso.nome} com sucesso!')
             return redirect('dashboard')
 
@@ -212,6 +236,10 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
         self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
         if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+            security_logger.warning(
+                f"ACESSO NEGADO: Coordenador {request.user.username} ({self.coordenador.curso.nome}) "
+                f"tentou editar categoria do curso {self.categoria.curso.nome}"
+            )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
         return super().dispatch(request, *args, **kwargs)
@@ -224,6 +252,10 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         form = CategoriaCursoForm(request.POST, instance=self.categoria, user=request.user)
         if form.is_valid():
             form.save()
+            business_logger.warning(
+                f"CURSO-CATEGORIA EDITADA: {self.categoria.categoria.nome} -> {self.categoria.curso.nome} | "
+                f"User: {request.user.username}"
+            )
             messages.success(request, f'Categoria {self.categoria.categoria.nome} atualizada com sucesso!')
             return redirect('listar_categorias')
         
@@ -239,16 +271,30 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
 
     def get(self, request):
         if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+            security_logger.warning(
+                f"ACESSO NEGADO: Coordenador {request.user.username} ({self.coordenador.curso.nome}) "
+                f"tentou acessar categoria do curso {self.categoria.curso.nome}"
+            )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
         return render(request, self.template_name, {'categoria': self.categoria})
 
     def post(self, request):
         if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+            security_logger.warning(
+                f"ACESSO NEGADO: Coordenador {request.user.username} ({self.coordenador.curso.nome}) "
+                f"tentou excluir categoria do curso {self.categoria.curso.nome}"
+            )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
+        
+        cat_nome = self.categoria.categoria.nome
+        curso_nome = self.categoria.curso.nome
         self.categoria.delete()
-        messages.success(request, f'Categoria {self.categoria.categoria.nome} desassociada com sucesso!')
+        business_logger.warning(
+            f"CURSO-CATEGORIA EXCLUÍDA: {cat_nome} -> {curso_nome} | User: {request.user.username}"
+        )
+        messages.success(request, f'Categoria {cat_nome} desassociada com sucesso!')
         return redirect('listar_categorias_curso')
 
 class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
@@ -621,3 +667,59 @@ class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
             'semestres': self.semestres,
             'semestre_selecionado': semestre.id if semestre else '',
         }
+    
+class VisualizarLogsView(GestorRequiredMixin, TemplateView):
+    template_name = "atividades/visualizar_logs.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Define qual arquivo de log visualizar
+        log_type = self.request.GET.get("tipo", "errors")
+        num_lines = int(self.request.GET.get("linhas", 100))
+        
+        # Mapeia tipos para arquivos
+        log_files = {
+            "errors": "errors.log",
+            "business": "business.log",
+            "security": "security.log",
+        }
+        
+        log_filename = log_files.get(log_type, "errors.log")
+        log_path = Path(settings.BASE_DIR) / "logs" / log_filename
+        
+        log_content = []
+        file_exists = False
+        
+        if log_path.exists():
+            file_exists = True
+            try:
+                # Lê as últimas N linhas do arquivo
+                with open(log_path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                    # Pega as últimas N linhas
+                    log_content = lines[-num_lines:] if len(lines) > num_lines else lines
+                    # Inverte para mostrar as mais recentes primeiro
+                    log_content.reverse()
+            except Exception as e:
+                log_content = [f"Erro ao ler arquivo de log: {str(e)}"]
+        
+        # Informações do arquivo
+        file_size = 0
+        if file_exists:
+            file_size = log_path.stat().st_size / 1024  # KB
+        
+        context.update({
+            "log_type": log_type,
+            "log_content": log_content,
+            "file_exists": file_exists,
+            "file_size": round(file_size, 2),
+            "num_lines": num_lines,
+            "log_types": [
+                {"value": "errors", "label": "Erros do Sistema"},
+                {"value": "business", "label": "Operações Críticas"},
+                {"value": "security", "label": "Segurança"},
+            ],
+        })
+        
+        return context

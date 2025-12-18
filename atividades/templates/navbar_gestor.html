@@ -127,6 +127,20 @@
                 <div class="sidebar-item-name">Criar Admin</div>
             </div>
         </div>
+
+        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+
+        <!-- Seção de Logs -->
+        <div class="sidebar-section-title mb-2">
+            <small class="text-muted">SISTEMA</small>
+        </div>
+
+        <div class="sidebar-item {% if 'visualizar_logs' in request.path %}active{% endif %}" data-url="{% url 'visualizar_logs' %}">
+            <div class="sidebar-item-header">
+                <i class="bi bi-file-text me-2"></i>
+                <div class="sidebar-item-name">Visualizar Logs</div>
+            </div>
+        </div>
     </div>
 </nav>
 {% endif %}

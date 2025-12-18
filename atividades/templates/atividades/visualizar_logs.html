@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="main-blue mb-4">Visualizar Logs do Sistema</h2>
+    
+    <div class="mb-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+    <!-- Filtros de Log -->
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tipo de Log</label>
+                    <select name="tipo" class="form-select" onchange="this.form.submit()">
+                        {% for log in log_types %}
+                            <option value="{{ log.value }}" {% if log.value == log_type %}selected{% endif %}>
+                                {{ log.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label">Número de Linhas</label>
+                    <select name="linhas" class="form-select" onchange="this.form.submit()">
+                        <option value="50" {% if num_lines == 50 %}selected{% endif %}>50 linhas</option>
+                        <option value="100" {% if num_lines == 100 %}selected{% endif %}>100 linhas</option>
+                        <option value="200" {% if num_lines == 200 %}selected{% endif %}>200 linhas</option>
+                        <option value="500" {% if num_lines == 500 %}selected{% endif %}>500 linhas</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </form>
+ 
+
+    <!-- Informações do Arquivo -->
+    {% if file_exists %}
+    <div class="alert alert-info mt-2">
+        <i class="bi bi-info-circle"></i>
+        <strong>Arquivo:</strong> {{ log_type }}.log | 
+        <strong>Tamanho:</strong> {{ file_size }} KB |
+        <strong>Exibindo:</strong> últimas {{ num_lines }} linhas
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        Arquivo de log ainda não foi criado. Nenhum evento foi registrado ainda.
+    </div>
+    {% endif %}
+
+    <!-- Conteúdo do Log -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-file-text"></i> Conteúdo do Log
+        </div>
+        <div class="card-body p-0">
+            <div class="log-viewer">
+                {% if file_exists %}
+                    {% if log_content %}
+                        {% for line in log_content %}
+                            <div class="log-line 
+                                {% if 'ERROR' in line %}log-error{% endif %}
+                                {% if 'WARNING' in line %}log-warning{% endif %}
+                            ">{{ line|safe }}</div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-3 text-muted">Nenhum log registrado ainda.</div>
+                    {% endif %}
+                {% else %}
+                    <div class="p-3 text-muted">Arquivo não existe.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

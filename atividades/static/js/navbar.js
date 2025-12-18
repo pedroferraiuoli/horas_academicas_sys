@@ -1,6 +1,6 @@
 // JavaScript para navbar - redirecionamento ao clicar nas categorias
 document.addEventListener('DOMContentLoaded', function() {
-    const navbarRows = document.querySelectorAll('.sidebar-row[data-url]');
+    const navbarRows = document.querySelectorAll('.sidebar-item');
     navbarRows.forEach(row => {
         row.addEventListener('click', function() {
 

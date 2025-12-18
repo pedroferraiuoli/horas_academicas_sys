@@ -18,9 +18,13 @@
 
 <main class="
     {% if user.is_authenticated and user.aluno %}
-        d-flex
+        d-flex main
+    {% elif user.is_authenticated and user.coordenador %}
+        d-flex main
+    {% elif user.is_authenticated and user.groups.all.0.name == 'Gestor' %}
+        d-flex main
     {% elif user.is_authenticated and not user.aluno %}
-        main-nosidebar
+        main
     {% else %}
         main-login
     {% endif %}
@@ -28,18 +32,17 @@
     
     {% if user.is_authenticated and user.aluno %}
         {% include 'navbar.html' %}
+    {% elif user.is_authenticated and user.coordenador %}
+        {% include 'navbar_coordenador.html' %}
+    {% elif user.is_authenticated and user.groups.all.0.name == 'Gestor' %}
+        {% include 'navbar_gestor.html' %}
     {% endif %}
 
     <div class="
         px-4 
-        {% if user.is_authenticated and user.aluno %}
+        {% if user.is_authenticated %}
             flex-grow-1 main
-        {% elif user.is_authenticated %}
-            pt-2
-        {% else %}
-            mt-4 w-100 d-flex justify-content-center
-        {% endif %}
-    ">
+        {% endif %}">
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>

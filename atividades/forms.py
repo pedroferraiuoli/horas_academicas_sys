@@ -1,4 +1,6 @@
 from django.contrib.auth.models import Group
+
+from atividades.selectors import CursoCategoriaSelectors, SemestreSelectors
 from .models import Curso, CursoCategoria
 from .models import CategoriaAtividade
 from django.contrib.auth.forms import AuthenticationForm
@@ -86,8 +88,26 @@ class CategoriaCursoForm(forms.ModelForm):
         model = CursoCategoria
         fields = ['curso', 'categoria', 'limite_horas', 'semestre']
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if not user:
+            return
+
+        coordenador = getattr(user, 'coordenador', None)
+
+        if coordenador:
+            self.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso_id)
+            self.fields['curso'].initial = coordenador.curso
+
+            semestre_atual = SemestreSelectors.get_semestre_atual()
+
+            self.fields['categoria'].queryset = (CursoCategoriaSelectors.categorias_disponiveis_para_associar(
+                    coordenador.curso,
+                    semestre_atual
+                )
+            )
 
 
 class AtividadeForm(forms.ModelForm):
@@ -99,12 +119,18 @@ class AtividadeForm(forms.ModelForm):
             'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
         }
 
-    def __init__(self, *args, **kwargs):
-        aluno = kwargs.pop('aluno', None)
+    def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         if aluno:
-            categorias = CursoCategoria.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
+
+        if categoria_id:
+            try:
+                categoria = CursoCategoria.objects.get(id=categoria_id)
+                self.fields['categoria'].initial = categoria
+            except CursoCategoria.DoesNotExist:
+                pass
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
     username = forms.CharField(label='Usuário ou Email')
@@ -145,14 +171,4 @@ class CategoriaCursoDiretaForm(forms.Form):
     nome = forms.CharField(label='Nome da categoria', max_length=100)
     limite_horas = forms.IntegerField(label='Limite de horas', min_value=0)
     semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre')
-
-    def save(self, coordenador):
-        categoria = CategoriaAtividade.objects.create(nome=self.cleaned_data['nome'])
-        curso_categoria = CursoCategoria.objects.create(
-            curso=coordenador.curso,
-            categoria=categoria,
-            limite_horas=self.cleaned_data['limite_horas'],
-            semestre=self.cleaned_data['semestre']
-        )
-        return curso_categoria
 

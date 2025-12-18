@@ -1,4 +1,4 @@
-from .models import CursoCategoria
+from atividades.selectors import CursoCategoriaSelectors
 
 def categorias_do_usuario(request):
 
@@ -10,7 +10,9 @@ def categorias_do_usuario(request):
     if not aluno or not aluno.curso:
         return {}
 
-    categorias_qs = aluno.curso.get_categorias(semestre=aluno.semestre_ingresso)
-    categorias_qs = categorias_qs.select_related('categoria')
+    categorias_qs = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(
+        curso=aluno.curso,
+        semestre=aluno.semestre_ingresso
+    ).select_related('categoria')
 
     return {'categorias_context': categorias_qs}

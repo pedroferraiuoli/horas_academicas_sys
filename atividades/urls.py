@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', auth_views.LoginView.as_view(
-        template_name='atividades/login.html',
+        template_name='auth/login.html',
         authentication_form=EmailOrUsernameAuthenticationForm
     ), name='login'),
     path('criar-usuario-admin/', views.CriarUsuarioAdminView.as_view(), name='criar_usuario_admin'),
@@ -36,12 +36,12 @@ urlpatterns = [
     path('semestres/', views.ListarSemestresView.as_view(), name='listar_semestres'),
     path('semestre/<int:semestre_id>/excluir/', views.ExcluirSemestreView.as_view(), name='excluir_semestre'),
     path('alterar-email/', views.AlterarEmailView.as_view(), name='alterar_email'),
-    path('trocar-senha/', auth_views.PasswordChangeView.as_view(template_name='atividades/password_change_form.html', success_url='/'), name='password_change'),
+    path('trocar-senha/', auth_views.PasswordChangeView.as_view(template_name='auth/password_change_form.html', success_url='/'), name='password_change'),
     # Password reset
-    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='atividades/password_reset_form.html'), name='password_reset'),
-    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='atividades/password_reset_done.html'), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='atividades/password_reset_confirm.html'), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='atividades/password_reset_complete.html'), name='password_reset_complete'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='auth/password_reset_form.html'), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='auth/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='auth/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'), name='password_reset_complete'),
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('usuarios/<int:user_id>/ativar-desativar/', views.ativar_desativar_usuario, name='ativar_desativar_usuario'),
     path('associar-categorias-ao-curso/', views.AssociarCategoriasCursoView.as_view(), name='associar_categorias_ao_curso'),

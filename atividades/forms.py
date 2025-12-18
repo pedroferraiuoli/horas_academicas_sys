@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
-
 from atividades.selectors import CursoCategoriaSelectors, SemestreSelectors
+from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
 from .models import Curso, CursoCategoria
 from .models import CategoriaAtividade
 from django.contrib.auth.forms import AuthenticationForm
@@ -116,13 +116,29 @@ class AtividadeForm(forms.ModelForm):
         model = Atividade
         fields = ['categoria', 'nome', 'descricao', 'horas', 'data', 'documento', 'observacoes_para_aprovador']
         widgets = {
-            'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
+            'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'descricao': forms.Textarea(attrs={'rows': 4}),
+            'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 4}),
+            'documento': forms.ClearableFileInput(attrs={'accept': (
+            '.pdf,'
+            'application/pdf,'
+            '.jpg,.jpeg,'
+            'image/jpeg,'
+            '.png,'
+            'image/png,'
+            '.doc,'
+            'application/msword,'
+            '.docx,'
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    )
+                }
+            )
         }
 
     def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         if aluno:
-            categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre(curso=aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
 
         if categoria_id:
@@ -131,6 +147,16 @@ class AtividadeForm(forms.ModelForm):
                 self.fields['categoria'].initial = categoria
             except CursoCategoria.DoesNotExist:
                 pass
+    
+    def clean_documento(self):
+        documento = self.cleaned_data.get('documento')
+        ValidadorDeArquivo.validar(documento)
+        return documento
+    
+    def clean_horas(self):
+        horas = self.cleaned_data.get('horas')
+        ValidadorDeHoras.validar_horas(horas)
+        return horas
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
     username = forms.CharField(label='Usuário ou Email')

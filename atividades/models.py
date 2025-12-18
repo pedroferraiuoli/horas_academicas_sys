@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.forms import ValidationError
+
+from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
@@ -25,7 +28,7 @@ class CategoriaAtividade(BaseModel):
 
 class Curso(BaseModel):
     nome = models.CharField(max_length=100)
-    horas_requeridas = models.IntegerField(help_text="Horas totais necessárias para conclusão do curso")
+    horas_requeridas = models.PositiveIntegerField(help_text="Horas totais necessárias para conclusão do curso")
 
     def __str__(self):
         return self.nome
@@ -33,7 +36,7 @@ class Curso(BaseModel):
 class CursoCategoria(BaseModel):
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='curso_categorias')
     categoria = models.ForeignKey('CategoriaAtividade', on_delete=models.CASCADE, related_name='curso_categorias')
-    limite_horas = models.IntegerField(help_text="Limite máximo de horas para esta categoria neste curso")
+    limite_horas = models.PositiveIntegerField(help_text="Limite máximo de horas para esta categoria neste curso")
     equivalencia_horas = models.CharField(max_length=50, help_text="Equivalência de horas (e.g., 1h = 1h)", null=True, blank=True, default="1h = 1h")
     semestre = models.ForeignKey('Semestre', on_delete=models.PROTECT)
 
@@ -98,10 +101,21 @@ class Atividade(BaseModel):
     nome = models.CharField(max_length=200)
     descricao = models.TextField(blank=True, null=True)
     observacoes_para_aprovador = models.TextField(blank=True, null=True)
-    horas = models.IntegerField(help_text="Duração da atividade em horas")
-    horas_aprovadas = models.IntegerField(null=True, blank=True)
+    horas = models.PositiveIntegerField(help_text="Duração da atividade em horas")
+    horas_aprovadas = models.PositiveIntegerField(null=True, blank=True)
     data = models.DateField()
     documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.nome} ({self.aluno})"
+    
+    def clean(self):
+
+        ValidadorDeArquivo.validar(self.documento)
+        ValidadorDeHoras.validar_horas(self.horas, self.horas_aprovadas)
+        
+        return super().clean()
+    
+    def save(self, force_insert = ..., force_update = ..., using = ..., update_fields = ...):
+        self.clean()
+        return super().save(force_insert, force_update, using, update_fields)

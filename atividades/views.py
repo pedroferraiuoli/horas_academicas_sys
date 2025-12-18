@@ -11,7 +11,7 @@ from .services import AtividadeService, CursoCategoriaService, UserService, Seme
 from .mixins import AlunoRequiredMixin, CoordenadorRequiredMixin, GestorRequiredMixin, GestorOuCoordenadorRequiredMixin, LoginRequiredMixin
 
 class CriarCursoView(GestorRequiredMixin, View):
-    template_name = 'atividades/form_curso.html'
+    template_name = 'forms/form_curso.html'
 
     def get(self, request):
         form = CursoForm()
@@ -27,7 +27,7 @@ class CriarCursoView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 class EditarCursoView(GestorRequiredMixin, View):
-    template_name = 'atividades/form_curso.html'
+    template_name = 'forms/form_curso.html'
 
     def dispatch(self, request, curso_id, *args, **kwargs):
         self.curso = get_object_or_404(Curso, id=curso_id)       
@@ -47,7 +47,7 @@ class EditarCursoView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'curso': self.curso, 'edit': True})
 
 class ExcluirCursoView(GestorRequiredMixin, View):
-    template_name = 'atividades/excluir_curso.html'
+    template_name = 'excluir/excluir_curso.html'
 
     def dispatch(self, request, curso_id, *args, **kwargs):
         self.curso = get_object_or_404(Curso, id=curso_id)
@@ -62,7 +62,7 @@ class ExcluirCursoView(GestorRequiredMixin, View):
         return redirect('listar_cursos')
 
 class ListarCursosView(GestorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_cursos.html'
+    template_name = 'listas/listar_cursos.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,7 +70,7 @@ class ListarCursosView(GestorRequiredMixin, TemplateView):
         return context
 
 class CriarSemestreView(GestorRequiredMixin, View):
-    template_name = 'atividades/form_semestre.html'
+    template_name = 'forms/form_semestre.html'
 
     def get(self, request):
         form = SemestreForm()
@@ -90,7 +90,7 @@ class CriarSemestreView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'semestres': semestres})
 
 class EditarSemestreView(GestorRequiredMixin, View):
-    template_name = 'atividades/form_semestre.html'
+    template_name = 'forms/form_semestre.html'
 
     def get(self, request, semestre_id):
         semestre = get_object_or_404(Semestre, id=semestre_id)
@@ -108,7 +108,7 @@ class EditarSemestreView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'semestre': semestre, 'edit': True})
     
 class ExcluirSemestreView(GestorRequiredMixin, View):
-    template_name = 'atividades/excluir_semestre.html'
+    template_name = 'excluir/excluir_semestre.html'
 
     def dispatch(self, request, semestre_id, *args, **kwargs):
         self.semestre = get_object_or_404(Semestre, id=semestre_id)
@@ -123,7 +123,7 @@ class ExcluirSemestreView(GestorRequiredMixin, View):
         return redirect('listar_semestres')
     
 class ListarSemestresView(GestorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_semestres.html'
+    template_name = 'listas/listar_semestres.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -131,7 +131,7 @@ class ListarSemestresView(GestorRequiredMixin, TemplateView):
         return context
 
 class CriarCategoriaView(GestorRequiredMixin, View):
-    template_name = 'atividades/form_categoria.html'
+    template_name = 'forms/form_categoria.html'
 
     def get(self, request):
         form = CategoriaAtividadeForm()
@@ -147,7 +147,7 @@ class CriarCategoriaView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 class EditarCategoriaView(GestorRequiredMixin, View):
-    template_name = 'atividades/form_categoria.html'
+    template_name = 'forms/form_categoria.html'
 
     def get(self, request, categoria_id):
         categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
@@ -165,7 +165,7 @@ class EditarCategoriaView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'categoria': categoria, 'edit': True})
     
 class ExcluirCategoriaView(GestorRequiredMixin, View):
-    template_name = 'atividades/excluir_categoria.html'
+    template_name = 'excluir/excluir_categoria.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
@@ -180,7 +180,7 @@ class ExcluirCategoriaView(GestorRequiredMixin, View):
         return redirect('listar_categorias')
 
 class ListarCategoriasView(GestorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_categorias.html'
+    template_name = 'listas/listar_categorias.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -188,7 +188,7 @@ class ListarCategoriasView(GestorRequiredMixin, TemplateView):
         return context
     
 class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
-    template_name = 'atividades/form_associar_categoria.html'
+    template_name = 'forms/form_associar_categoria.html'
 
     def get(self, request):
         coordenador = UserSelectors.get_coordenador_by_user(request.user)
@@ -206,7 +206,7 @@ class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'coordenador': coordenador})
     
 class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
-    template_name = 'atividades/form_associar_categoria.html'
+    template_name = 'forms/form_associar_categoria.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
@@ -230,7 +230,7 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'categoria': self.categoria, 'edit': True, 'coordenador': self.coordenador})
 
 class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
-    template_name = 'atividades/excluir_categoria.html'
+    template_name = 'excluir/excluir_categoria.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
@@ -252,7 +252,7 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         return redirect('listar_categorias_curso')
 
 class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_categorias_curso.html'
+    template_name = 'listas/listar_categorias_curso.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -266,7 +266,7 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
         return context
 
 class CadastrarAtividadeView(AlunoRequiredMixin, View):
-    template_name = 'atividades/form_atividade.html'
+    template_name = 'forms/form_atividade.html'
 
     def dispatch(self, request, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -288,7 +288,7 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
     
 class EditarAtividadeView(AlunoRequiredMixin, View):
-    template_name = 'atividades/form_atividade.html'
+    template_name = 'forms/form_atividade.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -308,7 +308,7 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'atividade': self.atividade, 'edit': True})
     
 class ExcluirAtividadeView(AlunoRequiredMixin, View):
-    template_name = 'atividades/excluir_atividade.html'
+    template_name = 'excluir/excluir_atividade.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -324,7 +324,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         return redirect('listar_atividades')
 
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_atividades.html'
+    template_name = 'listas/listar_atividades.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -343,13 +343,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         if UserSelectors.is_user_aluno(user):
             self.dashboard_type = 'aluno'
-            self.template_name = 'atividades/dashboard.html'
+            self.template_name = 'dashboards/dashboard.html'
         elif UserSelectors.is_user_coordenador(user):
             self.dashboard_type = 'coordenador'
-            self.template_name = 'atividades/dashboard_gestor.html'
+            self.template_name = 'dashboards/dashboard_gestor.html'
         elif UserSelectors.is_user_gestor(user):
             self.dashboard_type = 'gestor'
-            self.template_name = 'atividades/dashboard_gestor.html'
+            self.template_name = 'dashboards/dashboard_gestor.html'
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -419,7 +419,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         }
     
 class RegisterView(View):
-    template_name = 'atividades/register.html'
+    template_name = 'auth/register.html'
 
     def get(self, request):
         form = UserRegistrationForm()
@@ -434,7 +434,7 @@ class RegisterView(View):
         return render(request, self.template_name, {'form': form})
     
 class AlterarEmailView(LoginRequiredMixin, View):
-    template_name = 'atividades/alterar_email.html'
+    template_name = 'auth/alterar_email.html'
 
     def get(self, request):
         form = AlterarEmailForm(instance=request.user)
@@ -449,7 +449,7 @@ class AlterarEmailView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 class CriarUsuarioAdminView(GestorRequiredMixin, View):
-    template_name = 'atividades/criar_usuario_admin.html'
+    template_name = 'auth/criar_usuario_admin.html'
 
     def get(self, request):
         form = AdminUserForm()
@@ -464,7 +464,7 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
     
 class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_usuarios_admin.html'
+    template_name = 'listas/listar_usuarios_admin.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -475,7 +475,7 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
         return context
     
 class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_alunos_coordenador.html'
+    template_name = 'listas/listar_alunos_coordenador.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -494,7 +494,7 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         return context
     
 class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_atividades_coordenador.html'
+    template_name = 'listas/listar_atividades_coordenador.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -518,8 +518,6 @@ class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         return context
     
 class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
-    template_name = 'atividades/aprovar_atividade.html'
-
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
         self.atividade = get_object_or_404(Atividade, id=atividade_id)
@@ -552,7 +550,7 @@ def ativar_desativar_usuario(request, user_id):
     return redirect('listar_usuarios_admin')
 
 class CriarCategoriaCursoDiretaView(CoordenadorRequiredMixin, View):
-    template_name = 'atividades/form_categoria_curso_direta.html'
+    template_name = 'forms/form_categoria_curso_direta.html'
 
     def get(self, request):
         coordenador = UserSelectors.get_coordenador_by_user(request.user)
@@ -570,7 +568,7 @@ class CriarCategoriaCursoDiretaView(CoordenadorRequiredMixin, View):
         return render(request, self.template_name, {'form': form, 'curso_nome': coordenador.curso.nome})
     
 class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
-    template_name = 'atividades/form_associar_categorias.html'
+    template_name = 'forms/form_associar_categorias.html'
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user

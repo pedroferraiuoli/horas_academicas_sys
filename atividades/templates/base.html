@@ -42,10 +42,7 @@
         px-4 
         {% if user.is_authenticated %}
             flex-grow-1 main
-        {% else %}
-            mt-4 w-100 d-flex justify-content-center
-        {% endif %}
-    ">
+        {% endif %}">
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>

@@ -30,10 +30,24 @@ class AlunosFilter(django_filters.FilterSet):
         empty_label="Todos"
     )
 
+    nome = django_filters.CharFilter(
+        method='filtrar_nome',
+        label='Nome',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por nome...'}
+        )
+    )
+
     class Meta:
         model = Aluno
-        fields = ['semestre_ingresso', 'tem_horas_a_validar']
+        fields = ['semestre_ingresso', 'tem_horas_a_validar', 'nome']
 
+    def filtrar_nome(self, queryset, name, value):
+        return queryset.filter(
+            Q(user__first_name__icontains=value) |
+            Q(user__last_name__icontains=value) |
+            Q(user__username__icontains=value)
+        )
 
     def filter_tem_horas_a_validar(self, queryset, name, value):
         # se nenhum valor enviado, não filtra

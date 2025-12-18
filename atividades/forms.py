@@ -103,7 +103,7 @@ class CategoriaCursoForm(forms.ModelForm):
 
             semestre_atual = SemestreSelectors.get_semestre_atual()
 
-            self.fields['categoria'].queryset = (CursoCategoriaSelectors.categorias_disponiveis_para_associar(
+            self.fields['categoria'].queryset = (CursoCategoriaSelectors.get_curso_categorias_disponiveis_para_associar(
                     coordenador.curso,
                     semestre_atual
                 )

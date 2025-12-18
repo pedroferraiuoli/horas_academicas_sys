@@ -1780,9 +1780,11 @@ header button:hover {
     margin: 0;
 }
 
-.footer-copyright strong {
-    color: var(--main-orange);
-    font-weight: 600;
+.footer-copyright a {
+    color: var(--main-orange) !important;
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    cursor: pointer;
 }
 
 /* Footer Responsivo */

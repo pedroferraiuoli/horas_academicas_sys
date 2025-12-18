@@ -18,6 +18,18 @@ from django.conf import settings
 business_logger = logging.getLogger('atividades.business')
 security_logger = logging.getLogger('atividades.security')
 
+def custom_404(request, exception=None):
+    return render(request, 'errors/404.html', status=404)
+
+def custom_500(request):
+    return render(request, 'errors/500.html', status=500)
+
+def custom_403(request, exception=None):
+    return render(request, 'errors/403.html', status=403)
+
+def custom_400(request, exception=None):
+    return render(request, 'errors/400.html', status=400)
+
 class CriarCursoView(GestorRequiredMixin, View):
     template_name = 'forms/form_curso.html'
 
@@ -392,7 +404,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             self.template_name = 'dashboards/dashboard.html'
         elif UserSelectors.is_user_coordenador(user):
             self.dashboard_type = 'coordenador'
-            self.template_name = 'dashboards/dashboard_gestor.html'
+            self.template_name = 'dashboards/dashboard_coord.html'
         elif UserSelectors.is_user_gestor(user):
             self.dashboard_type = 'gestor'
             self.template_name = 'dashboards/dashboard_gestor.html'

@@ -1920,3 +1920,59 @@ header button:hover {
 }
 
 /* Fim Visualizador de Logs */
+
+/* =============================================================================
+   PÁGINAS DE ERRO (400, 403, 404, 500)
+   ============================================================================= */
+
+.error-page-container {
+    min-height: 100vh;
+}
+
+.error-icon {
+    margin-bottom: 2rem;
+}
+
+.error-icon i {
+    font-size: 120px;
+}
+
+.error-icon .error-404 {
+    color: var(--main-orange);
+}
+
+.error-icon .error-403 {
+    color: #ffc107;
+}
+
+.error-icon .error-500 {
+    color: #dc3545;
+}
+
+.error-icon .error-400 {
+    color: var(--text-muted);
+}
+
+.error-title {
+    font-size: 6rem;
+    font-weight: bold;
+    color: var(--main-blue);
+}
+
+.error-subtitle {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.error-description {
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Fim Páginas de Erro */

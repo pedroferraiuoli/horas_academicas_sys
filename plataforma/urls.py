@@ -21,3 +21,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('atividades.urls')),
 ]
+
+# Handlers de erro personalizados (apenas em produção com DEBUG=False)
+handler404 = 'atividades.views.custom_404'
+handler500 = 'atividades.views.custom_500'
+handler403 = 'atividades.views.custom_403'
+handler400 = 'atividades.views.custom_400'

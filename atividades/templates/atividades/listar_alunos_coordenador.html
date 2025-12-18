@@ -29,31 +29,31 @@
       <!-- Desktop: linha de tabela / Mobile: card compacto -->
       <div class="atividade-main" data-bs-toggle="collapse" data-bs-target="#collapse-aluno-{{ aluno.id }}" aria-expanded="false">
         <div class="row g-2">
-          <div class="col-lg-3 col-6">
+          <div class="col-lg-2 col-6">
             <div class="ativ-col">
               <span class="ativ-label">Nome</span>
               <span class="ativ-value">{{ aluno.user.get_full_name|default:aluno.user.username }}</span>
             </div>
           </div>
-          <div class="col-lg-2 desktop-only">
+          <div class="col-lg desktop-only">
             <div class="ativ-col">
               <span class="ativ-label">Usuário</span>
               <span class="ativ-value">{{ aluno.user.username }}</span>
             </div>
           </div>
-          <div class="col-lg-3 desktop-only">
+          <div class="col-lg-4 desktop-only">
             <div class="ativ-col">
               <span class="ativ-label">E-mail</span>
               <span class="ativ-value">{{ aluno.user.email }}</span>
             </div>
           </div>
-          <div class="col-lg-1 col-3">
+          <div class="col-lg col-3">
             <div class="ativ-col">
               <span class="ativ-label">Ingresso</span>
               <span class="ativ-value">{{ aluno.semestre_ingresso }}</span>
             </div>
           </div>
-          <div class="col-lg-1 col-3">
+          <div class="col-lg col-3">
             <div class="ativ-col">
               <span class="ativ-label">Status</span>
               <span class="ativ-value">
@@ -65,7 +65,7 @@
               </span>
             </div>
           </div>
-          <div class="col-lg-2 desktop-only">
+          <div class="col-lg desktop-only">
             <div class="ativ-col">
               <span class="ativ-label">Ações</span>
               <div class="ativ-actions">

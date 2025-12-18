@@ -464,7 +464,7 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
     
 class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
-    template_name = 'atividades/listar_usuarios.html'
+    template_name = 'atividades/listar_usuarios_admin.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

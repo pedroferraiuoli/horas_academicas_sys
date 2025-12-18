@@ -1,0 +1,86 @@
+from django.views.generic import TemplateView
+
+from ..selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, SemestreSelectors, UserSelectors
+from ..mixins import LoginRequiredMixin
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+
+        if UserSelectors.is_user_aluno(user):
+            self.dashboard_type = 'aluno'
+            self.template_name = 'dashboards/dashboard.html'
+        elif UserSelectors.is_user_coordenador(user):
+            self.dashboard_type = 'coordenador'
+            self.template_name = 'dashboards/dashboard_coord.html'
+        elif UserSelectors.is_user_gestor(user):
+            self.dashboard_type = 'gestor'
+            self.template_name = 'dashboards/dashboard_gestor.html'
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.dashboard_type == 'aluno':
+            context.update(self.get_aluno_context())
+        else:
+            context.update(self.get_gestor_context())
+
+        return context
+    
+    def get_aluno_context(self):
+        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
+
+        total_horas = aluno.horas_complementares_validas(apenas_aprovadas=True)
+        horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
+
+        progresso = 0
+        if horas_requeridas > 0:
+            progresso = min(100, round((total_horas / horas_requeridas) * 100))
+
+        atividades_recentes = AtividadeSelectors.get_atividades_recentes_aluno(aluno, limite=5)
+
+        ultrapassou_limite = False
+        if aluno.curso:
+            categorias = CursoCategoriaSelectors.get_curso_categorias_por_curso(aluno.curso)
+            ultrapassou_limite = any(
+                c.ultrapassou_limite_pelo_aluno(aluno)
+                for c in categorias
+            )
+
+        return {
+            'aluno': aluno,
+            'total_horas': total_horas,
+            'progresso_percentual': progresso,
+            'atividades_recentes': atividades_recentes,
+            'ultrapassou_limite': ultrapassou_limite,
+        }
+
+    def get_gestor_context(self):
+        user = self.request.user
+        grupo = UserSelectors.get_user_primary_group(user)
+        semestre_atual = SemestreSelectors.get_semestre_atual()
+
+        stats = {}
+
+        if grupo == 'Coordenador':
+            coordenador = getattr(user, 'coordenador', None)
+            if coordenador:
+                curso = coordenador.curso
+                alunos = AlunoSelectors.get_num_alunos_por_curso(curso)
+                alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias_por_curso(curso)
+                atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes_curso(curso)
+                stats = {
+                    'num_alunos': alunos,
+                    'alunos_com_pendencias':alunos_com_pendencias,
+                    'atividades_pendentes': atividades_pendentes,
+                }
+
+        return {
+            'grupo': grupo,
+            'stats': stats,
+            'semestre_atual': semestre_atual,
+        }

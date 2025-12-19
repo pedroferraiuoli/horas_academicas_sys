@@ -138,7 +138,7 @@ class AtividadeForm(forms.ModelForm):
     def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         if aluno:
-            categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(curso=aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CursoCategoriaSelectors.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
 
         if categoria_id:

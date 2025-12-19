@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, OuterRef, Exists
+from django.db.models import QuerySet, OuterRef, Exists, Prefetch
 from typing import Optional, List
 from .models import Atividade, Aluno, CategoriaAtividade, Curso, Coordenador, CursoCategoria, Semestre
 from django.utils import timezone
@@ -47,12 +47,14 @@ class AtividadeSelectors:
         ).order_by('created_at')
     
     @staticmethod
-    def get_num_atividades_pendentes_curso(curso: Curso) -> int:
+    def get_num_atividades_pendentes(*, curso=None) -> int:
         """Conta atividades pendentes de aprovação de um curso"""
-        return Atividade.objects.filter(
-            aluno__curso=curso,
+        queryset = Atividade.objects.filter(
             horas_aprovadas__isnull=True
-        ).count()
+        )
+        if curso:
+            queryset = queryset.filter(aluno__curso=curso)
+        return queryset.count()
     
 class SemestreSelectors:
     
@@ -66,21 +68,42 @@ class SemestreSelectors:
             )
         except Semestre.DoesNotExist:
             return None
+    
+    @staticmethod
+    def get_ultimos_semestres_com_alunos(limite: int = 5, *, curso=None) -> List[dict]:
+        """Retorna os últimos semestres com contagem de alunos ingressantes"""
+        from django.db.models import Count, Q
+        
+        if curso:
+            semestres = Semestre.objects.annotate(
+                num_alunos=Count('aluno', filter=Q(aluno__curso=curso))
+            ).order_by('-data_inicio')[:limite]
+        else:
+            semestres = Semestre.objects.annotate(
+                num_alunos=Count('aluno')
+            ).order_by('-data_inicio')[:limite]
+        
+        return [
+            {
+                'semestre': s,
+                'num_alunos': s.num_alunos
+            }
+            for s in semestres
+        ]
         
 class CursoCategoriaSelectors:
     
     @staticmethod
-    def get_curso_categorias_por_semestre_curso(curso: Curso, semestre: Semestre) -> QuerySet['CursoCategoria']:
-        """Busca categorias de um curso em um semestre específico"""
-        return CursoCategoria.objects.filter(
-            curso=curso,
-            semestre=semestre
-        ).select_related('categoria').order_by('categoria__nome')
-    
-    @staticmethod
-    def get_curso_categorias_por_curso(curso) -> QuerySet['CursoCategoria']:
-        """Busca todas as categorias de um curso"""
-        return curso.curso_categorias.select_related('categoria').all()
+    def get_curso_categorias(*, curso=None, semestre=None) -> QuerySet['CursoCategoria']:
+        """Busca categorias"""
+
+        cat = CursoCategoria.objects.filter().select_related('categoria').order_by('categoria__nome')
+
+        if curso:
+            cat = cat.filter(curso=curso)
+        if semestre:
+            cat = cat.filter(semestre=semestre)
+        return cat
     
     @staticmethod
     def get_curso_categorias_disponiveis_para_associar(curso, semestre):
@@ -122,20 +145,26 @@ class AlunoSelectors:
             return None
         
     @staticmethod
-    def get_alunos_com_pendencias_por_curso(curso) -> QuerySet[Aluno]:
-        qs = Aluno.objects.filter(curso=curso)
+    def get_alunos_com_pendencias(*, curso=None) -> QuerySet[Aluno]:
+        qs = Aluno.objects.all()
+        if curso:
+            qs = qs.filter(curso=curso)
         return (
             AlunoSelectors._with_pendencia_annotation(qs)
             .filter(tem_pendencia=True)
         )
     
     @staticmethod
-    def get_num_alunos_com_pendencias_por_curso(curso):
-        return AlunoSelectors.get_alunos_com_pendencias_por_curso(curso).count()
+    def get_num_alunos_com_pendencias(*, curso=None) -> int:
+        if curso:
+            return AlunoSelectors.get_alunos_com_pendencias(curso=curso).count()
+        return AlunoSelectors.get_alunos_com_pendencias().count()
     
     @staticmethod
-    def get_num_alunos_por_curso(curso):
-        return curso.alunos.all().count()
+    def get_num_alunos(*, curso=None) -> int:
+        if curso:
+            return curso.alunos.all().count()
+        return Aluno.objects.count()
     
     @staticmethod
     def get_alunos_por_curso_order_by_pendencia(curso):
@@ -202,3 +231,26 @@ class UserSelectors:
         """Retorna o nome do primeiro grupo do usuário, se existir"""
         groups = UserSelectors.get_user_groups(user)
         return groups[0] if groups else None
+
+class CursoSelectors:
+
+    @staticmethod
+    def listar_cursos_com_categorias_semestre_atual():
+        semestre_atual = SemestreSelectors.get_semestre_atual()
+
+        categorias_prefetch = Prefetch(
+            'curso_categorias',
+            queryset=(
+                CursoCategoria.objects
+                .filter(semestre=semestre_atual)
+                .select_related('categoria')
+                .order_by('categoria__nome')
+            ),
+            to_attr='categorias_semestre_atual'
+        )
+
+        return (
+            Curso.objects
+            .all()
+            .prefetch_related(categorias_prefetch)
+        )

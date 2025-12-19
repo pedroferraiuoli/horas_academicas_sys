@@ -76,7 +76,7 @@ class Aluno(BaseModel):
             return 0
         
         from atividades.selectors import CursoCategoriaSelectors
-        categorias = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(
+        categorias = CursoCategoriaSelectors.get_curso_categorias(
             self.curso,
             semestre=self.semestre_ingresso
         )

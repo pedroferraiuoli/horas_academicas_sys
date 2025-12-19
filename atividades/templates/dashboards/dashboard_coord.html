@@ -8,14 +8,9 @@
 
     <div class="d-flex justify-content-between align-items-center">
       <h2 class="orange mt-4" style="font-weight: 600;">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
-    </div>
-    
+    </div> 
     <h5 class="main-blue">{{ user.coordenador.curso.nome }}</h5>
-    <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
-    <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
-    <a href="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Categorias do Curso</a>
-    <a href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Alunos do Curso</a>
-
+  
     <div class="row mt-4 mb-4 w-100">
 
       <a class="col-md-4 mb-3 link-limpo" href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}">
@@ -46,6 +41,47 @@
       </a>
 
     </div>
+
+
+    <!-- Tabela de Últimos Semestres -->
+    <div class="card shadow-sm mb-4" style="border-radius: 13px;">
+      <div class="card-header bg-transparent">
+        <h5 class="main-blue mb-0">Últimos 5 Semestres - Alunos Ingressantes</h5>
+      </div>
+      <div class="card-body">
+        {% if ultimos_semestres %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Semestre</th>
+                <th>Período</th>
+                <th class="text-center">Alunos Ingressantes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in ultimos_semestres %}
+              <tr>
+                <td><strong>{{ item.semestre.nome }}</strong></td>
+                <td>{{ item.semestre.data_inicio|date:"d/m/Y" }} - {{ item.semestre.data_fim|date:"d/m/Y" }}</td>
+                <td class="text-center"><span class="badge bg-info">{{ item.num_alunos }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">Nenhum semestre cadastrado.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <h5 class="main-blue mb-3">Ações Rápidas</h5>
+     <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
+    <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
+    <a href="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Categorias do Curso</a>
+    <a href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Alunos do Curso</a>
+
 
   </div>
 {% endblock %}

@@ -45,7 +45,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         ultrapassou_limite = False
         if aluno.curso:
-            categorias = CursoCategoriaSelectors.get_curso_categorias_por_curso(aluno.curso)
+            categorias = CursoCategoriaSelectors.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             ultrapassou_limite = any(
                 c.ultrapassou_limite_pelo_aluno(aluno)
                 for c in categorias
@@ -65,22 +65,39 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         semestre_atual = SemestreSelectors.get_semestre_atual()
 
         stats = {}
+        curso = None
 
         if grupo == 'Coordenador':
             coordenador = getattr(user, 'coordenador', None)
             if coordenador:
                 curso = coordenador.curso
-                alunos = AlunoSelectors.get_num_alunos_por_curso(curso)
-                alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias_por_curso(curso)
-                atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes_curso(curso)
+                alunos = AlunoSelectors.get_num_alunos(curso=curso)
+                alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias(curso=curso)
+                atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes(curso=curso)
                 stats = {
                     'num_alunos': alunos,
                     'alunos_com_pendencias':alunos_com_pendencias,
                     'atividades_pendentes': atividades_pendentes,
                 }
+        elif grupo == 'Gestor':
+            alunos = AlunoSelectors.get_num_alunos()
+            alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias()
+            atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes()
+            stats = {
+                'num_alunos': alunos,
+                'alunos_com_pendencias': alunos_com_pendencias,
+                'atividades_pendentes': atividades_pendentes,
+            }
 
-        return {
+        context = {
             'grupo': grupo,
             'stats': stats,
             'semestre_atual': semestre_atual,
         }
+
+        if grupo == 'Gestor':
+            context['ultimos_semestres'] = SemestreSelectors.get_ultimos_semestres_com_alunos(5)
+        elif grupo == 'Coordenador' and curso:
+            context['ultimos_semestres'] = SemestreSelectors.get_ultimos_semestres_com_alunos(5, curso=curso)
+
+        return context

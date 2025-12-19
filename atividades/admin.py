@@ -1,16 +1,16 @@
 from django.contrib import admin
-from .models import Curso, CategoriaAtividade, Aluno, Atividade, CursoCategoria
+from .models import Curso, Categoria, Aluno, Atividade, CategoriaCurso
 
 @admin.register(Curso)
 class CursoAdmin(admin.ModelAdmin):
     list_display = ("nome",)
 
-@admin.register(CategoriaAtividade)
-class CategoriaAtividadeAdmin(admin.ModelAdmin):
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
     list_display = ("nome",)
 
-@admin.register(CursoCategoria)
-class CursoCategoriaAdmin(admin.ModelAdmin):
+@admin.register(CategoriaCurso)
+class CategoriaCursoAdmin(admin.ModelAdmin):
     list_display = ("curso", "categoria", "limite_horas")
     list_filter = ("curso", "categoria")
 

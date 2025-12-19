@@ -47,11 +47,15 @@
             <div class="ativ-col">
               <span class="ativ-label">Status</span>
               <span class="ativ-value">
-                {% if atividade.horas_aprovadas is not None %}
-                  <span class="badge bg-success">{{ atividade.horas_aprovadas }}h</span>
-                {% else %}
-                  <span class="badge bg-warning text-dark">Aguardando</span>
-                {% endif %}
+                {% if atividade.status == 'Rejeitada' %}
+                <span class="badge bg-danger">Rejeitada</span>
+              {% elif atividade.status == 'Aguardando' %}
+                <span class="badge bg-warning text-dark">Aguardando</span>
+              {% elif atividade.status == 'Limite Atingido' %}
+                <span class="badge bg-secondary">Limite Categoria Atingido</span>
+              {% else %}
+                <span class="badge bg-success">{{ atividade.horas_aprovadas }}h</span>
+              {% endif %}
               </span>
             </div>
           </div>
@@ -124,11 +128,19 @@
             </span>
           </div>
           {% endif %}
+
+          {% if atividade.status != 'Limite Atingido' %}
           <div class="detail-actions">
             <button type="button" class="btn btn-outline-main-blue btn-sm w-100" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
-              <i class="bi bi-check2-circle"></i> {% if atividade.horas_aprovadas is None %}Aprovar Atividade{% else %}Editar Aprovação{% endif %}
+              <i class="bi bi-check2-circle"></i> 
+              {% if atividade.status == 'Aguardando' %}Aprovar Atividade
+              {% elif atividade.status == 'Rejeitada' %} Reaproveitar Atividade
+              {% else %}
+              Editar Aprovação
+              {% endif %}
             </button>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>

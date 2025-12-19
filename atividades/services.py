@@ -1,8 +1,9 @@
-from atividades.selectors import CursoCategoriaSelectors
-from .models import Aluno, Atividade, CategoriaAtividade, Curso, Coordenador, CursoCategoria, Semestre
+from atividades.selectors import CategoriaCursoSelectors
+from .models import Aluno, Atividade, Categoria, Curso, Coordenador, CategoriaCurso, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
     
 class SemestreService:
@@ -23,7 +24,7 @@ class SemestreService:
 
         to_create = []
         with transaction.atomic():
-            origem_qs = CursoCategoria.objects.filter(semestre=source_semestre).select_related('categoria', 'curso')
+            origem_qs = CategoriaCurso.objects.filter(semestre=source_semestre).select_related('categoria', 'curso')
             cursos_por_id = {}
             for cc in origem_qs:
                 cursos_por_id.setdefault(cc.curso_id, []).append(cc)
@@ -31,12 +32,12 @@ class SemestreService:
             for curso_id, curso_categorias in cursos_por_id.items():
                 # ids já existentes no semestre destino para este curso
                 existing_cat_ids = set(
-                    CursoCategoria.objects.filter(curso_id=curso_id, semestre=semestre_novo).values_list('categoria_id', flat=True)
+                    CategoriaCurso.objects.filter(curso_id=curso_id, semestre=semestre_novo).values_list('categoria_id', flat=True)
                 )
                 for cc in curso_categorias:
                     if cc.categoria_id in existing_cat_ids:
                         continue
-                    to_create.append(CursoCategoria(
+                    to_create.append(CategoriaCurso(
                         curso_id=curso_id,
                         categoria_id=cc.categoria_id,
                         limite_horas=cc.limite_horas,
@@ -45,7 +46,7 @@ class SemestreService:
                     ))
 
             if to_create:
-                CursoCategoria.objects.bulk_create(to_create)
+                CategoriaCurso.objects.bulk_create(to_create)
                 return True
         return False
 
@@ -111,16 +112,22 @@ class AtividadeService:
 
         if horas_aprovadas > atividade.horas:
             raise ValueError('Horas aprovadas não podem exceder as horas da atividade')
+        
+        if atividade.status == 'Limite Atingido':
+            raise ValueError('Não é possível aprovar horas para esta atividade, o limite da categoria já foi atingido.')
+        
+        if atividade.categoria.atingiu_limite_pelo_aluno(atividade.aluno):
+            raise ValueError('Não é possível aprovar horas para esta atividade, o limite da categoria já foi atingido para este aluno.')
 
         atividade.horas_aprovadas = horas_aprovadas
-        atividade.save(update_fields=['horas_aprovadas'])
+        atividade.save()
 
-class CursoCategoriaService:
+class CategoriaCursoService:
    
    @staticmethod
    def create_categoria_curso(*, form, coordenador: Coordenador):
-        categoria = CategoriaAtividade.objects.create(nome=form.cleaned_data['nome'])
-        curso_categoria = CursoCategoria.objects.create(
+        categoria = Categoria.objects.create(nome=form.cleaned_data['nome'])
+        curso_categoria = CategoriaCurso.objects.create(
             curso=coordenador.curso,
             categoria=categoria,
             limite_horas=form.cleaned_data['limite_horas'],
@@ -130,7 +137,7 @@ class CursoCategoriaService:
    
    @staticmethod
    def associar_categorias(*, curso, semestre, dados_post):
-        categorias_disponiveis = CursoCategoriaSelectors.get_curso_categorias_disponiveis_para_associar(
+        categorias_disponiveis = CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
             curso,
             semestre
         )
@@ -146,7 +153,7 @@ class CursoCategoriaService:
                     limite = 0
 
                 if limite > 0:
-                    CursoCategoria.objects.create(
+                    CategoriaCurso.objects.create(
                         curso=curso,
                         categoria=categoria,
                         limite_horas=limite,
@@ -158,4 +165,40 @@ class CursoCategoriaService:
             raise ValueError('Nenhuma categoria válida foi selecionada.')
 
         return adicionadas
+   
+class AlunoService:
+
+    @staticmethod
+    def calcular_horas_complementares_validas(
+        *,
+        aluno: Aluno,
+        apenas_aprovadas: bool = False
+    ) -> int:
+        if not aluno.curso:
+            return 0
+
+        categorias = CategoriaCursoSelectors.get_categorias_curso(
+            curso=aluno.curso,
+            semestre=aluno.semestre_ingresso
+        )
+
+        total = 0
+
+        for curso_categoria in categorias:
+            qs = aluno.atividades.filter(categoria=curso_categoria)
+
+            if apenas_aprovadas:
+                soma = qs.aggregate(
+                    total=Sum('horas_aprovadas')
+                )['total'] or 0
+            else:
+                soma = qs.aggregate(
+                    total=Sum('horas')
+                )['total'] or 0
+
+            limite = curso_categoria.limite_horas or 0
+            total += min(soma, limite) if limite > 0 else soma
+
+        return total
+
 

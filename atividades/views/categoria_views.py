@@ -4,8 +4,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
 
-from ..models import CategoriaAtividade
-from ..forms import CategoriaAtividadeForm
+from atividades.selectors import CategoriaSelectors
+
+from ..models import Categoria
+from ..forms import CategoriaForm
 from ..mixins import GestorRequiredMixin
 
 business_logger = logging.getLogger('atividades.business')
@@ -15,11 +17,11 @@ class CriarCategoriaView(GestorRequiredMixin, View):
     template_name = 'forms/form_categoria.html'
 
     def get(self, request):
-        form = CategoriaAtividadeForm()
+        form = CategoriaForm()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = CategoriaAtividadeForm(request.POST)
+        form = CategoriaForm(request.POST)
         if form.is_valid():
             categoria = form.save()
             business_logger.warning(f"CATEGORIA CRIADA: {categoria.nome} | User: {request.user.username}")
@@ -33,13 +35,13 @@ class EditarCategoriaView(GestorRequiredMixin, View):
     template_name = 'forms/form_categoria.html'
 
     def get(self, request, categoria_id):
-        categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
-        form = CategoriaAtividadeForm(instance=categoria)
+        categoria = get_object_or_404(Categoria, id=categoria_id)
+        form = CategoriaForm(instance=categoria)
         return render(request, self.template_name, {'form': form, 'categoria': categoria, 'edit': True})
 
     def post(self, request, categoria_id):
-        categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
-        form = CategoriaAtividadeForm(request.POST, instance=categoria)
+        categoria = get_object_or_404(Categoria, id=categoria_id)
+        form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
             form.save()
             business_logger.warning(f"CATEGORIA EDITADA: {categoria.nome} | User: {request.user.username}")
@@ -53,7 +55,7 @@ class ExcluirCategoriaView(GestorRequiredMixin, View):
     template_name = 'excluir/excluir_categoria.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
-        self.categoria = get_object_or_404(CategoriaAtividade, id=categoria_id)
+        self.categoria = get_object_or_404(Categoria, id=categoria_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
@@ -72,5 +74,5 @@ class ListarCategoriasView(GestorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categorias'] = CategoriaAtividade.objects.all()
+        context['categorias'] = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
         return context

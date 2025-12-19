@@ -1,7 +1,6 @@
-from atividades.selectors import AlunoSelectors, CursoCategoriaSelectors
+from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors
 
 def categorias_do_usuario(request):
-
     user = getattr(request, 'user', None)
     if not user or not user.is_authenticated:
         return {}
@@ -10,9 +9,8 @@ def categorias_do_usuario(request):
     if not aluno or not aluno.curso:
         return {}
 
-    categorias_qs = CursoCategoriaSelectors.get_curso_categorias_por_semestre_curso(
-        curso=aluno.curso,
-        semestre=aluno.semestre_ingresso
+    categorias = CategoriaCursoSelectors.get_categorias_curso_com_horas_por_aluno(
+        aluno=aluno
     )
-    
-    return {'categorias_context': categorias_qs}
+
+    return {'categorias_context': categorias}

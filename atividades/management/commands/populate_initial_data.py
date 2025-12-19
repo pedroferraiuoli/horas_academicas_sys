@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
-from atividades.models import Curso, CategoriaAtividade, CursoCategoria, Aluno, Coordenador
+from atividades.models import Curso, Categoria, CategoriaCurso, Aluno, Coordenador
 
 class Command(BaseCommand):
     help = 'Popula o sistema com dados iniciais: usuários, cursos, categorias e associações.'
@@ -68,7 +68,7 @@ class Command(BaseCommand):
         ]
         categorias = []
         for nome in categorias_nomes:
-            categoria, _ = CategoriaAtividade.objects.get_or_create(nome=nome)
+            categoria, _ = Categoria.objects.get_or_create(nome=nome)
             categorias.append(categoria)
 
         # CursoCategoria (associação)
@@ -78,7 +78,7 @@ class Command(BaseCommand):
                 for semestre in Semestre.objects.all():
                     print('Associando', curso.nome, '->', categoria.nome, 'no semestre', semestre.nome)
                     limite_horas = random.randint(10, 60)
-                    CursoCategoria.objects.get_or_create(
+                    CategoriaCurso.objects.get_or_create(
                         curso=curso,
                         categoria=categoria,
                         limite_horas=limite_horas,

@@ -100,7 +100,7 @@ class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
             aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
             atividades = AtividadeSelectors.get_atividades_aluno(aluno)
         else: 
-            atividades = AtividadeSelectors.get_atividades_pendentes_curso(curso)
+            atividades = AtividadeSelectors.get_atividades_pendentes(curso=curso)
 
         filtro = AtividadesFilter(self.request.GET, queryset=atividades, request=self.request)
         atividades_filtradas = filtro.qs

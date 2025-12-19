@@ -3,12 +3,11 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
-
-from ..models import Curso, CursoCategoria, Semestre
+from ..models import Curso, CategoriaCurso, Semestre
 from ..forms import CategoriaCursoForm, CategoriaCursoDiretaForm
-from ..selectors import CursoCategoriaSelectors, UserSelectors
-from ..services import CursoCategoriaService
-from ..filters import CursoCategoriaFilter
+from ..selectors import CategoriaCursoSelectors, UserSelectors
+from ..services import CategoriaCursoService
+from ..filters import CategoriaCursoFilter
 from ..mixins import GestorOuCoordenadorRequiredMixin, CoordenadorRequiredMixin
 
 business_logger = logging.getLogger('atividades.business')
@@ -42,7 +41,7 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
     template_name = 'forms/form_associar_categoria.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
-        self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
+        self.categoria = get_object_or_404(CategoriaCurso, id=categoria_id)
         self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
         if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
             security_logger.warning(
@@ -75,7 +74,7 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
     template_name = 'excluir/excluir_categoria.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
-        self.categoria = get_object_or_404(CursoCategoria, id=categoria_id)
+        self.categoria = get_object_or_404(CategoriaCurso, id=categoria_id)
         self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
         return super().dispatch(request, *args, **kwargs)
 
@@ -113,9 +112,9 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        base_qs = CursoCategoriaSelectors.get_curso_categorias_usuario(self.request.user)
+        base_qs = CategoriaCursoSelectors.get_categorias_curso_usuario(self.request.user)
 
-        filtro = CursoCategoriaFilter(self.request.GET or None, queryset=base_qs)
+        filtro = CategoriaCursoFilter(self.request.GET or None, queryset=base_qs)
         categorias = filtro.qs
 
         context['categorias'] = categorias
@@ -136,7 +135,7 @@ class CriarCategoriaCursoDiretaView(CoordenadorRequiredMixin, View):
         form = CategoriaCursoDiretaForm(request.POST)
         if form.is_valid():
             curso_categoria = form.save()
-            CursoCategoriaService.create_categoria_curso(form=form, coordenador=coordenador)
+            CategoriaCursoService.create_categoria_curso(form=form, coordenador=coordenador)
             business_logger.warning(
                 f"CURSO-CATEGORIA CRIADA DIRETAMENTE: {curso_categoria.categoria.nome} -> {curso_categoria.curso.nome} | "
                 f"User: {request.user.username}"
@@ -169,7 +168,7 @@ class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
         semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
 
         try:
-            adicionadas = CursoCategoriaService.associar_categorias(
+            adicionadas = CategoriaCursoService.associar_categorias(
                 curso=self.curso,
                 semestre=semestre,
                 dados_post=request.POST
@@ -193,7 +192,7 @@ class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
 
         categorias = []
         if curso and semestre:
-            categorias = CursoCategoriaSelectors.get_curso_categorias_disponiveis_para_associar(semestre=semestre, curso=curso)
+            categorias = CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(semestre=semestre, curso=curso)
 
         return {
             'categorias': categorias,

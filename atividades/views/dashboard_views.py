@@ -1,6 +1,8 @@
 from django.views.generic import TemplateView
 
-from ..selectors import AlunoSelectors, AtividadeSelectors, CursoCategoriaSelectors, SemestreSelectors, UserSelectors
+from atividades.services import AlunoService
+
+from ..selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, SemestreSelectors, UserSelectors
 from ..mixins import LoginRequiredMixin
 
 
@@ -34,7 +36,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_aluno_context(self):
         aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
 
-        total_horas = aluno.horas_complementares_validas(apenas_aprovadas=True)
+        total_horas = AlunoService.calcular_horas_complementares_validas(aluno=aluno, apenas_aprovadas=True)
         horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
 
         progresso = 0
@@ -45,7 +47,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         ultrapassou_limite = False
         if aluno.curso:
-            categorias = CursoCategoriaSelectors.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CategoriaCursoSelectors.get_categorias_curso(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             ultrapassou_limite = any(
                 c.ultrapassou_limite_pelo_aluno(aluno)
                 for c in categorias

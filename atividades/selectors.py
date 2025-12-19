@@ -1,6 +1,7 @@
-from django.db.models import QuerySet, OuterRef, Exists, Prefetch
+from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, F, Q, Case, When, Value, BooleanField, Subquery
+from django.db.models.functions import Coalesce
 from typing import Optional, List
-from .models import Atividade, Aluno, CategoriaAtividade, Curso, Coordenador, CursoCategoria, Semestre
+from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, Semestre
 from django.utils import timezone
 
 class AtividadeSelectors:
@@ -36,25 +37,72 @@ class AtividadeSelectors:
         )
     
     @staticmethod
-    def get_atividades_pendentes_curso(curso: Curso) -> QuerySet[Atividade]:
-        """Busca atividades pendentes de aprovação de um curso"""
-        return Atividade.objects.filter(
-            aluno__curso=curso,
-            horas_aprovadas__isnull=True
-        ).select_related(
-            'aluno__user',
-            'categoria__categoria'
-        ).order_by('created_at')
+    def get_atividades_pendentes(curso=None):
+
+        total_aprovado_subquery = (
+            Atividade.objects
+            .filter(
+                aluno=OuterRef('aluno'),
+                categoria=OuterRef('categoria'),
+                horas_aprovadas__isnull=False,
+            )
+            .values('aluno', 'categoria')
+            .annotate(total=Sum('horas_aprovadas'))
+            .values('total')[:1]
+        )
+
+        qs = (
+            Atividade.objects
+            .select_related(
+                'aluno__user',
+                'categoria__curso',
+            )
+            .annotate(
+                total_horas_categoria=Coalesce(
+                    Subquery(total_aprovado_subquery),
+                    0
+                ),
+                limite_categoria=F('categoria__limite_horas'),
+            )
+            .annotate(
+                limite_atingido=Case(
+                    When(
+                        total_horas_categoria__gte=F('limite_categoria'),
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=BooleanField()
+                )
+            )
+            .filter(
+                horas_aprovadas__isnull=True,
+                limite_atingido=False
+            )
+            .order_by('created_at')
+        )
+
+        if curso:
+            qs = qs.filter(aluno__curso=curso)
+
+        return qs
     
     @staticmethod
     def get_num_atividades_pendentes(*, curso=None) -> int:
         """Conta atividades pendentes de aprovação de um curso"""
-        queryset = Atividade.objects.filter(
-            horas_aprovadas__isnull=True
-        )
+        queryset = AtividadeSelectors.get_atividades_pendentes()
         if curso:
             queryset = queryset.filter(aluno__curso=curso)
         return queryset.count()
+
+    @staticmethod
+    def get_total_horas_por_aluno_categoria(*, aluno, curso_categoria):
+        return (
+            aluno.atividades
+            .filter(categoria=curso_categoria)
+            .aggregate(total=Sum('horas_aprovadas'))['total']
+            or 0
+        )
+
     
 class SemestreSelectors:
     
@@ -91,13 +139,13 @@ class SemestreSelectors:
             for s in semestres
         ]
         
-class CursoCategoriaSelectors:
+class CategoriaCursoSelectors:
     
     @staticmethod
-    def get_curso_categorias(*, curso=None, semestre=None) -> QuerySet['CursoCategoria']:
+    def get_categorias_curso(*, curso=None, semestre=None) -> QuerySet['CategoriaCurso']:
         """Busca categorias"""
 
-        cat = CursoCategoria.objects.filter().select_related('categoria').order_by('categoria__nome')
+        cat = CategoriaCurso.objects.filter().select_related('categoria').order_by('categoria__nome')
 
         if curso:
             cat = cat.filter(curso=curso)
@@ -106,35 +154,84 @@ class CursoCategoriaSelectors:
         return cat
     
     @staticmethod
-    def get_curso_categorias_disponiveis_para_associar(curso, semestre):
+    def get_categorias_curso_disponiveis_para_associar(curso, semestre):
         """Retorna categorias que ainda não estão associadas ao curso no semestre"""
-        CursoCategoria_qs = CursoCategoria.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True)
-        disponiveis = CategoriaAtividade.objects.exclude(id__in=CursoCategoria_qs)
+        CategoriaCurso_qs = CategoriaCurso.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True)
+        disponiveis = Categoria.objects.exclude(id__in=CategoriaCurso_qs)
         return disponiveis.order_by('nome')
     
     @staticmethod
-    def get_curso_categorias_usuario(user) -> QuerySet['CursoCategoria']:
+    def get_categorias_curso_usuario(user) -> QuerySet['CategoriaCurso']:
         """Retorna categorias de curso visíveis para o usuário"""
         if user.groups.filter(name='Gestor').exists():
-            return CursoCategoria.objects.select_related('curso', 'categoria', 'semestre').all()
+            return CategoriaCurso.objects.select_related('curso', 'categoria', 'semestre').all()
         elif user.groups.filter(name='Coordenador').exists():
             try:
                 coordenador = Coordenador.objects.get(user=user)
-                return CursoCategoria.objects.select_related('curso', 'categoria', 'semestre').filter(curso=coordenador.curso)
+                return CategoriaCurso.objects.select_related('curso', 'categoria', 'semestre').filter(curso=coordenador.curso)
             except Coordenador.DoesNotExist:
-                return CursoCategoria.objects.none()
-        return CursoCategoria.objects.none()
+                return CategoriaCurso.objects.none()
+        return CategoriaCurso.objects.none()
+    
+    @staticmethod
+    def get_categorias_curso_com_horas_por_aluno(*, aluno):
+        return (
+            CategoriaCurso.objects
+            .filter(
+                curso=aluno.curso,
+                semestre=aluno.semestre_ingresso,
+            )
+            .annotate(
+                horas_aprovadas_total=Coalesce(
+                    Sum(
+                        'atividade__horas_aprovadas',
+                        filter=Q(
+                            atividade__aluno=aluno,
+                            atividade__horas_aprovadas__isnull=False
+                        )
+                    ),
+                    0
+                )
+            )
+            .select_related('categoria')
+            .order_by('categoria__nome')
+        )
     
 class AlunoSelectors:
 
     @staticmethod
-    def _with_pendencia_annotation(qs):
-        pendencias_subquery = Atividade.objects.filter(
+    def _pendencias_validas_subquery():
+
+        total_aprovado_subquery = Atividade.objects.filter(
+                aluno=OuterRef('aluno'),
+                categoria=OuterRef('categoria'),
+                horas_aprovadas__isnull=False,
+            ).values('aluno', 'categoria').annotate(total=Sum('horas_aprovadas')).values('total')[:1]
+        
+        return (
+        Atividade.objects
+        .filter(
             aluno=OuterRef('pk'),
             horas_aprovadas__isnull=True,
         )
+        .annotate(
+            total_horas_categoria=Coalesce(
+                Subquery(total_aprovado_subquery),
+                0
+            ),
+            limite_categoria=F('categoria__limite_horas'),
+        )
+        .filter(
+            total_horas_categoria__lt=F('limite_categoria')
+        )
+    )
+
+    @staticmethod
+    def _with_pendencia_annotation(qs):
+        pendencias_validas = AlunoSelectors._pendencias_validas_subquery()
+
         return qs.annotate(
-            tem_pendencia=Exists(pendencias_subquery)
+            tem_pendencia=Exists(pendencias_validas)
         )
 
     @staticmethod
@@ -239,9 +336,9 @@ class CursoSelectors:
         semestre_atual = SemestreSelectors.get_semestre_atual()
 
         categorias_prefetch = Prefetch(
-            'curso_categorias',
+            'categoria_cursos',
             queryset=(
-                CursoCategoria.objects
+                CategoriaCurso.objects
                 .filter(semestre=semestre_atual)
                 .select_related('categoria')
                 .order_by('categoria__nome')
@@ -254,3 +351,28 @@ class CursoSelectors:
             .all()
             .prefetch_related(categorias_prefetch)
         )
+
+class CategoriaSelectors:
+
+    @staticmethod
+    def listar_categorias_geral_com_cursos_semestre_atual():
+        semestre_atual = SemestreSelectors.get_semestre_atual()
+
+        return (
+            Categoria.objects
+            .filter(categoria_cursos__semestre=semestre_atual, especifica=False)
+            .distinct()
+            .prefetch_related(
+                Prefetch(
+                    'categoria_cursos',
+                    queryset=(
+                        CategoriaCurso.objects
+                        .filter(semestre=semestre_atual)
+                        .select_related('curso')
+                    ),
+                    to_attr='cursos_no_semestre_atual'
+                )
+            )
+        )
+
+    

@@ -1,12 +1,12 @@
 import django_filters
 
-from atividades.selectors import AlunoSelectors, CursoCategoriaSelectors
-from .models import Atividade, Curso, CursoCategoria, Semestre, Aluno
+from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors
+from .models import Atividade, Curso, CategoriaCurso, Semestre, Aluno
 from django import forms
 from django.db.models import Exists, OuterRef, Q
 
 
-class CursoCategoriaFilter(django_filters.FilterSet):
+class CategoriaCursoFilter(django_filters.FilterSet):
     semestre = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={
             'class': 'form-select',   # coloque as classes que quiser
         }))
@@ -16,7 +16,7 @@ class CursoCategoriaFilter(django_filters.FilterSet):
         }))
 
     class Meta:
-        model = CursoCategoria
+        model = CategoriaCurso
         fields = ['semestre', 'curso']
 
 class AlunosFilter(django_filters.FilterSet):
@@ -82,7 +82,7 @@ class AtividadesFilter(django_filters.FilterSet):
     )
 
     categoria = django_filters.ModelChoiceFilter(
-        queryset=CursoCategoria.objects.none(),
+        queryset=CategoriaCurso.objects.none(),
         label='Categorias',
         empty_label='Todas',
         widget=forms.Select(attrs={'class': 'form-select'})
@@ -106,8 +106,8 @@ class AtividadesFilter(django_filters.FilterSet):
         aluno = self.aluno
 
         if aluno:
-            self.filters['categoria'].queryset = CursoCategoriaSelectors.get_curso_categorias(
-                aluno.curso,
+            self.filters['categoria'].queryset = CategoriaCursoSelectors.get_categorias_curso(
+                curso=aluno.curso,
                 semestre=aluno.semestre_ingresso
             )
 

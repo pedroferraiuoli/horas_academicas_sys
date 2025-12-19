@@ -1,13 +1,10 @@
 from django.contrib.auth.models import Group
-from atividades.selectors import CursoCategoriaSelectors, SemestreSelectors
+from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
-from .models import Curso, CursoCategoria
-from .models import CategoriaAtividade
+from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Aluno, Curso, Semestre
-from .models import Atividade, CategoriaAtividade
 
 class SemestreForm(forms.ModelForm): 
 
@@ -73,10 +70,10 @@ class CursoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
 
-class CategoriaAtividadeForm(forms.ModelForm):
+class CategoriaForm(forms.ModelForm):
 
     class Meta:
-        model = CategoriaAtividade
+        model = Categoria
         fields = ['nome']
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Nome da categoria'})
@@ -85,7 +82,7 @@ class CategoriaAtividadeForm(forms.ModelForm):
 class CategoriaCursoForm(forms.ModelForm):
 
     class Meta:
-        model = CursoCategoria
+        model = CategoriaCurso
         fields = ['curso', 'categoria', 'limite_horas', 'semestre']
 
 
@@ -103,7 +100,7 @@ class CategoriaCursoForm(forms.ModelForm):
 
             semestre_atual = SemestreSelectors.get_semestre_atual()
 
-            self.fields['categoria'].queryset = (CursoCategoriaSelectors.get_curso_categorias_disponiveis_para_associar(
+            self.fields['categoria'].queryset = (CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
                     coordenador.curso,
                     semestre_atual
                 )
@@ -138,19 +135,20 @@ class AtividadeForm(forms.ModelForm):
     def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         if aluno:
-            categorias = CursoCategoriaSelectors.get_curso_categorias(curso=aluno.curso, semestre=aluno.semestre_ingresso)
+            categorias = CategoriaCursoSelectors.get_categorias_curso(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
 
         if categoria_id:
             try:
-                categoria = CursoCategoria.objects.get(id=categoria_id)
+                categoria = CategoriaCurso.objects.get(id=categoria_id)
                 self.fields['categoria'].initial = categoria
-            except CursoCategoria.DoesNotExist:
+            except CategoriaCurso.DoesNotExist:
                 pass
     
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')
-        ValidadorDeArquivo.validar(documento)
+        if documento:
+            ValidadorDeArquivo.validar(documento)
         return documento
     
     def clean_horas(self):

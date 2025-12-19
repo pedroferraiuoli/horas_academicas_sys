@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load atividade_extras %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <h2 class="orange dashboard-welcome">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
+    <div class="dashboard-actions">
+        <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span></a>
+        <a href="{% url 'listar_atividades' %}" class="btn btn-info"><i class="bi bi-list"></i> <span class="btn-text">Listar Atividades</span></a>
+    </div>
+</div>
+      
+
+<p class="dashboard-course-info">Curso: <span class="fw-bold">{{ aluno.curso }}</span> | Horas requeridas: <span class="fw-bold">{{ aluno.curso.horas_requeridas }}h</span></p>
+    {% if ultrapassou_limite %}
+      <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Você possui categorias em que o total de horas cadastradas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
+      </div>
+    {% endif %}
+    <div class="dashboard-progress-section">
+      <div class="progress-info">
+        <span class="progress-percentage">{{progresso_percentual}}%</span>
+        <span class="progress-hours">{{ total_horas }}h / {{ aluno.curso.horas_requeridas }}h</span>
+      </div>
+      <div class="progress dashboard-progress-bar">
+          <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;" aria-valuenow="{{ progresso_percentual }}" aria-valuemin="0" aria-valuemax="100">
+            <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas }}h</span>
+        </div>
+      </div>
+    </div>
+
+  {% if atividades_recentes %}
+    <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>
+    
+    <!-- Lista Responsiva de Atividades -->
+    <div class="atividades-list">
+      {% for atividade in atividades_recentes %}
+       {% include 'listas/partials/atividades_aluno.html' %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+<script src="{% static 'js/listar_atividades.js' %}"></script>
+{% endblock %}

@@ -27,3 +27,5 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.NOTICE('Iniciando servidor de desenvolvimento...'))
         call_command('runserver')
+
+        self.stdout.write(self.style.SUCCESS('Projeto configurado e servidor iniciado.'))

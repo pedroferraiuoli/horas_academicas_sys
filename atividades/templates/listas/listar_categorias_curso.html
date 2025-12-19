@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+<h2 class="main-blue">Categorias de Atividade</h2>
+<div class="mb-3">
+<a href="{% url 'criar_categoria' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Categoria</a>
+<a href="javascript:history.back()" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+
+<div class="mb-3">
+  <form method="get" class="row g-2 align-items-center filtros-atividades">
+    <div class="col-12 col-md-3">
+      {{ filter.form.semestre }}
+    </div>
+    <div class="col-12 col-md-3">
+      {{ filter.form.curso }}
+    </div>
+    <div class="col-12 col-md-4 filtros-buttons">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Lista Responsiva de Categorias -->
+<div class="atividades-list">
+  {% for categoria in categorias %}
+  <div class="atividade-item" id="categoria-{{ categoria.id }}">
+    <!-- Desktop: linha de tabela / Mobile: card compacto -->
+    <div class="atividade-main" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ categoria.id }}" aria-expanded="false">
+      <div class="row g-2">
+        <div class="col-lg-5 col-8">
+          <div class="ativ-col">
+            <span class="ativ-label">Nome</span>
+            <span class="ativ-value">{{ categoria.categoria.nome }} ({{categoria.semestre}})</span>
+          </div>
+        </div>
+        <div class="col-lg col-4">
+          <div class="ativ-col">
+            <span class="ativ-label">Limite de Horas</span>
+            <span class="ativ-value"><span class="">{{ categoria.limite_horas }}h</span></span>
+          </div>
+        </div>
+        <div class="col-lg desktop-only">
+          <div class="ativ-col">
+            <span class="ativ-label">Ações</span>
+            <div class="ativ-actions">
+              <a href="{% url 'editar_categoria_curso' categoria.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
+              <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" title="Desassociar"><i class="bi bi-x-circle"></i></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Detalhes expandidos (mobile) -->
+    <div class="collapse atividade-details" id="collapse-cat-{{ categoria.id }}">
+      <div class="details-content">
+        <div class="detail-actions">
+          <a href="{% url 'editar_categoria_curso' categoria.id %}" class="btn btn-outline-main-blue btn-sm w-100 mb-2">
+            <i class="bi bi-pencil"></i> Editar Categoria
+          </a>
+          <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm w-100" title="Desassociar">
+              <i class="bi bi-x-circle"></i> Desassociar do Curso
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center text-muted py-4">
+    Nenhuma categoria cadastrada.
+  </div>
+  {% endfor %}
+</div>
+</div>
+
+<script src="{% static 'js/filtros.js' %}"></script>
+<script src="{% static 'js/listar_atividades.js' %}"></script>
+{% endblock %}

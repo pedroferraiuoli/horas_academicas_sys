@@ -1,12 +1,20 @@
 from django.contrib.auth.models import Group
-from .models import Curso, CursoCategoria
-from django.contrib.auth.models import Group
-from .models import CategoriaAtividade
+from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors
+from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
+from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Aluno, Curso
-from .models import Atividade, CategoriaAtividade
+
+class SemestreForm(forms.ModelForm): 
+
+    class Meta:
+        model = Semestre
+        fields = ['nome', 'data_inicio', 'data_fim']
+        widgets = {
+            'data_inicio': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'data_fim': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
+        }
 
 class AlterarEmailForm(forms.ModelForm):
     email = forms.EmailField(label='Novo e-mail', max_length=254)
@@ -54,101 +62,99 @@ class AdminUserForm(forms.ModelForm):
         return cleaned_data
 
 class CursoForm(forms.ModelForm):
-    horas_requeridas_int = forms.IntegerField(label='Horas requeridas', min_value=0, required=False, initial=0)
-    minutos_requeridos_int = forms.IntegerField(label='Minutos requeridos', min_value=0, max_value=59, required=False, initial=0)
-
     class Meta:
         model = Curso
-        fields = ['nome', 'horas_requeridas_int', 'minutos_requeridos_int']
+        fields = ['nome', 'horas_requeridas']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            horas = int(self.instance.horas_requeridas)
-            minutos = int(round((self.instance.horas_requeridas - horas) * 60))
-            self.fields['horas_requeridas_int'].initial = horas
-            self.fields['minutos_requeridos_int'].initial = minutos
 
-    def clean(self):
-        cleaned_data = super().clean()
-        horas = cleaned_data.get('horas_requeridas_int') or 0
-        minutos = cleaned_data.get('minutos_requeridos_int') or 0
-        cleaned_data['horas_requeridas'] = horas + (minutos / 60)
-        return cleaned_data
 
-    def save(self, commit=True):
-        self.instance.horas_requeridas = self.cleaned_data['horas_requeridas']
-        return super().save(commit=commit)
-
-class CategoriaAtividadeForm(forms.ModelForm):
+class CategoriaForm(forms.ModelForm):
 
     class Meta:
-        model = CategoriaAtividade
+        model = Categoria
         fields = ['nome']
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Nome da categoria'})
         }
 
 class CategoriaCursoForm(forms.ModelForm):
-    limite_horas_int = forms.IntegerField(label='Limite de Horas', min_value=0, required=False, initial=0)
-    limite_minutos_int = forms.IntegerField(label='Limite de Minutos', min_value=0, max_value=59, required=False, initial=0)
 
     class Meta:
-        model = CursoCategoria
-        fields = ['curso', 'categoria', 'limite_horas_int', 'limite_minutos_int', 'carga_horaria']
+        model = CategoriaCurso
+        fields = ['curso', 'categoria', 'limite_horas', 'semestre']
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            horas = int(self.instance.limite_horas)
-            minutos = int(round((self.instance.limite_horas - horas) * 60))
-            self.fields['limite_horas_int'].initial = horas
-            self.fields['limite_minutos_int'].initial = minutos
 
-    def clean(self):
-        cleaned_data = super().clean()
-        horas = cleaned_data.get('limite_horas_int') or 0
-        minutos = cleaned_data.get('limite_minutos_int') or 0
-        cleaned_data['limite_horas'] = horas + (minutos / 60)
-        return cleaned_data
+        if not user:
+            return
 
-    def save(self, commit=True):
-        self.instance.limite_horas = self.cleaned_data['limite_horas']
-        return super().save(commit=commit)
+        coordenador = getattr(user, 'coordenador', None)
+
+        if coordenador:
+            self.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso_id)
+            self.fields['curso'].initial = coordenador.curso
+
+            semestre_atual = SemestreSelectors.get_semestre_atual()
+
+            self.fields['categoria'].queryset = (CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
+                    coordenador.curso,
+                    semestre_atual
+                )
+            )
+
 
 class AtividadeForm(forms.ModelForm):
-    horas_int = forms.IntegerField(label='Horas', min_value=0, required=False, initial=0)
-    minutos_int = forms.IntegerField(label='Minutos', min_value=0, max_value=59, required=False, initial=0)
 
     class Meta:
         model = Atividade
-        fields = ['categoria', 'nome', 'descricao', 'horas_int', 'minutos_int', 'data', 'documento']
+        fields = ['categoria', 'nome', 'descricao', 'horas', 'data', 'documento', 'observacoes_para_aprovador']
         widgets = {
-            'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
+            'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'descricao': forms.Textarea(attrs={'rows': 4}),
+            'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 4}),
+            'documento': forms.ClearableFileInput(attrs={'accept': (
+            '.pdf,'
+            'application/pdf,'
+            '.jpg,.jpeg,'
+            'image/jpeg,'
+            '.png,'
+            'image/png,'
+            '.doc,'
+            'application/msword,'
+            '.docx,'
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    )
+                }
+            )
         }
 
-    def __init__(self, *args, **kwargs):
-        aluno = kwargs.pop('aluno', None)
+    def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            horas = int(self.instance.horas)
-            minutos = int(round((self.instance.horas - horas) * 60))
-            self.fields['horas_int'].initial = horas
-            self.fields['minutos_int'].initial = minutos
         if aluno:
-            categorias = aluno.curso.curso_categorias.all()
+            categorias = CategoriaCursoSelectors.get_categorias_curso(curso=aluno.curso, semestre=aluno.semestre_ingresso)
             self.fields['categoria'].queryset = categorias
 
-    def clean(self):
-        cleaned_data = super().clean()
-        horas = cleaned_data.get('horas_int') or 0
-        minutos = cleaned_data.get('minutos_int') or 0
-        cleaned_data['horas'] = horas + (minutos / 60)
-        return cleaned_data
-
-    def save(self, commit=True):
-        self.instance.horas = self.cleaned_data['horas']
-        return super().save(commit=commit)
+        if categoria_id:
+            try:
+                categoria = CategoriaCurso.objects.get(id=categoria_id)
+                self.fields['categoria'].initial = categoria
+            except CategoriaCurso.DoesNotExist:
+                pass
+    
+    def clean_documento(self):
+        documento = self.cleaned_data.get('documento')
+        if documento:
+            ValidadorDeArquivo.validar(documento)
+        return documento
+    
+    def clean_horas(self):
+        horas = self.cleaned_data.get('horas')
+        ValidadorDeHoras.validar_horas(horas)
+        return horas
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
     username = forms.CharField(label='Usuário ou Email')
@@ -173,6 +179,7 @@ class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(label='Senha', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirme a senha', widget=forms.PasswordInput)
     curso = forms.ModelChoiceField(queryset=Curso.objects.all(), label='Curso de Graduação')
+    semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre de Ingresso')
 
     class Meta:
         model = User
@@ -186,14 +193,6 @@ class UserRegistrationForm(forms.ModelForm):
 
 class CategoriaCursoDiretaForm(forms.Form):
     nome = forms.CharField(label='Nome da categoria', max_length=100)
-    limite_horas = forms.DecimalField(label='Limite de horas', max_digits=5, decimal_places=2, min_value=0)
-
-    def save(self, coordenador):
-        categoria = CategoriaAtividade.objects.create(nome=self.cleaned_data['nome'])
-        curso_categoria = CursoCategoria.objects.create(
-            curso=coordenador.curso,
-            categoria=categoria,
-            limite_horas=self.cleaned_data['limite_horas']
-        )
-        return curso_categoria
+    limite_horas = forms.IntegerField(label='Limite de horas', min_value=0)
+    semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre')
 

@@ -1,44 +1,76 @@
-{% load atividade_extras %}
 {% load static %}
  <!-- Sidebar -->
             {% if user.is_authenticated and user.aluno %}
-            <nav class="d-none d-md-block sidebar" style="min-height: 100vh; position: sticky; top: 0; width: 39.3%; max-height: 100vh; overflow-y: auto;">
-                <div class="navbar-list">
-                    <div class="d-flex" style="padding: 0 0.5rem 0rem 0.5rem;">
-                        <div class="navbar-head" style="width: 60%;">CATEGORIAS</div>
-                        <div class="navbar-head text-center" style="width: 30%;">CARGA HORÁRIA</div>
-                        <div class="navbar-head text-center" style="width: 10%;">LIMITE</div>
-                    </div>
-                    {% for categoria in user.aluno.curso.curso_categorias.all %}
-                        <div class="d-flex navbar-row {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}" style="padding: 0 0.5rem 0rem 0.5rem;">
-                            <div class="d-flex" style="width: 60%;">
-                                <div class="me-4 py-2" style="font-size: 1.5rem;">
-                                    {% if categoria.categoria.id %}
-                                        {% if categoria.categoria.id < 10 %}
-                                            0{{ categoria.categoria.id }}
-                                        {% else %}
-                                            {{ categoria.categoria.id }}
-                                        {% endif %}
-                                    {% endif %}
+
+            <!-- Toggle button for mobile - Fixed position -->
+            <button class="sidebar-toggle-btn d-lg-none" type="button" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            
+            
+            <nav class="sidebar" id="sidebarMenu">
+                    <!-- Close button for mobile -->
+                    <button class="sidebar-close-btn d-lg-none" onclick="closeSidebar()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    
+                    <div class="sidebar-content">
+                        
+                        {% for categoria in categorias_context %}
+                            <div class="sidebar-item {% if categoria.id|stringformat:'s' == request.GET.categoria %}active{% endif %}" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}">
+                                <div class="sidebar-item-header">
+                                    <div class="sidebar-item-number">{{ forloop.counter|stringformat:"02d" }}</div>
+                                    <div class="sidebar-item-name">{{ categoria.categoria.nome }}</div>
                                 </div>
-                                <div class="mb-0 text-start py-3 ">{{ categoria.categoria.nome }}</div>
-                            </div>
-                            <div class="text-center py-3 small" style="width: 30%;">{{ categoria.carga_horaria }}</div>
-                            <div class="text-center py-3" style="width: 10%;">
-                                <div class="d-flex flex-column align-items-center">
-                                    <span class="small fw-bold">{{ categoria.limite_horas_formatado }}</span>
-                                    <div class="badge">
-                                    <span class="small mt-1">Feitas:</span>
-                                    <span class="small mt-1">{{ user.aluno.atividade_set.all|categoria_horas:categoria }}</span>
+                                <div class="sidebar-item-info">
+                                    <div class="info-group">
+                                        <span class="info-label">Carga Horária:</span>
+                                        <span class="info-value">{{ categoria.equivalencia_horas }}</span>
+                                    </div>
+                                    <div class="info-group">
+                                        <span class="info-label">Limite:</span>
+                                        <span class="info-value">{{ categoria.limite_horas }}h</span>
+                                    </div>
+                                    <div class="info-group">
+                                        <span class="info-label">Aprovadas:</span>
+                                        <span class="info-value badge bg-success">{{ categoria.horas_aprovadas_total }}h</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="navbar-separator"></div>
-                    {% empty %}
-                        <div class="text-muted text-center py-3">Nenhuma categoria</div>
-                    {% endfor %}
-                </div>
+                        {% empty %}
+                            <div class="text-muted text-center py-3">Nenhuma categoria</div>
+                        {% endfor %}
+                    </div>
             </nav>
             {% endif %}
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Fechar ao clicar em um item (mobile)
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (window.innerWidth < 992) {
+                closeSidebar();
+            }
+        });
+    });
+});
+</script>
 <script src="{% static 'js/navbar.js' %}"></script>

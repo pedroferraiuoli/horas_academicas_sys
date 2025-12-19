@@ -56,6 +56,7 @@ body {
 
 .container {
     margin-top: 1rem;
+    margin-bottom: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -1864,3 +1865,114 @@ header button:hover {
 /* ========================================
    FIM DO FOOTER
    ======================================== */
+
+
+/* Visualizador de Logs */
+
+.log-viewer {
+    max-height: 600px;
+    overflow-y: auto;
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 15px;
+}
+
+.log-line {
+    padding: 4px 0;
+    border-bottom: 1px solid #2d2d2d;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.log-error {
+    background-color: #4a1a1a;
+    color: #ff6b6b;
+    padding: 6px;
+    margin: 2px 0;
+    border-left: 3px solid #ff0000;
+}
+
+.log-warning {
+    background-color: #4a3c1a;
+    color: #ffa500;
+    padding: 6px;
+    margin: 2px 0;
+    border-left: 3px solid #ffa500;
+}
+
+.log-viewer::-webkit-scrollbar {
+    width: 12px;
+}
+
+.log-viewer::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+.log-viewer::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 6px;
+}
+
+.log-viewer::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* Fim Visualizador de Logs */
+
+/* =============================================================================
+   PÁGINAS DE ERRO (400, 403, 404, 500)
+   ============================================================================= */
+
+.error-page-container {
+    min-height: 100vh;
+}
+
+.error-icon {
+    margin-bottom: 2rem;
+}
+
+.error-icon i {
+    font-size: 120px;
+}
+
+.error-icon .error-404 {
+    color: var(--main-orange);
+}
+
+.error-icon .error-403 {
+    color: #ffc107;
+}
+
+.error-icon .error-500 {
+    color: #dc3545;
+}
+
+.error-icon .error-400 {
+    color: var(--text-muted);
+}
+
+.error-title {
+    font-size: 6rem;
+    font-weight: bold;
+    color: var(--main-blue);
+}
+
+.error-subtitle {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.error-description {
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Fim Páginas de Erro */

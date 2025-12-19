@@ -12,8 +12,11 @@
 
 <div class="mb-3">
   <form method="get" class="row g-2 align-items-center filtros-atividades">
-    <div class="col-12 col-md-8">
+    <div class="col-12 col-md-3">
       {{ filter.form.semestre }}
+    </div>
+    <div class="col-12 col-md-3">
+      {{ filter.form.curso }}
     </div>
     <div class="col-12 col-md-4 filtros-buttons">
       <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>

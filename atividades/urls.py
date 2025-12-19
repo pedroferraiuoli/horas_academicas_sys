@@ -42,12 +42,15 @@ urlpatterns = [
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='auth/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='auth/password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'), name='password_reset_complete'),
+    
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('usuarios/<int:user_id>/ativar-desativar/', views.ativar_desativar_usuario, name='ativar_desativar_usuario'),
     path('associar-categorias-ao-curso/', views.AssociarCategoriasCursoView.as_view(), name='associar_categorias_ao_curso'),
     path('alunos-coordenador/', views.ListarAlunosCoordenadorView.as_view(), name='listar_alunos_coordenador'),
     path('atividades-coordenador/', views.ListarAtividadesCoordenadorView.as_view(), name='listar_atividades_coordenador'),
     path('aprovar-horas-atividade/<int:atividade_id>/', views.AprovarHorasAtividadeView.as_view(), name='aprovar_horas_atividade'),
+    #LOGS
+    path('visualizar-logs/', views.VisualizarLogsView.as_view(), name='visualizar_logs'),
 ]
 
 if settings.DEBUG:

@@ -2,8 +2,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from ..utils import paginate_queryset
 from ..models import Atividade, Aluno
 from ..forms import AtividadeForm
 from ..selectors import AlunoSelectors, AtividadeSelectors, UserSelectors
@@ -83,16 +82,7 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         filtro = AtividadesFilter(self.request.GET or None, queryset=atividades, request=self.request)
         atividades_filtradas = filtro.qs
 
-        paginator = Paginator(atividades_filtradas, 10)  # 10 atividades por página
-        page = self.request.GET.get('page')
-
-        try:
-            atividades_paginadas = paginator.page(page)
-        except PageNotAnInteger:
-            atividades_paginadas = paginator.page(1)
-        except EmptyPage:
-            atividades_paginadas = paginator.page(paginator.num_pages)
-
+        atividades_paginadas = paginate_queryset(qs=atividades_filtradas, page=self.request.GET.get('page'), per_page=10)
         context['atividades'] = atividades_paginadas
         context['filter'] = filtro
         return context
@@ -119,16 +109,7 @@ class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         filtro = AtividadesCoordenadorFilter(self.request.GET, queryset=atividades, show_status=show_status_filter)
         atividades_filtradas = filtro.qs
 
-         # Paginação
-        paginator = Paginator(atividades_filtradas, 20)  # 20 alunos por página
-        page = self.request.GET.get('page')
-        
-        try:
-            atividades_paginadas = paginator.page(page)
-        except PageNotAnInteger:
-            atividades_paginadas = paginator.page(1)
-        except EmptyPage:
-            atividades_paginadas = paginator.page(paginator.num_pages)
+        atividades_paginadas = paginate_queryset(qs=atividades_filtradas, page=self.request.GET.get('page'), per_page=10)
 
         context['aluno'] = aluno if aluno_id else None
         context['atividades'] = atividades_paginadas

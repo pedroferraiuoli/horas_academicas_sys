@@ -3,6 +3,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from ..utils import paginate_queryset
 
 from atividades.selectors import CategoriaSelectors
 
@@ -74,5 +75,10 @@ class ListarCategoriasView(GestorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categorias'] = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
+        
+        categorias = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
+
+        categorias_paginados = paginate_queryset(qs=categorias, page=self.request.GET.get('page'), per_page=15)
+    
+        context['categorias'] = categorias_paginados
         return context

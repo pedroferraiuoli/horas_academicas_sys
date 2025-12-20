@@ -3,6 +3,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from ..utils import paginate_queryset
 
 from ..models import Semestre
 from ..forms import SemestreForm
@@ -77,5 +78,9 @@ class ListarSemestresView(GestorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['semestres'] = Semestre.objects.all()
+        semestres = Semestre.objects.all()
+
+        semestres_paginados = paginate_queryset(qs=semestres, page=self.request.GET.get('page'), per_page=15)
+
+        context['semestres'] = semestres_paginados
         return context

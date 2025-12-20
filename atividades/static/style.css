@@ -1,4 +1,3 @@
-/* === PALETA PERSONALIZADA CORRIGIDA === */
 :root {
     --main-blue: #15224F;
     --main-green: #004F2D;
@@ -65,48 +64,7 @@ body {
     }
 }
 
-.login-text {
-    font-size: 2.5rem;
-    color: var(--main-blue);
-}
 
-.login-border {
-    width: 18px;
-    height: 97%;
-    background: var(--main-orange);
-    margin-top: 4px;
-    border-radius: 5px;
-}
-
-.div-login {
-    padding-left: 2rem;
-    align-self: center;
-}
-
-.login-card {
-    background-color: var(--background-card);
-    border-radius: 30px !important;
-    border: none;
-    margin-bottom: 1rem;
-}
-
-.form-control-login {
-    display: block;
-    width: 100%;
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.8;
-    color: var(--bs-body-color);
-    background-color: var(--bs-body-bg);
-    background-clip: padding-box;
-    border: var(--bs-border-width) solid var(--bs-border-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    border-radius: 15px;
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-}
 
 /* Header - azul escuro */
 .bg-primary-dark {
@@ -446,71 +404,425 @@ body {
     color: #6c757d;
 }
 
-/* Formulários */
+/* ========================================
+   FORMULÁRIO DE ATIVIDADE - DESIGN MODERNO
+   ======================================== */
+
+.form-atividade-container {
+    min-height: calc(100vh - 120px);
+    padding: 2rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.form-atividade-wrapper {
+    width: 100%;
+    max-width: 900px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* === HEADER === */
+.form-atividade-header {
+    background: linear-gradient(135deg, var(--main-blue) 0%, #0d1630 100%);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-header-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--main-orange);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.form-header-icon i {
+    font-size: 1.8rem;
+    color: white;
+}
+
+.form-header-content {
+    flex: 1;
+    z-index: 1;
+}
+
+.form-header-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.25rem 0;
+}
+
+.form-header-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* === FORM BODY === */
+.form-atividade-body {
+    padding: 2.5rem;
+}
+
+.modern-form {
+    width: 100%;
+}
+
+/* === GRID DE CAMPOS === */
+.form-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-field-full {
+    grid-column: 1 / -1;
+}
+
+/* === LABELS === */
+.form-field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--main-blue);
+    margin: 0;
+}
+
+.label-icon {
+    width: 24px;
+    height: 24px;
+    background: var(--bg-light);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.label-icon i {
+    font-size: 0.9rem;
+    color: var(--main-orange);
+}
+
+.label-text {
+    flex: 1;
+}
+
+.label-required {
+    color: var(--main-orange);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* === INPUTS === */
+.form-field-wrapper {
+    position: relative;
+}
+
+.form-field-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    color: var(--text-secondary);
+}
+
+.form-field-input:focus {
+    outline: none;
+    border-color: var(--main-orange);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(241, 111, 51, 0.1);
+}
+
+.form-field-select {
+    cursor: pointer;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2315224F' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+    appearance: none;
+}
+
+.form-field-file {
+    cursor: pointer;
+    padding: 0.75rem;
+}
+
+.form-field-file::-webkit-file-upload-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--main-blue);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-field-file::-webkit-file-upload-button:hover {
+    background: var(--main-orange);
+}
+
+.form-field-textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-field-date,
+.form-field-number {
+    cursor: pointer;
+}
+
+/* === HELP TEXT === */
+.form-field-help {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-light);
+    border-radius: 6px;
+}
+
+.form-field-help i {
+    font-size: 0.9rem;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+/* === ERROR === */
+.form-field-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #cc0000;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    background: #fff5f5;
+    border-left: 3px solid #cc0000;
+    border-radius: 6px;
+    animation: shake 0.5s;
+}
+
+.form-field-error i {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* === ACTIONS === */
+.form-atividade-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--bg-light);
+}
+
+.form-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.form-action-secondary {
+    background: white;
+    color: var(--main-blue);
+    border: 2px solid var(--main-blue);
+}
+
+.form-action-secondary:hover {
+    background: var(--main-blue);
+    color: white;
+    transform: translateX(-3px);
+}
+
+.form-action-primary {
+    background: linear-gradient(135deg, var(--main-orange) 0%, #d95a20 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(241, 111, 51, 0.3);
+}
+
+.form-action-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(241, 111, 51, 0.4);
+}
+
+.form-action-primary:active,
+.form-action-secondary:active {
+    transform: scale(0.98);
+}
+
+.form-action-btn i {
+    font-size: 1.2rem;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    .form-atividade-container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-atividade-wrapper {
+        border-radius: 16px;
+    }
+    
+    .form-atividade-header {
+        padding: 1.75rem 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .form-header-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .form-header-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .form-header-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-header-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .form-atividade-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    .form-fields-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-atividade-actions {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+    }
+    
+    .form-action-btn {
+        width: 100%;
+        padding: 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-atividade-container {
+        padding: 1rem 0.75rem;
+    }
+    
+    .form-atividade-wrapper {
+        border-radius: 12px;
+    }
+    
+    .form-atividade-header {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    .form-header-icon {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .form-header-icon i {
+        font-size: 1.3rem;
+    }
+    
+    .form-header-title {
+        font-size: 1.35rem;
+    }
+    
+    .form-header-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .form-atividade-body {
+        padding: 1.75rem 1.25rem;
+    }
+    
+    .form-fields-grid {
+        gap: 1.25rem;
+    }
+    
+    .form-field-label {
+        font-size: 0.9rem;
+    }
+    
+    .label-icon {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .label-icon i {
+        font-size: 0.85rem;
+    }
+    
+    .form-field-input {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-action-btn {
+        font-size: 0.95rem;
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .form-action-btn i {
+        font-size: 1.1rem;
+    }
+}
+
+/* === FIM FORMULÁRIO === */
+
+/* Formulários Antigos - Manter compatibilidade */
 .form-card {
     max-width: 800px;
 }
 
 .form-label {
     margin-top: 1rem !important;
-}
-
-/* Form Atividade */
-.form-atividade-card {
-    border-radius: 10px;
-    border: none;
-    background: var(--main-bg) !important;
-}
-
-.form-atividade-header {
-    background: var(--main-bg);
-    border-bottom: 0;
-    border-radius: 10px 10px 0 0;
-}
-
-.form-atividade-title {
-    font-weight: 600;
-    letter-spacing: 1px;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-}
-
-.form-atividade-body {
-    background: var(--main-bg);
-    border-radius: 0 0 10px 10px;
-}
-
-.form-atividade-label {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.form-atividade-btn {
-    font-weight: 500;
-    border-radius: 30px;
-    padding: 0.5rem 1.5rem;
-}
-
-.form-atividade-btn-save {
-    font-weight: 600;
-    border-radius: 30px;
-    padding: 0.5rem 2.5rem;
-}
-
-.form-atividade-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 3rem;
-    gap: 1rem;
-}
-
-.form-atividade-body .form-control {
-    background-color: var(--main-bg);
-}
-
-.form-atividade-body .form-select {
-    background-color: var(--main-bg);
 }
 
 /* Textos secundários */
@@ -1040,64 +1352,6 @@ header button:hover {
     }
 }
 
-/* Formulários Responsivos */
-@media (max-width: 768px) {
-    .form-card {
-        max-width: 100%;
-    }
-    
-    .form-atividade-title {
-        font-size: 1.2rem;
-        letter-spacing: 0.5px;
-    }
-    
-    .form-atividade-label {
-        font-size: 0.95rem;
-    }
-    
-    .form-atividade-btn,
-    .form-atividade-btn-save {
-        font-size: 0.9rem;
-        padding: 0.4rem 1.2rem;
-    }
-    
-    .form-atividade-actions {
-        flex-direction: column;
-        margin-top: 2rem;
-    }
-    
-    .form-atividade-actions .btn {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .form-atividade-title {
-        font-size: 1rem;
-        padding-top: 0.75rem;
-        padding-bottom: 0.75rem;
-    }
-    
-    .form-atividade-label {
-        font-size: 0.9rem;
-    }
-    
-    .form-atividade-btn,
-    .form-atividade-btn-save {
-        font-size: 0.85rem;
-        padding: 0.5rem 1rem;
-    }
-    
-    .form-atividade-btn .btn-text,
-    .form-atividade-btn-save .btn-text {
-        display: none;
-    }
-    
-    .form-atividade-actions {
-        margin-top: 1.5rem;
-    }
-}
-
 /* Login Responsivo */
 
 /* Classes do Login */
@@ -1118,145 +1372,429 @@ header button:hover {
     margin-top: 7rem;
 }
 
-.login-text {
-    margin-top: 7rem;
+/* ========================================
+   LOGIN PAGE - DESIGN MODERNO
+   ======================================== */
+
+.login-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
 }
 
-.login-text-bold {
-    font-weight: 600;
+/* === LADO ESQUERDO - BRANDING === */
+.login-left-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--main-blue) 0%, #0d1630 100%);
+    position: relative;
+    overflow: hidden;
 }
 
-.login-title {
-    font-size: 5rem;
-    font-weight: 600;
-    margin-top: 4rem;
+.login-brand-container {
+    display: flex;
+    gap: 2rem;
+    z-index: 1;
+    padding: 3rem;
 }
 
-.login-form-content {
-    padding: 0 1rem 0 1rem;
+.login-brand-accent {
+    width: 8px;
+    background: linear-gradient(to bottom, var(--main-orange), transparent);
+    border-radius: 4px;
+    flex-shrink: 0;
 }
 
-.login-label {
-    font-size: 1.5rem;
-    font-weight: 500;
+.login-brand-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    color: white;
 }
 
-.login-submit-btn {
-    font-size: 1.5rem;
-    font-weight: 500;
-    gap: 1rem;
+.login-brand-logo {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    filter: brightness(1.1);
+    animation: fadeInDown 0.8s ease-out;
 }
 
-.login-links {
-    border-bottom: 1px solid white;
-    padding-bottom: 1rem;
+.login-brand-text {
+    animation: fadeInLeft 0.8s ease-out 0.2s both;
 }
 
-.login-bottom-logo {
-    margin-top: 4rem;
-    width: 30%;
-    margin-left: auto;
-    margin-right: auto;
+.login-brand-title {
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    line-height: 1.2;
 }
 
-.login-bottom-logo img {
+.login-brand-subtitle {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--main-orange);
+    margin: 0;
+    line-height: 1.1;
+    text-shadow: 0 2px 10px rgba(241, 111, 51, 0.3);
+}
+
+.login-institution-logo {
+    width: 180px;
+    height: auto;
+    margin-top: 2rem;
+    filter: brightness(1.1);
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+/* === LADO DIREITO - FORMULÁRIO === */
+.login-right-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    animation: fadeInRight 0.8s ease-out;
+}
+
+.login-form-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.login-form-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--main-blue);
+    margin: 0 0 0.5rem 0;
+}
+
+.login-form-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* === FORMULÁRIO === */
+.login-form {
     width: 100%;
 }
 
-/* Media Queries */
+.login-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fff5f5;
+    border-left: 4px solid #ff4444;
+    color: #cc0000;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    animation: shake 0.5s;
+}
+
+.login-alert i {
+    font-size: 1.2rem;
+}
+
+.login-form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.login-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.login-form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--main-blue);
+    margin: 0;
+}
+
+.login-form-label i {
+    font-size: 1.1rem;
+    color: var(--main-orange);
+}
+
+.login-form-input {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.login-form-input:focus {
+    outline: none;
+    border-color: var(--main-orange);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(241, 111, 51, 0.1);
+}
+
+.login-field-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #cc0000;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.login-field-error i {
+    font-size: 0.9rem;
+}
+
+.login-submit-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--main-orange) 0%, #d95a20 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 15px rgba(241, 111, 51, 0.3);
+}
+
+.login-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(241, 111, 51, 0.4);
+}
+
+.login-submit-btn:active {
+    transform: translateY(0);
+}
+
+.login-submit-btn i {
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+.login-submit-btn:hover i {
+    transform: translateX(4px);
+}
+
+.login-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.login-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--main-blue);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.login-link:hover {
+    color: var(--main-orange);
+    gap: 0.6rem;
+}
+
+.login-link i {
+    font-size: 1rem;
+}
+
+.login-divider {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.login-footer-logo {
+    margin-top: 2.5rem;
+    text-align: center;
+    opacity: 0.4;
+}
+
+.login-footer-logo img {
+    width: 120px;
+    height: auto;
+}
+
+/* === ANIMAÇÕES === */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* === RESPONSIVIDADE === */
 @media (max-width: 992px) {
-    .login-card {
-        max-width: 90%;
+    .login-left-side {
+        display: none;
     }
     
-    .login-left-side {
-        max-width: 100% !important;
+    .login-right-side {
+        flex: 1;
+    }
+    
+    .login-form-wrapper {
+        max-width: 500px;
     }
 }
 
 @media (max-width: 768px) {
-    .login-wrapper {
-        flex-direction: column !important;
+    .login-right-side {
+        padding: 1.5rem;
     }
     
-    .login-left-side {
-        max-width: 100% !important;
+    .login-form-wrapper {
+        padding: 2.5rem 2rem;
     }
     
-    .login-border {
-        display: none;
+    .login-form-title {
+        font-size: 2rem;
     }
     
-    .div-login {
-        padding-left: 1rem;
-        text-align: center;
-    }
-    
-    .login-logo-top {
-        width: 60% !important;
-    }
-    
-    .login-logo-bottom {
-        width: 40% !important;
-        margin-top: 3rem !important;
-    }
-    
-    .login-text {
-        font-size: 1.8rem;
-        margin-top: 3rem !important;
-    }
-    
-    .login-card {
-        width: 100% !important;
-        max-width: 500px;
-        margin-top: 2rem;
-        align-self: center;
-    }
-    
-    .login-title {
-        font-size: 3rem !important;
-        margin-top: 2rem !important;
-    }
-    
-    .login-bottom-logo {
-        width: 40%;
-        margin-top: 2rem;
-    }
-    
-}
-
-@media (max-width: 480px) {
-    .login-logo-top {
-        width: 70% !important;
-    }
-    
-    .login-logo-bottom {
-        width: 25% !important;
-        margin-top: 2rem !important;
-    }
-    
-    .login-text {
-        font-size: 1.4rem;
-        margin-top: 2rem !important;
-    }
-    
-    .login-title {
-        font-size: 2.5rem !important;
-    }
-    
-    .login-label {
-        font-size: 1.2rem !important;
+    .login-form-subtitle {
+        font-size: 0.9rem;
     }
     
     .login-submit-btn {
-        font-size: 1.2rem !important;
-    }
-    
-    .login-bottom-logo {
-        width: 50%;
-        margin-top: 1.5rem;
+        font-size: 1rem;
+        padding: 0.875rem 1.5rem;
     }
 }
+
+@media (max-width: 480px) {
+    .login-wrapper {
+        background: white;
+    }
+    
+    .login-right-side {
+        padding: 1rem;
+    }
+    
+    .login-form-wrapper {
+        padding: 2rem 1.5rem;
+        box-shadow: none;
+    }
+    
+    .login-form-header {
+        margin-bottom: 2rem;
+    }
+    
+    .login-form-title {
+        font-size: 1.75rem;
+    }
+    
+    .login-form-body {
+        gap: 1.25rem;
+    }
+    
+    .login-form-input {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .login-submit-btn {
+        font-size: 0.95rem;
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .login-links {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .login-divider {
+        display: none;
+    }
+    
+    .login-footer-logo {
+        margin-top: 2rem;
+    }
+    
+    .login-footer-logo img {
+        width: 100px;
+    }
+}
+
+/* === FIM LOGIN === */
 
 /* Dashboard Responsivo */
 
@@ -1976,3 +2514,194 @@ header button:hover {
 }
 
 /* Fim Páginas de Erro */
+
+/* ============================================
+   Paginação
+   ============================================ */
+.pagination {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pagination .page-link {
+    color: var(--main-blue);
+    border-color: #dee2e6;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--bg-light);
+    border-color: var(--main-blue);
+    color: var(--main-blue);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--main-blue);
+    border-color: var(--main-blue);
+    color: white;
+    font-weight: 600;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--text-muted);
+    background-color: white;
+    border-color: #dee2e6;
+}
+
+/* Responsivo */
+@media (max-width: 576px) {
+    .pagination {
+        font-size: 0.875rem;
+    }
+    
+    .pagination .page-link {
+        padding: 0.375rem 0.5rem;
+    }
+}
+
+/* Fim Paginação */
+
+/* ============================================
+   Dashboard Coord e Gestor- Estilos Gerais
+   ============================================ */
+
+/* Títulos do Dashboard */
+.dashboard-title {
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    color: var(--main-blue);
+    margin-bottom: 1.5rem;
+}
+
+/* Cards Estatísticos */
+.dashboard-card {
+    border-radius: 16px;
+    border: none;
+    transition: all 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(21, 34, 79, 0.15) !important;
+}
+
+.dashboard-card .card-body {
+    padding: 2rem 1.5rem;
+}
+
+/* Stats Numbers */
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--main-blue) 0%, #2a3d7a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--main-orange);
+    line-height: 1.3;
+}
+
+/* Card com Link */
+.dashboard-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.dashboard-card-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Tabela de Semestres */
+.dashboard-table-card {
+    border-radius: 16px;
+    border: none;
+    overflow: hidden;
+}
+
+.dashboard-table-card .card-header {
+    background: linear-gradient(135deg, var(--bg-light) 0%, #d8e7f5 100%);
+    border-bottom: 2px solid var(--main-blue);
+    padding: 1.25rem 1.5rem;
+}
+
+.dashboard-table-card .card-body {
+    padding: 1.5rem;
+}
+
+.dashboard-table-card .table {
+    margin-bottom: 0;
+}
+
+.dashboard-table-card .table thead th {
+    border-bottom: 2px solid var(--main-blue);
+    color: var(--main-blue);
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.dashboard-table-card .table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.dashboard-table-card .table tbody tr:hover {
+    background-color: var(--bg-light);
+}
+
+.dashboard-table-card .table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* Ações Rápidas */
+.dashboard-actions-title {
+    color: var(--main-blue);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+}
+
+/* Badge Info */
+.badge.bg-info {
+    background-color: var(--main-blue) !important;
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .stat-number {
+        font-size: 2.5rem;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+    }
+    
+    .dashboard-card .card-body {
+        padding: 1.5rem 1rem;
+    }
+    
+    .dashboard-actions-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* Fim Dashboard */

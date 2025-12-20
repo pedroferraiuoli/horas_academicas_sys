@@ -3,21 +3,20 @@
 
 {% block content %}
 <div class="container">
-<h2 class="main-blue">Categorias de Atividade</h2>
+<h2 class="main-blue">Categorias do Curso</h2>
 <div class="mb-3">
-<a href="{% url 'criar_categoria' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Categoria</a>
+<a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Categoria</a>
 <a href="javascript:history.back()" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
 </div>
 
 
 <div class="mb-3">
   <form method="get" class="row g-2 align-items-center filtros-atividades">
-    <div class="col-12 col-md-3">
-      {{ filter.form.semestre }}
-    </div>
-    <div class="col-12 col-md-3">
-      {{ filter.form.curso }}
-    </div>
+    {% for field in filter.form %}
+      <div class="col-12 col-md-3">
+        {{ field }}
+      </div>
+    {% endfor %}
     <div class="col-12 col-md-4 filtros-buttons">
       <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
     </div>
@@ -81,6 +80,8 @@
   </div>
   {% endfor %}
 </div>
+
+{% include 'pagination.html' with qs=categorias %}
 </div>
 
 <script src="{% static 'js/filtros.js' %}"></script>

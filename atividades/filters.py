@@ -1,6 +1,6 @@
 import django_filters
 
-from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors
+from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors, UserSelectors
 from .models import Atividade, Curso, CategoriaCurso, Semestre, Aluno
 from django import forms
 from django.db.models import Exists, OuterRef, Q
@@ -14,10 +14,26 @@ class CategoriaCursoFilter(django_filters.FilterSet):
     curso = django_filters.ModelChoiceFilter(queryset=Curso.objects.all(), label='Curso', empty_label='Todos', widget=forms.Select(attrs={
             'class': 'form-select',
         }))
+    
+    especifica = django_filters.BooleanFilter(
+        field_name='categoria__especifica',
+        label='Categorias Específicas',
+        widget=forms.Select(choices=(
+            ('', 'Todas'),
+            ('true', 'Apenas Específicas'),
+            ('false', 'Apenas Gerais'),
+        ), attrs={'class': 'form-select'})
+    )
 
     class Meta:
         model = CategoriaCurso
-        fields = ['semestre', 'curso']
+        fields = ['semestre', 'curso', 'especifica']
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+        if user and UserSelectors.is_user_coordenador(user):
+            self.filters.pop('curso')
 
 class AlunosFilter(django_filters.FilterSet):
     semestre_ingresso = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={
@@ -125,5 +141,41 @@ class AtividadesFilter(django_filters.FilterSet):
             return queryset.filter(horas_aprovadas__isnull=True)
 
         return queryset
+    
+class AtividadesCoordenadorFilter(django_filters.FilterSet):
 
+    status = django_filters.ChoiceFilter(
+        choices=(
+            ('1', 'Aprovadas'),
+            ('0', 'Aguardando'),
+        ),
+        label='Status',
+        method='filter_atividades_status',
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Todas"
+    )
 
+    nome_aluno = django_filters.CharFilter(
+        method='filtrar_nome_aluno',
+        label='Nome do Aluno',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por nome do aluno...'}
+        )
+    )
+
+    class Meta:
+        model = Atividade
+        fields = ['status', 'nome_aluno']
+
+    def filtrar_nome_aluno(self, queryset, name, value):
+        return queryset.filter(
+            Q(aluno__user__first_name__icontains=value) |
+            Q(aluno__user__last_name__icontains=value) |
+            Q(aluno__user__username__icontains=value)
+        )
+    
+    def __init__ (self, *args, show_status=True, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not show_status:
+            self.filters.pop('status')

@@ -2,6 +2,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from ..forms import UserRegistrationForm, AlterarEmailForm, AdminUserForm
 from ..selectors import AlunoSelectors, UserSelectors
@@ -65,6 +66,14 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         gestores = UserSelectors.get_gestor_users()
         coordenadores = UserSelectors.get_coordenador_users()
+        paginator = Paginator(coordenadores, 10)  # 15 coordenadores por página
+        page = self.request.GET.get('page')
+        try:
+            coordenadores = paginator.page(page)
+        except PageNotAnInteger:
+            coordenadores = paginator.page(1)
+        except EmptyPage:
+            coordenadores = paginator.page(paginator.num_pages)
         context['gestores'] = gestores
         context['coordenadores'] = coordenadores
         return context
@@ -84,8 +93,19 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         filtro = AlunosFilter(self.request.GET, queryset=alunos_base)
         alunos_filtrados = filtro.qs
 
+        # Paginação
+        paginator = Paginator(alunos_filtrados, 20)  # 20 alunos por página
+        page = self.request.GET.get('page')
+        
+        try:
+            alunos_paginados = paginator.page(page)
+        except PageNotAnInteger:
+            alunos_paginados = paginator.page(1)
+        except EmptyPage:
+            alunos_paginados = paginator.page(paginator.num_pages)
+
         context['curso'] = curso
-        context['alunos'] = alunos_filtrados
+        context['alunos'] = alunos_paginados
         context['filter'] = filtro
         return context
 

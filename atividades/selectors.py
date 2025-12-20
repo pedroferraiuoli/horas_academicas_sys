@@ -345,7 +345,7 @@ class CursoSelectors:
         semestre_atual = SemestreSelectors.get_semestre_atual()
 
         categorias_prefetch = Prefetch(
-            'categoria_cursos',
+            'categorias',
             queryset=(
                 CategoriaCurso.objects
                 .filter(semestre=semestre_atual)

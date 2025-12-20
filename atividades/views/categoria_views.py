@@ -3,6 +3,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from atividades.selectors import CategoriaSelectors
 
@@ -74,5 +75,19 @@ class ListarCategoriasView(GestorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categorias'] = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
+        
+        categorias = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
+
+         # Paginação
+        paginator = Paginator(categorias, 15)  # 15 categorias por página
+        page = self.request.GET.get('page')
+        
+        try:
+            categorias_paginados = paginator.page(page)
+        except PageNotAnInteger:
+            categorias_paginados = paginator.page(1)
+        except EmptyPage:
+            categorias_paginados = paginator.page(paginator.num_pages)
+    
+        context['categorias'] = categorias_paginados
         return context

@@ -3,6 +3,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from ..models import Semestre
 from ..forms import SemestreForm
@@ -77,5 +78,15 @@ class ListarSemestresView(GestorRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['semestres'] = Semestre.objects.all()
+        semestres = Semestre.objects.all()
+
+        paginator = Paginator(semestres, 15)  # 15 semestres por página
+        page = self.request.GET.get('page')
+        try:
+            semestres_paginados = paginator.page(page)
+        except PageNotAnInteger:
+            semestres_paginados = paginator.page(1)
+        except EmptyPage:
+            semestres_paginados = paginator.page(paginator.num_pages)
+        context['semestres'] = semestres_paginados
         return context

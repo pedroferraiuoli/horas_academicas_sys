@@ -3,6 +3,7 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from ..models import Curso, CategoriaCurso, Semestre
 from ..forms import CategoriaCursoForm, CategoriaCursoDiretaForm
 from ..selectors import CategoriaCursoSelectors, UserSelectors
@@ -116,6 +117,16 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
 
         filtro = CategoriaCursoFilter(self.request.GET or None, queryset=base_qs, user=self.request.user)
         categorias = filtro.qs
+
+        paginator = Paginator(categorias, 15)  # 15 categorias por página
+        page = self.request.GET.get('page')
+
+        try:
+            categorias = paginator.page(page)
+        except PageNotAnInteger:
+            categorias = paginator.page(1)
+        except EmptyPage:
+            categorias = paginator.page(paginator.num_pages)
 
         context['categorias'] = categorias
         context['filter'] = filtro

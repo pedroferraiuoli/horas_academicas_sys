@@ -80,6 +80,8 @@
   </div>
   {% endfor %}
 </div>
+
+{% include 'pagination.html' with qs=categorias %}
 </div>
 
 <script src="{% static 'js/filtros.js' %}"></script>

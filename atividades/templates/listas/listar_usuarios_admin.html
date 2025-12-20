@@ -149,6 +149,7 @@
     </div>
     {% endfor %}
   </div>
+{% include 'pagination.html' with qs=coordenadores %}
 </div>
 
 <script src="{% static 'js/listar_atividades.js' %}"></script>

@@ -66,6 +66,14 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         gestores = UserSelectors.get_gestor_users()
         coordenadores = UserSelectors.get_coordenador_users()
+        paginator = Paginator(coordenadores, 10)  # 15 coordenadores por página
+        page = self.request.GET.get('page')
+        try:
+            coordenadores = paginator.page(page)
+        except PageNotAnInteger:
+            coordenadores = paginator.page(1)
+        except EmptyPage:
+            coordenadores = paginator.page(paginator.num_pages)
         context['gestores'] = gestores
         context['coordenadores'] = coordenadores
         return context

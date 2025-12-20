@@ -158,56 +158,115 @@ class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user
-
         self.coordenador = UserSelectors.get_coordenador_by_user(user)
-        self.cursos = Curso.objects.all() if UserSelectors.is_user_gestor(user) else None
-        self.curso = self.coordenador.curso if self.coordenador else None
-        self.semestres = Semestre.objects.all()
-
+        self.is_gestor = UserSelectors.is_user_gestor(user)
+        
+        # Gestor pode escolher qualquer curso; Coordenador tem curso fixo
+        if self.is_gestor:
+            self.cursos = Curso.objects.all().order_by('nome')
+            self.curso_fixo = None
+        else:
+            self.cursos = None
+            self.curso_fixo = self.coordenador.curso if self.coordenador else None
+        
+        self.semestres = Semestre.objects.all().order_by('-data_inicio')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, self.get_context())
+        # Pegar curso e semestre da query string (para atualização dinâmica)
+        curso_id = request.GET.get('curso_id')
+        semestre_id = request.GET.get('semestre_id')
+        
+        curso_selecionado = None
+        semestre_selecionado = None
+        
+        if curso_id:
+            try:
+                curso_selecionado = Curso.objects.get(id=curso_id)
+                # Se é coordenador, validar que é o curso dele
+                if self.coordenador and curso_selecionado != self.coordenador.curso:
+                    curso_selecionado = self.coordenador.curso
+            except Curso.DoesNotExist:
+                pass
+        elif self.curso_fixo:
+            curso_selecionado = self.curso_fixo
+            
+        if semestre_id:
+            try:
+                semestre_selecionado = Semestre.objects.get(id=semestre_id)
+            except Semestre.DoesNotExist:
+                pass
+        
+        return render(request, self.template_name, self.get_context(
+            curso=curso_selecionado,
+            semestre=semestre_selecionado
+        ))
 
     def post(self, request):
-        if not self.curso:
-            self.curso = get_object_or_404(Curso, id=request.POST.get('curso_id'))
+        # Determinar o curso
+        if self.curso_fixo:
+            curso = self.curso_fixo
+        else:
+            curso_id = request.POST.get('curso_id')
+            if not curso_id:
+                messages.error(request, 'Selecione um curso.')
+                return render(request, self.template_name, self.get_context())
+            try:
+                curso = Curso.objects.get(id=curso_id)
+            except Curso.DoesNotExist:
+                messages.error(request, 'Curso inválido.')
+                return render(request, self.template_name, self.get_context())
+        
+        # Determinar o semestre
+        semestre_id = request.POST.get('semestre_id')
+        if not semestre_id:
+            messages.error(request, 'Selecione um semestre.')
+            return render(request, self.template_name, self.get_context(curso=curso))
+        
+        try:
+            semestre = Semestre.objects.get(id=semestre_id)
+        except Semestre.DoesNotExist:
+            messages.error(request, 'Semestre inválido.')
+            return render(request, self.template_name, self.get_context(curso=curso))
 
-        semestre = get_object_or_404(Semestre, id=request.POST.get('semestre_id'))
-
+        # Tentar associar as categorias
         try:
             adicionadas = CategoriaCursoService.associar_categorias(
-                curso=self.curso,
+                curso=curso,
                 semestre=semestre,
                 dados_post=request.POST
             )
+            
+            business_logger.warning(
+                f"CURSO-CATEGORIAS ASSOCIADAS: {adicionadas} categoria(s) ao curso {curso.nome} "
+                f"para o semestre {semestre.nome} | User: {request.user.username}"
+            )
+            messages.success(request, f'{adicionadas} categoria(s) associada(s) ao curso com sucesso!')
+            return redirect('listar_categorias_curso')
+            
         except ValueError as e:
             messages.warning(request, str(e))
             return render(request, self.template_name, self.get_context(
-                curso=self.curso,
+                curso=curso,
                 semestre=semestre
             ))
-
-        business_logger.warning(
-            f"CURSO-CATEGORIAS ASSOCIADAS: {adicionadas} categoria(s) ao curso {self.curso.nome} "
-            f"para o semestre {semestre.nome} | User: {request.user.username}"
-        )
-        messages.success(request, f'{adicionadas} categoria(s) associada(s) ao curso!')
-        return redirect('dashboard')
     
     def get_context(self, curso=None, semestre=None):
-        curso = curso or self.curso
-
         categorias = []
+        
+        # Buscar categorias disponíveis apenas se curso E semestre estiverem selecionados
         if curso and semestre:
-            categorias = CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(semestre=semestre, curso=curso)
+            categorias = CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
+                curso=curso, 
+                semestre=semestre
+            )
 
         return {
             'categorias': categorias,
             'curso_nome': curso.nome if curso else '',
             'curso_selecionado': curso.id if curso else '',
-            'curso_required': self.cursos is not None,
+            'semestre_selecionado': semestre.id if semestre else '',
             'cursos': self.cursos,
             'semestres': self.semestres,
-            'semestre_selecionado': semestre.id if semestre else '',
+            'is_gestor': self.is_gestor,
         }

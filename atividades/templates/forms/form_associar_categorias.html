@@ -1,64 +1,137 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Associar Categorias ao Curso{% endblock %}
 {% load widget_tweaks %}
 {% block content %}
-<div class="card shadow-sm mx-auto mt-5" style="max-width: 700px;">
-  <div class="card-header bg-white border-bottom-0">
-    <h4 class="mb-0 text-main-green"><i class="bi bi-check2-square"></i> Associar Categorias ao Curso: {{ curso_nome }}</h4>
-  </div>
-  <div class="card-body bg-white">
-    <form method="post">
-      {% csrf_token %}
-        <div class="mb-3">
+
+<div class="form-atividade-container">
+  <div class="form-atividade-wrapper">
+    
+    <!-- Header -->
+    <div class="form-atividade-header">
+      <div class="form-header-icon">
+        <i class="bi bi-link-45deg"></i>
+      </div>
+      <div class="form-header-content">
+        <h3 class="form-header-title">Associar Categorias ao Curso</h3>
+        <p class="form-header-subtitle">{% if curso_nome %}{{ curso_nome }}{% else %}Selecione um curso e semestre para iniciar{% endif %}</p>
+      </div>
+    </div>
+
+    <!-- Form Body -->
+    <div class="form-atividade-body">
+      <form method="get" id="selectionForm" autocomplete="off" class="modern-form">
+        
+        <div class="form-fields-grid">
           
           {% if cursos %}
-          <label for="curso_id" class="form-label">Selecione o curso:</label>
-          <select name="curso_id" id="curso_id" class="form-select">
-              <option value="" disabled selected>-- Escolha --</option>
-              {% for c in cursos %}
-                <option value="{{ c.id }}" {% if c.id|stringformat:'s' == curso_selecionado|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
+          <div class="form-field form-field-full">
+            <label for="curso_id" class="form-field-label">
+              <span class="label-icon"><i class="bi bi-award"></i></span>
+              <span class="label-text">Curso</span>
+              <span class="label-required">*</span>
+            </label>
+            <div class="form-field-wrapper">
+              <select name="curso_id" id="curso_id" class="form-field-input form-field-select" onchange="this.form.submit()">
+                <option value="" {% if not curso_selecionado %}selected{% endif %}>-- Escolha o curso --</option>
+                {% for c in cursos %}
+                  <option value="{{ c.id }}" {% if c.id|stringformat:'s' == curso_selecionado|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
                 {% endfor %}
-            </select>
-            {% endif %}
+              </select>
+            </div>
+          </div>
+          {% endif %}
 
-            <label for="semestre_id" class="form-label">Selecione o semestre:</label>
-            <select name="semestre_id" id="semestre_id" class="form-select" onchange="this.form.submit()">
-              <option value="" disabled selected>-- Escolha --</option>
-              {% for s in semestres %}
-                <option value="{{ s.id }}" {% if s.id|stringformat:'s' == semestre_selecionado|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
-              {% endfor %}
-            </select>
-            
+          <div class="form-field form-field-full">
+            <label for="semestre_id" class="form-field-label">
+              <span class="label-icon"><i class="bi bi-calendar3"></i></span>
+              <span class="label-text">Semestre</span>
+              <span class="label-required">*</span>
+            </label>
+            <div class="form-field-wrapper">
+              <select name="semestre_id" id="semestre_id" class="form-field-input form-field-select" onchange="this.form.submit()">
+                <option value="" {% if not semestre_selecionado %}selected{% endif %}>-- Escolha o semestre --</option>
+                {% for s in semestres %}
+                  <option value="{{ s.id }}" {% if s.id|stringformat:'s' == semestre_selecionado|stringformat:'s' %}selected{% endif %}>{{ s.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          
         </div>
+      </form>
+
       {% if categorias %}
-          <table class="table table-bordered align-middle">
-            <thead>
-              <tr>
-                <th>Selecionar</th>
-                <th>Categoria</th>
-                <th>Limite de horas</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for categoria in categorias %}
-              <tr>
-                <td>
-                  <input type="checkbox" name="cat_{{ categoria.id }}" id="id_cat_{{ categoria.id }}">
-                </td>
-                <td>{{ categoria.nome }}</td>
-                <td>
-                  <input type="number" step="0.01" min="0" name="horas_{{ categoria.id }}" id="id_horas_{{ categoria.id }}" class="form-control" style="max-width:120px;">
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Associar Selecionadas</button>
-        {% elif curso_selecionado and semestre_selecionado %}
-          <div class="alert alert-warning text-center mt-3 mb-0">Nenhuma categoria disponível para associação neste curso.</div>
+      <form method="post" autocomplete="off" id="associationForm">
+        {% csrf_token %}
+        
+        <!-- Campos hidden para manter curso e semestre no POST -->
+        {% if curso_selecionado %}
+          <input type="hidden" name="curso_id" value="{{ curso_selecionado }}">
+        {% endif %}
+        {% if semestre_selecionado %}
+          <input type="hidden" name="semestre_id" value="{{ semestre_selecionado }}">
+        {% endif %}
+        
+        <div class="mt-4">
+          <h5 class="main-blue mb-3"><i class="bi bi-tags"></i> Categorias Disponíveis ({{ categorias|length }})</h5>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th style="width: 80px;" class="text-center">
+                    <input type="checkbox" id="selectAll" class="form-check-input" title="Selecionar todas">
+                  </th>
+                  <th>Categoria</th>
+                  <th style="width: 200px;">Limite de horas <span class="text-danger">*</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for categoria in categorias %}
+                <tr>
+                  <td class="text-center">
+                    <input type="checkbox" name="cat_{{ categoria.id }}" id="id_cat_{{ categoria.id }}" class="form-check-input categoria-checkbox">
+                  </td>
+                  <td><strong>{{ categoria.nome }}</strong></td>
+                  <td>
+                    <input type="number" step="1" min="1" name="horas_{{ categoria.id }}" id="id_horas_{{ categoria.id }}" class="form-control form-control-sm" placeholder="Ex: 40">
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-atividade-actions">
+          <a href="{% url 'dashboard' %}" class="form-action-btn form-action-secondary">
+            <i class="bi bi-arrow-left"></i>
+            <span>Voltar</span>
+          </a>
+          <button type="submit" class="form-action-btn form-action-primary">
+            <i class="bi bi-check-circle"></i>
+            <span>Associar Selecionadas</span>
+          </button>
+        </div>
+      </form>
+      
+      {% elif curso_selecionado and semestre_selecionado %}
+          <div class="alert alert-warning text-center mt-4">
+            <i class="bi bi-exclamation-triangle"></i>
+            Nenhuma categoria disponível para associação neste curso e semestre.
+          </div>
+          <div class="form-atividade-actions">
+            <a href="{% url 'dashboard' %}" class="form-action-btn form-action-secondary">
+              <i class="bi bi-arrow-left"></i>
+              <span>Voltar</span>
+            </a>
+          </div>
         {% endif %}
 
-    </form>
+    </div>
   </div>
 </div>
+
+<script src="{% static 'js/associar_categorias.js' %}"></script>
 {% endblock %}

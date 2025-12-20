@@ -154,34 +154,67 @@ class CategoriaCursoService:
    
    @staticmethod
    def associar_categorias(*, curso, semestre, dados_post):
-        categorias_disponiveis = CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
-            curso,
-            semestre
-        )
-
-        adicionadas = 0
-
-        for categoria in categorias_disponiveis:
-            if dados_post.get(f'cat_{categoria.id}'):
-                limite = dados_post.get(f'horas_{categoria.id}') or 0
+        """
+        Associa categorias selecionadas ao curso no semestre específico.
+        Processa apenas as categorias marcadas no formulário.
+        """
+        categorias_selecionadas = []
+        
+        # Extrair apenas as categorias marcadas do POST
+        for key, value in dados_post.items():
+            if key.startswith('cat_') and value == 'on':
                 try:
-                    limite = int(limite)
-                except ValueError:
-                    limite = 0
-
-                if limite > 0:
-                    CategoriaCurso.objects.create(
-                        curso=curso,
-                        categoria=categoria,
-                        limite_horas=limite,
-                        semestre=semestre
-                    )
-                    adicionadas += 1
-
-        if adicionadas == 0:
-            raise ValueError('Nenhuma categoria válida foi selecionada.')
-
-        return adicionadas
+                    categoria_id = int(key.replace('cat_', ''))
+                    limite_key = f'horas_{categoria_id}'
+                    limite = dados_post.get(limite_key, '0')
+                    
+                    # Validar limite de horas
+                    try:
+                        limite = int(limite)
+                    except ValueError:
+                        continue
+                    
+                    if limite <= 0:
+                        continue
+                    
+                    categorias_selecionadas.append({
+                        'categoria_id': categoria_id,
+                        'limite_horas': limite
+                    })
+                except (ValueError, AttributeError):
+                    continue
+        
+        if not categorias_selecionadas:
+            raise ValueError('Nenhuma categoria válida foi selecionada. Marque as categorias e informe um limite de horas maior que zero.')
+        
+        # Verificar se as categorias selecionadas estão disponíveis para este curso/semestre
+        categorias_disponiveis_ids = set(
+            CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
+                curso=curso,
+                semestre=semestre
+            ).values_list('id', flat=True)
+        )
+        
+        # Criar as associações em batch
+        to_create = []
+        for item in categorias_selecionadas:
+            if item['categoria_id'] not in categorias_disponiveis_ids:
+                continue  # Ignora categorias já associadas ou inválidas
+            
+            to_create.append(CategoriaCurso(
+                curso=curso,
+                categoria_id=item['categoria_id'],
+                limite_horas=item['limite_horas'],
+                semestre=semestre
+            ))
+        
+        if not to_create:
+            raise ValueError('As categorias selecionadas já estão associadas a este curso.')
+        
+        # Criar todas de uma vez (bulk_create é mais eficiente)
+        CategoriaCurso.objects.bulk_create(to_create)
+        
+        return len(to_create)
    
 class AlunoService:
 

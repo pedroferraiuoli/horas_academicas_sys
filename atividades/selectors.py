@@ -165,9 +165,26 @@ class CategoriaCursoSelectors:
     
     @staticmethod
     def get_categorias_curso_disponiveis_para_associar(curso, semestre):
-        """Retorna categorias que ainda não estão associadas ao curso no semestre"""
+        """Retorna categorias que ainda não estão associadas ao curso no semestre
+        
+        Regras:
+        - Categorias gerais (especifica=False): disponíveis para todos os cursos
+        - Categorias específicas (especifica=True): apenas se já foram associadas ao mesmo curso em outro semestre
+        """
+        # IDs já associados neste curso+semestre
         CategoriaCurso_qs = CategoriaCurso.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True)
-        disponiveis = Categoria.objects.exclude(id__in=CategoriaCurso_qs)
+        
+        # IDs de categorias específicas já usadas neste curso (em qualquer semestre)
+        categorias_especificas_do_curso = CategoriaCurso.objects.filter(
+            curso=curso,
+            categoria__especifica=True
+        ).values_list('categoria_id', flat=True).distinct()
+        
+        # Disponíveis = (gerais OU específicas já usadas neste curso) E não associadas neste semestre
+        disponiveis = Categoria.objects.filter(
+            Q(especifica=False) | Q(id__in=categorias_especificas_do_curso)
+        ).exclude(id__in=CategoriaCurso_qs)
+        
         return disponiveis.order_by('nome')
     
     @staticmethod

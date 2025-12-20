@@ -1,4 +1,4 @@
-from atividades.selectors import CategoriaCursoSelectors
+from atividades.selectors import CategoriaCursoSelectors, UserSelectors
 from .models import Aluno, Atividade, Categoria, Curso, Coordenador, CategoriaCurso, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
@@ -135,10 +135,17 @@ class AtividadeService:
 class CategoriaCursoService:
    
    @staticmethod
-   def create_categoria_curso(*, form, coordenador: Coordenador):
-        categoria = Categoria.objects.create(nome=form.cleaned_data['nome'])
+   def create_categoria_curso_especifica(*, form, user: User):
+        curso = form.cleaned_data['curso']
+
+        if UserSelectors.is_user_coordenador(user):
+            coordenador = UserSelectors.get_coordenador_by_user(user)
+            if coordenador.curso != curso:
+                raise ValueError('Coordenador só pode criar categorias para seu próprio curso.')
+            
+        categoria = Categoria.objects.create(nome=form.cleaned_data['nome'], especifica=True)
         curso_categoria = CategoriaCurso.objects.create(
-            curso=coordenador.curso,
+            curso=form.cleaned_data['curso'],
             categoria=categoria,
             limite_horas=form.cleaned_data['limite_horas'],
             semestre=form.cleaned_data['semestre']

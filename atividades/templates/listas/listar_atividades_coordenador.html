@@ -10,6 +10,20 @@
     <a href="javascript:history.back()" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
   </div>
 
+  <div class="mb-3">
+  <form method="get" class="row g-2 align-items-center filtros-atividades">
+    {% for field in filter.form %}
+    <div class="col-12 col-md-3">
+      {{ field }}
+    </div>
+    {% endfor %}
+
+    <div class="col-12 col-md-3 filtros-buttons">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
+    </div>
+  </form>
+</div>
+
   <!-- Lista Responsiva de Atividades -->
   <div class="atividades-list">
     {% for atividade in atividades %}
@@ -72,9 +86,11 @@
                 {% if atividade.documento %}
                   <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i></a>
                 {% endif %}
+                {% if atividade.status != 'Limite Atingido' %}
                 <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
                   <i class="bi bi-check2-circle"></i>
                 </button>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -169,7 +185,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="aprovarModalLabel{{ forloop.counter }}">Aprovar atividade</h5>
+            <h5 class="modal-title" id="aprovarModalLabel{{ forloop.counter }}">Aprovar atividade ({{ atividade.horas }}h)</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
           </div>
           <form action="{% url 'aprovar_horas_atividade' atividade.id %}" method="post">
@@ -178,10 +194,6 @@
               <div class="mb-3">
                 <label for="horasAprovadas{{ forloop.counter }}" class="form-label">Horas aprovadas</label>
                 <input id="horasAprovadas{{ forloop.counter }}" name="horas_aprovadas" type="number" min="0" max="{{atividade.horas}}" step="1" class="form-control" required placeholder="Ex.: 2" value="{{ atividade.horas_aprovadas|default:'' }}">
-              </div>
-              <div class="mb-3">
-                <label for="obsAprovador{{ forloop.counter }}" class="form-label">Observação (opcional)</label>
-                <textarea id="obsAprovador{{ forloop.counter }}" name="observacao_aprovador" class="form-control" rows="3" placeholder="Comentário para o registro">{{ atividade.observacao_aprovador|default:'' }}</textarea>
               </div>
             </div>
             <div class="modal-footer">
@@ -199,7 +211,9 @@
     </div>
     {% endfor %}
   </div>
+  {% include 'pagination.html' with qs=atividades %}
 </div>
 
+<script src="{% static 'js/filtros.js' %}"></script>
 <script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

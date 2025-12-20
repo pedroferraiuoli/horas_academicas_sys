@@ -114,7 +114,7 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         base_qs = CategoriaCursoSelectors.get_categorias_curso_usuario(self.request.user)
 
-        filtro = CategoriaCursoFilter(self.request.GET or None, queryset=base_qs)
+        filtro = CategoriaCursoFilter(self.request.GET or None, queryset=base_qs, user=self.request.user)
         categorias = filtro.qs
 
         context['categorias'] = categorias
@@ -122,27 +122,24 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
         return context
 
 
-class CriarCategoriaCursoDiretaView(CoordenadorRequiredMixin, View):
+class CriarCategoriaCursoDiretaView(GestorOuCoordenadorRequiredMixin, View):
     template_name = 'forms/form_categoria_curso_direta.html'
 
     def get(self, request):
-        coordenador = UserSelectors.get_coordenador_by_user(request.user)
-        form = CategoriaCursoDiretaForm()
-        return render(request, self.template_name, {'form': form, 'curso_nome': coordenador.curso.nome})
+        form = CategoriaCursoDiretaForm(user=request.user)
+        return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        coordenador = UserSelectors.get_coordenador_by_user(request.user)
         form = CategoriaCursoDiretaForm(request.POST)
         if form.is_valid():
-            curso_categoria = form.save()
-            CategoriaCursoService.create_categoria_curso(form=form, coordenador=coordenador)
+            categoria_curso = CategoriaCursoService.create_categoria_curso_especifica(form=form, user=request.user)
             business_logger.warning(
-                f"CURSO-CATEGORIA CRIADA DIRETAMENTE: {curso_categoria.categoria.nome} -> {curso_categoria.curso.nome} | "
+                f"CURSO-CATEGORIA CRIADA ESPECIFICAMENTE: {categoria_curso.categoria.nome} -> {categoria_curso.curso.nome} | "
                 f"User: {request.user.username}"
             )
-            messages.success(request, f'Categoria {curso_categoria.categoria.nome} criada e vinculada ao curso {curso_categoria.curso.nome}!')
+            messages.success(request, f'Categoria {categoria_curso.categoria.nome} criada e vinculada ao curso {categoria_curso.curso.nome}!')
             return redirect('dashboard')
-        return render(request, self.template_name, {'form': form, 'curso_nome': coordenador.curso.nome})
+        return render(request, self.template_name, {'form': form})
 
 
 class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):

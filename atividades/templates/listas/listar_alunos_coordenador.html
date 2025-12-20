@@ -104,6 +104,8 @@
     </div>
     {% endfor %}
   </div>
+
+  {% include 'pagination.html' with qs=alunos %}
 </div>
 
 <script src="{% static 'js/filtros.js' %}"></script>

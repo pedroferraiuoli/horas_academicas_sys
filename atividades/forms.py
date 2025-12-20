@@ -1,5 +1,5 @@
 from django.contrib.auth.models import Group
-from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors
+from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors, UserSelectors
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
 from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno
 from django.contrib.auth.forms import AuthenticationForm
@@ -192,7 +192,14 @@ class UserRegistrationForm(forms.ModelForm):
         return cd.get('password2')
 
 class CategoriaCursoDiretaForm(forms.Form):
+    curso = forms.ModelChoiceField(queryset=Curso.objects.all(), label='Curso')
     nome = forms.CharField(label='Nome da categoria', max_length=100)
     limite_horas = forms.IntegerField(label='Limite de horas', min_value=0)
     semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre')
 
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if UserSelectors.is_user_coordenador(user=user):
+            coordenador = UserSelectors.get_coordenador_by_user(user)
+            self.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso_id)
+            self.fields['curso'].initial = coordenador.curso

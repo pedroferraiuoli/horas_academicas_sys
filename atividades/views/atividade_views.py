@@ -2,12 +2,13 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from ..models import Atividade, Aluno
 from ..forms import AtividadeForm
 from ..selectors import AlunoSelectors, AtividadeSelectors, UserSelectors
 from ..services import AtividadeService
-from ..filters import AtividadesFilter
+from ..filters import AtividadesCoordenadorFilter, AtividadesFilter
 from ..mixins import AlunoRequiredMixin, CoordenadorRequiredMixin
 
 
@@ -99,14 +100,27 @@ class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         if aluno_id:
             aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
             atividades = AtividadeSelectors.get_atividades_aluno(aluno)
+            show_status_filter = True
         else: 
             atividades = AtividadeSelectors.get_atividades_pendentes(curso=curso)
+            show_status_filter = False
 
-        filtro = AtividadesFilter(self.request.GET, queryset=atividades, request=self.request)
+        filtro = AtividadesCoordenadorFilter(self.request.GET, queryset=atividades, show_status=show_status_filter)
         atividades_filtradas = filtro.qs
 
+         # Paginação
+        paginator = Paginator(atividades_filtradas, 20)  # 20 alunos por página
+        page = self.request.GET.get('page')
+        
+        try:
+            atividades_paginadas = paginator.page(page)
+        except PageNotAnInteger:
+            atividades_paginadas = paginator.page(1)
+        except EmptyPage:
+            atividades_paginadas = paginator.page(paginator.num_pages)
+
         context['aluno'] = aluno if aluno_id else None
-        context['atividades'] = atividades_filtradas
+        context['atividades'] = atividades_paginadas
         context['filter'] = filtro
         return context
 

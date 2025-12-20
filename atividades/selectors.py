@@ -285,6 +285,8 @@ class UserSelectors:
     @staticmethod
     def is_user_coordenador(user) -> bool:
         """Verifica se o usuário é um coordenador"""
+        if user is None:
+            return False
         return user.groups.filter(name='Coordenador').exists()
     
     @staticmethod
@@ -367,11 +369,11 @@ class CategoriaSelectors:
 
         return (
             Categoria.objects
-            .filter(categoria_cursos__semestre=semestre_atual, especifica=False)
+            .filter(especifica=False)
             .distinct()
             .prefetch_related(
                 Prefetch(
-                    'categoria_cursos',
+                    'categorias_curso',
                     queryset=(
                         CategoriaCurso.objects
                         .filter(semestre=semestre_atual)

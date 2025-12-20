@@ -4,7 +4,7 @@ from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors
 def categorias_do_usuario(request):
     """
     Context processor com cache para otimizar carregamento.
-    Cache expira em 10 minutos e é invalidado por aluno.
+    Cache expira em 10 minutos e é invalidado por aluno ao aprovar horas.
     """
     user = getattr(request, 'user', None)
     if not user or not user.is_authenticated:

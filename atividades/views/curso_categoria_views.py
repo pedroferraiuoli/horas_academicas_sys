@@ -9,7 +9,7 @@ from ..forms import CategoriaCursoForm, CategoriaCursoDiretaForm
 from ..selectors import CategoriaCursoSelectors, UserSelectors
 from ..services import CategoriaCursoService
 from ..filters import CategoriaCursoFilter
-from ..mixins import GestorOuCoordenadorRequiredMixin, CoordenadorRequiredMixin
+from ..mixins import GestorOuCoordenadorRequiredMixin
 
 business_logger = logging.getLogger('atividades.business')
 security_logger = logging.getLogger('atividades.security')

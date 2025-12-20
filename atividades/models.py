@@ -16,12 +16,26 @@ class Semestre(BaseModel):
     data_inicio = models.DateField(null=True, blank=True)
     data_fim = models.DateField(null=True, blank=True)
 
+    class Meta:
+        indexes = [
+            # Usado em get_semestre_atual() para buscar semestre por intervalo de datas
+            models.Index(fields=['data_inicio', 'data_fim'], name='semestre_datas_idx'),
+            # Usado em get_ultimos_semestres_com_alunos() para ordenação DESC
+            models.Index(fields=['-data_inicio'], name='semestre_inicio_desc_idx'),
+        ]
+
     def __str__(self):
         return self.nome
 
 class Categoria(BaseModel):
     nome = models.CharField(max_length=100)
     especifica = models.BooleanField(default=False, help_text="Indica se a categoria é específica para algum curso")
+
+    class Meta:
+        indexes = [
+            # Usado em listar_categorias_geral_com_cursos_semestre_atual()
+            models.Index(fields=['especifica'], name='cat_especifica_idx'),
+        ]
 
     def __str__(self):
         return self.nome
@@ -42,6 +56,12 @@ class CategoriaCurso(BaseModel):
 
     class Meta:
         unique_together = ('curso', 'categoria', 'semestre')
+        indexes = [
+            # Usado em context_processor e get_categorias_curso_com_horas_por_aluno()
+            models.Index(fields=['curso', 'semestre'], name='catcurso_cur_sem_idx'),
+            # Usado em filtros por semestre
+            models.Index(fields=['semestre'], name='catcurso_sem_idx'),
+        ]
 
     def __str__(self):
         return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
@@ -66,6 +86,12 @@ class Coordenador(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='coordenador')
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT)
 
+    class Meta:
+        indexes = [
+            # Usado em verificações de permissão de coordenador por curso
+            models.Index(fields=['curso'], name='coord_curso_idx'),
+        ]
+
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} - Coordenador de {self.curso.nome}"
 
@@ -74,6 +100,13 @@ class Aluno(BaseModel):
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name='alunos')
     semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
     
+    class Meta:
+        indexes = [
+            # Usado em get_num_atividades_pendentes() e filtros por curso
+            models.Index(fields=['curso'], name='aluno_curso_idx'),
+            # Usado em get_ultimos_semestres_com_alunos()
+            models.Index(fields=['semestre_ingresso'], name='aluno_semestre_idx'),
+        ]
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username} ({self.semestre_ingresso})"
@@ -88,6 +121,17 @@ class Atividade(BaseModel):
     horas_aprovadas = models.PositiveIntegerField(null=True, blank=True)
     data = models.DateField()
     documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            # Usado em get_num_atividades_pendentes() - subquery de totais aprovados
+            models.Index(fields=['horas_aprovadas', 'aluno', 'categoria'], name='ativ_hrs_aln_cat_idx'),
+            models.Index(fields=['aluno', 'categoria', 'horas_aprovadas'], name='ativ_aln_cat_hrs_idx'),
+            # Usado em get_atividades_pendentes() - ordenação por data de criação
+            models.Index(fields=['horas_aprovadas', 'created_at'], name='ativ_hrs_created_idx'),
+            # Usado em context_processor - aggregações de horas por aluno
+            models.Index(fields=['aluno', 'horas_aprovadas'], name='ativ_aln_hrs_idx'),
+        ]
 
     @property
     def status(self):

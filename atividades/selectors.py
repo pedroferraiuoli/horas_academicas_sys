@@ -27,7 +27,7 @@ class AtividadeSelectors:
             'categoria__categoria',
             'categoria__curso',
             'categoria__semestre'
-        ).order_by('-created_at')
+        ).order_by('horas_aprovadas', '-created_at')
     
     @staticmethod
     def get_atividades_recentes_aluno(aluno: Aluno, limite: int = 5) -> List[Atividade]:
@@ -38,61 +38,71 @@ class AtividadeSelectors:
     
     @staticmethod
     def get_atividades_pendentes(curso=None):
-
+        qs = Atividade.objects.filter(horas_aprovadas__isnull=True)
+        
+        if curso:
+            qs = qs.filter(aluno__curso=curso)
+        
         total_aprovado_subquery = (
             Atividade.objects
             .filter(
-                aluno=OuterRef('aluno'),
-                categoria=OuterRef('categoria'),
+                aluno_id=OuterRef('aluno_id'),  # Usar _id
+                categoria_id=OuterRef('categoria_id'),
                 horas_aprovadas__isnull=False,
             )
-            .values('aluno', 'categoria')
+            .values('aluno_id', 'categoria_id')
             .annotate(total=Sum('horas_aprovadas'))
             .values('total')[:1]
         )
 
-        qs = (
-            Atividade.objects
+        return (
+            qs
             .select_related(
                 'aluno__user',
                 'categoria__curso',
+                'categoria__categoria',
             )
             .annotate(
                 total_horas_categoria=Coalesce(
                     Subquery(total_aprovado_subquery),
                     0
                 ),
-                limite_categoria=F('categoria__limite_horas'),
-            )
-            .annotate(
-                limite_atingido=Case(
-                    When(
-                        total_horas_categoria__gte=F('limite_categoria'),
-                        then=Value(True)
-                    ),
-                    default=Value(False),
-                    output_field=BooleanField()
-                )
             )
             .filter(
-                horas_aprovadas__isnull=True,
-                limite_atingido=False
+                total_horas_categoria__lt=F('categoria__limite_horas')
             )
             .order_by('created_at')
         )
-
-        if curso:
-            qs = qs.filter(aluno__curso=curso)
-
-        return qs
     
     @staticmethod
     def get_num_atividades_pendentes(*, curso=None) -> int:
-        """Conta atividades pendentes de aprovação de um curso"""
-        queryset = AtividadeSelectors.get_atividades_pendentes()
+        atividades_base = Atividade.objects.filter(
+            horas_aprovadas__isnull=True
+        )
+
         if curso:
-            queryset = queryset.filter(aluno__curso=curso)
-        return queryset.count()
+            atividades_base = atividades_base.filter(aluno__curso=curso)
+
+        total_aprovado_subquery = (
+            Atividade.objects
+            .filter(
+                aluno_id=OuterRef('aluno_id'),
+                categoria_id=OuterRef('categoria_id'),
+                horas_aprovadas__isnull=False,
+            )
+            .values('aluno_id', 'categoria_id')
+            .annotate(total=Sum('horas_aprovadas'))
+            .values('total')[:1]
+        )
+
+        return atividades_base.annotate(
+            total_horas_categoria=Coalesce(
+                Subquery(total_aprovado_subquery),
+                0
+            ),
+        ).filter(
+            total_horas_categoria__lt=F('categoria__limite_horas')
+        ).count()
 
     @staticmethod
     def get_total_horas_por_aluno_categoria(*, aluno, curso_categoria):
@@ -145,7 +155,7 @@ class CategoriaCursoSelectors:
     def get_categorias_curso(*, curso=None, semestre=None) -> QuerySet['CategoriaCurso']:
         """Busca categorias"""
 
-        cat = CategoriaCurso.objects.filter().select_related('categoria').order_by('categoria__nome')
+        cat = CategoriaCurso.objects.select_related('categoria').order_by('categoria__nome')
 
         if curso:
             cat = cat.filter(curso=curso)
@@ -178,15 +188,15 @@ class CategoriaCursoSelectors:
         return (
             CategoriaCurso.objects
             .filter(
-                curso=aluno.curso,
-                semestre=aluno.semestre_ingresso,
+                curso_id=aluno.curso_id, 
+                semestre_id=aluno.semestre_ingresso_id,
             )
             .annotate(
                 horas_aprovadas_total=Coalesce(
                     Sum(
                         'atividade__horas_aprovadas',
                         filter=Q(
-                            atividade__aluno=aluno,
+                            atividade__aluno_id=aluno.id,
                             atividade__horas_aprovadas__isnull=False
                         )
                     ),
@@ -194,6 +204,12 @@ class CategoriaCursoSelectors:
                 )
             )
             .select_related('categoria')
+            .only(
+                'id', 
+                'limite_horas', 
+                'equivalencia_horas',
+                'categoria__nome'
+            )
             .order_by('categoria__nome')
         )
     
@@ -203,28 +219,19 @@ class AlunoSelectors:
     def _pendencias_validas_subquery():
 
         total_aprovado_subquery = Atividade.objects.filter(
-                aluno=OuterRef('aluno'),
-                categoria=OuterRef('categoria'),
+                aluno_id=OuterRef('aluno_id'),
+                categoria_id=OuterRef('categoria_id'),
                 horas_aprovadas__isnull=False,
-            ).values('aluno', 'categoria').annotate(total=Sum('horas_aprovadas')).values('total')[:1]
+            ).values('aluno_id', 'categoria_id').annotate(total=Sum('horas_aprovadas')).values('total')[:1]
         
-        return (
-        Atividade.objects
-        .filter(
-            aluno=OuterRef('pk'),
+        return Atividade.objects.filter(
+            aluno_id=OuterRef('pk'),
             horas_aprovadas__isnull=True,
+        ).annotate(
+            total_aprovado=Coalesce(Subquery(total_aprovado_subquery), 0)
+        ).filter(
+            total_aprovado__lt=F('categoria__limite_horas')
         )
-        .annotate(
-            total_horas_categoria=Coalesce(
-                Subquery(total_aprovado_subquery),
-                0
-            ),
-            limite_categoria=F('categoria__limite_horas'),
-        )
-        .filter(
-            total_horas_categoria__lt=F('limite_categoria')
-        )
-    )
 
     @staticmethod
     def _with_pendencia_annotation(qs):
@@ -243,7 +250,7 @@ class AlunoSelectors:
         
     @staticmethod
     def get_alunos_com_pendencias(*, curso=None) -> QuerySet[Aluno]:
-        qs = Aluno.objects.all()
+        qs = Aluno.objects.select_related('user', 'curso', 'semestre_ingresso')
         if curso:
             qs = qs.filter(curso=curso)
         return (
@@ -260,7 +267,7 @@ class AlunoSelectors:
     @staticmethod
     def get_num_alunos(*, curso=None) -> int:
         if curso:
-            return curso.alunos.all().count()
+            return curso.alunos.count()
         return Aluno.objects.count()
     
     @staticmethod

@@ -4,6 +4,7 @@ from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.core.cache import cache
 
     
 class SemestreService:
@@ -103,6 +104,12 @@ class UserService:
 class AtividadeService:
 
     @staticmethod
+    def invalidar_cache_aluno(aluno_id: int):
+        """Invalida o cache de categorias para um aluno específico"""
+        cache_key = f'categorias_aluno_{aluno_id}'
+        cache.delete(cache_key)
+
+    @staticmethod
     def aprovar_horas(*, atividade: Atividade, horas_aprovadas: int):
         if horas_aprovadas is None:
             raise ValueError('Informe a quantidade de horas.')
@@ -121,6 +128,9 @@ class AtividadeService:
 
         atividade.horas_aprovadas = horas_aprovadas
         atividade.save()
+        
+        # Invalidar cache do aluno após aprovação
+        AtividadeService.invalidar_cache_aluno(atividade.aluno_id)
 
 class CategoriaCursoService:
    

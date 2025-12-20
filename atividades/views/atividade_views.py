@@ -82,7 +82,18 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         atividades = AtividadeSelectors.get_atividades_aluno(aluno)
         filtro = AtividadesFilter(self.request.GET or None, queryset=atividades, request=self.request)
         atividades_filtradas = filtro.qs
-        context['atividades'] = atividades_filtradas
+
+        paginator = Paginator(atividades_filtradas, 10)  # 10 atividades por página
+        page = self.request.GET.get('page')
+
+        try:
+            atividades_paginadas = paginator.page(page)
+        except PageNotAnInteger:
+            atividades_paginadas = paginator.page(1)
+        except EmptyPage:
+            atividades_paginadas = paginator.page(paginator.num_pages)
+
+        context['atividades'] = atividades_paginadas
         context['filter'] = filtro
         return context
 

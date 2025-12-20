@@ -33,6 +33,7 @@
 </div>
 
 <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue mt-3"><i class="bi bi-arrow-left"></i> Voltar</a>
+{% include 'pagination.html' with qs=atividades %}
 
 <script src="{% static 'js/filtros.js' %}"></script>
 <script src="{% static 'js/listar_atividades.js' %}"></script>

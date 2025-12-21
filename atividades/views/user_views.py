@@ -92,15 +92,7 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         alunos_filtrados = filtro.qs
 
         # Paginação
-        paginator = Paginator(alunos_filtrados, 20)  # 20 alunos por página
-        page = self.request.GET.get('page')
-        
-        try:
-            alunos_paginados = paginator.page(page)
-        except PageNotAnInteger:
-            alunos_paginados = paginator.page(1)
-        except EmptyPage:
-            alunos_paginados = paginator.page(paginator.num_pages)
+        alunos_paginados = paginate_queryset(qs=alunos_filtrados, page=self.request.GET.get('page'), per_page=20)
 
         context['curso'] = curso
         context['alunos'] = alunos_paginados

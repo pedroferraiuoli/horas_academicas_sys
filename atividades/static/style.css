@@ -90,6 +90,10 @@ body {
     background-image: none !important;
 }
 
+.btn {
+    gap: 0.5rem !important;
+}
+
 /* Header - azul escuro */
 .bg-primary-dark {
     background-color: var(--main-blue) !important;
@@ -104,8 +108,7 @@ body {
 
 .badge {
     background-color: var(--main-blue);
-    min-width: 100%;
-    display: grid !important;
+    min-width: 50%;
 }
 
 /* Sidebar - fundo claro, borda fina */

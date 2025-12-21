@@ -60,15 +60,13 @@
             <thead>
               <tr>
                 <th>Semestre</th>
-                <th>Período</th>
                 <th class="text-center">Alunos Ingressantes</th>
               </tr>
             </thead>
             <tbody>
               {% for item in ultimos_semestres %}
               <tr>
-                <td><strong>{{ item.semestre.nome }}</strong></td>
-                <td>{{ item.semestre.data_inicio|date:"d/m/Y" }} - {{ item.semestre.data_fim|date:"d/m/Y" }}</td>
+                <td class="text-center"><strong>{{ item.semestre.nome }}</strong></td>
                 <td class="text-center"><span class="badge bg-info">{{ item.num_alunos }}</span></td>
               </tr>
               {% endfor %}
@@ -82,7 +80,7 @@
     </div>
 
     <h5 class="dashboard-actions-title">Ações Rápidas</h5>
-    <div class="d-flex flex-wrap gap-2">
+    <div class="d-flex flex-wrap gap-2 mb-3">
       <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
       <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
       <a href="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}" class="btn btn-info"><i class="bi bi-list"></i> Listar Categorias do Curso</a>

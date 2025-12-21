@@ -2,10 +2,24 @@
 {% load static %}
 {% block content %}
 <div class="container">
-<h2 class="main-blue">Categorias de Atividade</h2>
+<h2 class="main-blue">Categorias Gerais</h2>
 <div class="mb-3">
 <a href="{% url 'criar_categoria' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Categoria</a>
 <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<div class="mb-3">
+  <form method="get" class="row g-2 align-items-center filtros-atividades">
+    {% for field in filter.form %}
+      <div class="col-12 col-md-3">
+        <label for="{{ field.id_for_label }}" class="filtro-label">{{ field.label }}</label>
+        {{ field }}
+      </div>
+    {% endfor %}
+    <div class="col-12 col-md filtros-buttons">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
+    </div>
+  </form>
 </div>
 
 <!-- Lista Responsiva -->
@@ -22,7 +36,7 @@
         </div>
         <div class="col-lg-6 col-12 desktop-only">
           <div class="ativ-col">
-            <span class="ativ-label">Cursos Utilizando</span>
+            <span class="ativ-label">Cursos Utilizando ({{semestre_atual}})</span>
             <span class="ativ-value">{% for cat in categoria.cursos_no_semestre_atual %}<span class="badge bg-opacity-75 mb-1">{{ cat.curso.nome }} ({{ cat.limite_horas}})</span> {% endfor %}</span>
           </div>
         </div>
@@ -64,5 +78,6 @@
 {% include 'pagination.html' with qs=categorias %}
 </div>
 
+<script src="{% static 'js/filtros.js' %}"></script>
 <script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

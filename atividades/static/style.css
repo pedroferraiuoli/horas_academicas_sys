@@ -405,6 +405,23 @@ body {
 }
 
 /* ========================================
+   FILTROS
+   ======================================== */
+
+.filtros-atividades .filtro-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filtros-buttons {
+    align-self: end;
+}
+/* ========================================
    FORMULÁRIO DE ATIVIDADE - DESIGN MODERNO
    ======================================== */
 

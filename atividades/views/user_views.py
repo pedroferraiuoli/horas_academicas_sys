@@ -2,12 +2,12 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from ..utils import paginate_queryset
 
 from ..forms import UserRegistrationForm, AlterarEmailForm, AdminUserForm
 from ..selectors import AlunoSelectors, UserSelectors
 from ..services import UserService
-from ..filters import AlunosFilter
+from ..filters import AlunosFilter, UsuarioFilter
 from ..mixins import LoginRequiredMixin, GestorRequiredMixin, CoordenadorRequiredMixin
 
 
@@ -66,16 +66,14 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         gestores = UserSelectors.get_gestor_users()
         coordenadores = UserSelectors.get_coordenador_users()
-        paginator = Paginator(coordenadores, 10)  # 15 coordenadores por página
-        page = self.request.GET.get('page')
-        try:
-            coordenadores = paginator.page(page)
-        except PageNotAnInteger:
-            coordenadores = paginator.page(1)
-        except EmptyPage:
-            coordenadores = paginator.page(paginator.num_pages)
+
+        filter_coord = UsuarioFilter(self.request.GET, queryset=coordenadores)
+        coordenadores = filter_coord.qs
+
+        coordenadores = paginate_queryset(qs=coordenadores, page=self.request.GET.get('page'), per_page=10)
         context['gestores'] = gestores
         context['coordenadores'] = coordenadores
+        context['filter'] = filter_coord
         return context
 
 

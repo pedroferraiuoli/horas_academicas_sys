@@ -1,5 +1,5 @@
 import django_filters
-
+from django.contrib.auth.models import User
 from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors, UserSelectors
 from .models import Atividade, Curso, CategoriaCurso, Semestre, Aluno
 from django import forms
@@ -17,12 +17,20 @@ class CategoriaCursoFilter(django_filters.FilterSet):
     
     especifica = django_filters.BooleanFilter(
         field_name='categoria__especifica',
-        label='Categorias Específicas',
+        label='Categorias',
         widget=forms.Select(choices=(
             ('', 'Todas'),
             ('true', 'Apenas Específicas'),
             ('false', 'Apenas Gerais'),
         ), attrs={'class': 'form-select'})
+    )
+
+    nome = django_filters.CharFilter(
+        method='filtrar_nome',
+        label='Nome',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por nome...'}
+        )
     )
 
     class Meta:
@@ -34,6 +42,11 @@ class CategoriaCursoFilter(django_filters.FilterSet):
     
         if user and UserSelectors.is_user_coordenador(user):
             self.filters.pop('curso')
+
+    def filtrar_nome(self, queryset, name, value):
+        return queryset.filter(
+            categoria__nome__icontains=value
+        )
 
 class AlunosFilter(django_filters.FilterSet):
     semestre_ingresso = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={
@@ -179,3 +192,65 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
 
         if not show_status:
             self.filters.pop('status')
+
+class CursoFilter(django_filters.FilterSet):
+    nome = django_filters.CharFilter(
+        method='filtrar_nome',
+        label='Nome',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por nome...'}
+        )
+    )
+
+    class Meta:
+        model = Curso
+        fields = ['nome']
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+        if user and UserSelectors.is_user_coordenador(user):
+            self.filters.pop('curso')
+
+    def filtrar_nome(self, queryset, name, value):
+        return queryset.filter(
+            nome__icontains=value
+        )
+    
+class CategoriaFilter(django_filters.FilterSet):
+    nome = django_filters.CharFilter(
+        method='filtrar_nome',
+        label='Nome',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por nome...'}
+        )
+    )
+
+    class Meta:
+        model = CategoriaCurso
+        fields = ['nome']
+
+    def filtrar_nome(self, queryset, name, value):
+        return queryset.filter(
+            nome__icontains=value
+        )
+    
+class UsuarioFilter(django_filters.FilterSet):
+    nome = django_filters.CharFilter(
+        method='filtrar_username',
+        label='Username',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por username...'}
+        )
+    )
+
+    class Meta:
+        model = User
+        fields = ['nome']
+
+    def filtrar_username(self, queryset, name, value):
+        return queryset.filter(
+            Q(username__icontains=value) |
+            Q(first_name__icontains=value) |
+            Q(last_name__icontains=value)
+        )

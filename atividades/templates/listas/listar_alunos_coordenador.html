@@ -10,15 +10,12 @@
 
 <div class="mb-3">
   <form method="get" class="row g-2 align-items-center filtros-atividades">
+    {% for field in filter.form %}
     <div class="col-12 col-md-3">
-      {{ filter.form.semestre_ingresso }}
+      <label for="{{ field.id_for_label }}" class="filtro-label">{{ field.label }}</label>
+      {{ field }}
     </div>
-    <div class="col-12 col-md-3">
-      {{ filter.form.tem_horas_a_validar }}
-    </div>
-    <div class="col-12 col-md-3">
-      {{ filter.form.nome }}
-    </div>
+    {% endfor %}
     <div class="col-12 col-md-3 filtros-buttons">
       <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
     </div>

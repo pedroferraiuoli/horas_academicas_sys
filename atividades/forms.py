@@ -12,8 +12,8 @@ class SemestreForm(forms.ModelForm):
         model = Semestre
         fields = ['nome', 'data_inicio', 'data_fim']
         widgets = {
-            'data_inicio': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-            'data_fim': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
+            'data_inicio': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}, format='%d/%m/%Y'),
+            'data_fim': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}, format='%d/%m/%Y')
         }
 
 class AlterarEmailForm(forms.ModelForm):
@@ -113,7 +113,7 @@ class AtividadeForm(forms.ModelForm):
         model = Atividade
         fields = ['categoria', 'nome', 'descricao', 'horas', 'data', 'documento', 'observacoes_para_aprovador']
         widgets = {
-            'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'data': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}, format='%d/%m/%Y'),
             'descricao': forms.Textarea(attrs={'rows': 4}),
             'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 4}),
             'documento': forms.ClearableFileInput(attrs={'accept': (

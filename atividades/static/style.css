@@ -64,7 +64,31 @@ body {
     }
 }
 
+.datepicker {
+    padding: 0.875rem 1rem !important;
+    font-size: 0.95rem !important;
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 10px !important;
+    color: var(--text-secondary) !important;
 
+}
+
+.datepicker td,th{
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+
+.datepicker table tr td.today {
+    background-color: var(--main-orange) !important;
+    background-image: none !important;
+}
+
+.datepicker table tr td.active.active {
+    background-color: var(--main-blue) !important;
+    background-image: none !important;
+}
 
 /* Header - azul escuro */
 .bg-primary-dark {

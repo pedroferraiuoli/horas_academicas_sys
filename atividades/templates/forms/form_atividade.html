@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load static %}
+{% block title %}Formulário de Atividade{% endblock %}
 {% block content %}
 
 <div class="form-atividade-container">
@@ -102,5 +104,7 @@
     </div>
   </div>
 </div>
+
+<script src="{% static 'js/datepicker.js' %}"></script>
 
 {% endblock %}

@@ -179,6 +179,14 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
         )
     )
 
+    matricula_aluno = django_filters.CharFilter(
+        method='filtrar_matricula_aluno',
+        label='Matrícula do Aluno',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por matrícula do aluno...'}
+        )
+    )
+
     aluno_id = django_filters.NumberFilter(widget=forms.HiddenInput(), method='filter_aluno_id')
 
     class Meta:
@@ -191,6 +199,11 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
     def filtrar_nome_aluno(self, queryset, name, value):
         return queryset.filter(
             aluno__nome__icontains=value
+        )
+    
+    def filtrar_matricula_aluno(self, queryset, name, value):
+        return queryset.filter(
+            aluno__matricula__icontains=value
         )
     
     def filter_atividades_status(self, queryset, name, value):
@@ -215,6 +228,7 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
 
         if aluno_id:
             self.filters.pop('nome_aluno')
+            self.filters.pop('matricula_aluno')
 
         if not aluno_id:
             self.filters.pop('aluno_id')

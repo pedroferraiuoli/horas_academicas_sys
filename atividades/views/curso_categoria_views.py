@@ -110,6 +110,7 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
 
 class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
     template_name = 'listas/listar_categorias_curso.html'
+    htmx_template_name = 'listas/htmx/categorias_curso_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -121,6 +122,11 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
         context['categorias'] = paginate_queryset(qs=categorias, page=self.request.GET.get('page'), per_page=15)
         context['filter'] = filtro
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 class CriarCategoriaCursoDiretaView(GestorOuCoordenadorRequiredMixin, View):

@@ -1,4 +1,5 @@
  <!-- Lista Responsiva de Atividades -->
+  {% load static %}
   <div class="atividades-list">
     {% for atividade in atividades %}
     <div class="atividade-item" id="atividade-{{ atividade.id }}">
@@ -186,3 +187,4 @@
     {% endfor %}
   </div>
   {% include 'pagination.html' with qs=atividades %}
+  <script src="{% static 'js/listar_atividades.js' %}"></script>

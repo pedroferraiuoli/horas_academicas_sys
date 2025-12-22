@@ -1,0 +1,14 @@
+<!-- Tabela Responsiva -->
+ {% load static %}
+<div class="atividades-list">
+  {% for atividade in atividades %}
+ {% include 'listas/partials/atividades_aluno.html' %}
+  {% empty %}
+  <div class="text-center text-muted py-4">
+    Nenhuma atividade cadastrada.
+  </div>
+  {% endfor %}
+</div>
+
+{% include 'pagination.html' with qs=atividades %}
+<script src="{% static 'js/listar_atividades.js' %}"></script>

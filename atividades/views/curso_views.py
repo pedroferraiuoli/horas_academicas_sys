@@ -76,6 +76,7 @@ class ExcluirCursoView(GestorRequiredMixin, View):
 
 class ListarCursosView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_cursos.html'
+    htmx_template_name = 'listas/htmx/cursos_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -91,3 +92,8 @@ class ListarCursosView(GestorRequiredMixin, TemplateView):
         context['filter'] = filter
         
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]

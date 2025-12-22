@@ -4,7 +4,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="dashboard-header">
-    <h2 class="orange dashboard-welcome">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
+    <h2 class="orange dashboard-welcome">Bem-vindo, {{ aluno.nome }}!</h2>
     <div class="dashboard-actions">
         <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span></a>
         <a href="{% url 'listar_atividades' %}" class="btn btn-info"><i class="bi bi-list"></i> <span class="btn-text">Listar Atividades</span></a>

@@ -1,4 +1,5 @@
 <!-- Lista Responsiva de Categorias -->
+  {% load static %}
 <div class="atividades-list">
   {% for categoria in categorias %}
   <div class="atividade-item" id="categoria-{{ categoria.id }}">
@@ -57,3 +58,4 @@
 </div>
 
 {% include 'pagination.html' with qs=categorias %}
+<script src="{% static 'js/listar_atividades.js' %}"></script>

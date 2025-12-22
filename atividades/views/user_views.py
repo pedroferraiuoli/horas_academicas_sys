@@ -61,6 +61,7 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
 
 class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_usuarios_admin.html'
+    htmx_template_name = 'listas/htmx/users_admin_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -75,6 +76,11 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
         context['coordenadores'] = coordenadores
         context['filter'] = filter_coord
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):

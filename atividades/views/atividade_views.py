@@ -72,6 +72,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
 
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
     template_name = 'listas/listar_atividades.html'
+    htmx_template_name = 'listas/htmx/atividades_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,6 +85,11 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         context['atividades'] = atividades_paginadas
         context['filter'] = filtro
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):

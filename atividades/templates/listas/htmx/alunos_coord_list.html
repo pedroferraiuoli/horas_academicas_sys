@@ -1,4 +1,5 @@
 <!-- Lista Responsiva de Alunos -->
+  {% load static %}
   <div class="atividades-list">
     {% for aluno in alunos %}
     <div class="atividade-item" id="aluno-{{ aluno.id }}">
@@ -74,3 +75,5 @@
   </div>
 
 {% include 'pagination.html' with qs=alunos %}
+<script src="{% static 'js/listar_atividades.js' %}"></script>
+

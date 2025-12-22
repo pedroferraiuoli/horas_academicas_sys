@@ -52,7 +52,7 @@ class CategoriaCurso(BaseModel):
         ]
 
     def __str__(self):
-        return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
+        return f"{self.categoria.nome} ({self.limite_horas}h)"
     
     def ultrapassou_limite_pelo_aluno(self, aluno):
         from atividades.selectors import AtividadeSelectors

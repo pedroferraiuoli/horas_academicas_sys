@@ -1,5 +1,4 @@
 import re
-from django.contrib.auth.models import Group
 from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors, UserSelectors
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
 from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno

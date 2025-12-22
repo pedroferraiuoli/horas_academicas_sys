@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, F, Q, Case, When, Value, BooleanField, Subquery
+from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, Q
 from django.db.models.functions import Coalesce
 from typing import Optional, List
 from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, Semestre

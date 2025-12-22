@@ -1,5 +1,5 @@
 from atividades.selectors import AtividadeSelectors, CategoriaCursoSelectors, UserSelectors
-from .models import Aluno, Atividade, Categoria, Curso, Coordenador, CategoriaCurso, Semestre
+from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User

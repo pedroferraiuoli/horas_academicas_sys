@@ -100,8 +100,8 @@
               <tbody>
                 {% for cat in curso.categorias_semestre_atual %}
                 <tr>
-                  <td>{{ cat.categoria.nome }}</td>
-                  <td><span class="badge bg-success bg-opacity-75">{{ cat.limite_horas }}h</span></td>
+                  <td class="text-center">{{ cat.categoria.nome }}</td>
+                  <td class="text-center"><span class="badge bg-success bg-opacity-75">{{ cat.limite_horas }}h</span></td>
                 </tr>
                 {% endfor %}
               </tbody>

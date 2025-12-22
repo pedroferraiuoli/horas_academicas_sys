@@ -32,21 +32,16 @@
           <div class="col-lg-2 col-6">
             <div class="ativ-col">
               <span class="ativ-label">Nome</span>
-              <span class="ativ-value">{{ aluno.user.get_full_name|default:aluno.user.username }}</span>
+              <span class="ativ-value">{{ aluno.nome }}</span>
             </div>
           </div>
           <div class="col-lg desktop-only">
             <div class="ativ-col">
-              <span class="ativ-label">Usuário</span>
+              <span class="ativ-label">Matrícula</span>
               <span class="ativ-value">{{ aluno.user.username }}</span>
             </div>
           </div>
-          <div class="col-lg-4 desktop-only">
-            <div class="ativ-col">
-              <span class="ativ-label">E-mail</span>
-              <span class="ativ-value">{{ aluno.user.email }}</span>
-            </div>
-          </div>
+
           <div class="col-lg col-3">
             <div class="ativ-col">
               <span class="ativ-label">Ingresso</span>

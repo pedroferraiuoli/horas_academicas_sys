@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors, UserSelectors
 from .models import Atividade, Curso, CategoriaCurso, Semestre, Aluno
 from django import forms
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Q
 
 
 class CategoriaCursoFilter(django_filters.FilterSet):
@@ -77,10 +77,7 @@ class AlunosFilter(django_filters.FilterSet):
 
     def filtrar_nome(self, queryset, name, value):
         return queryset.filter(
-            Q(user__first_name__icontains=value) |
-            Q(user__last_name__icontains=value) |
-            Q(user__username__icontains=value)
-        )
+            nome__icontains=value)
 
     def filter_tem_horas_a_validar(self, queryset, name, value):
         # se nenhum valor enviado, não filtra
@@ -192,12 +189,8 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
         return queryset.filter(aluno__id=value)
 
     def filtrar_nome_aluno(self, queryset, name, value):
-        primeiro_nome = value.split(' ')[0]
-        segundo_nome = value.split(' ')[1] if len(value.split(' ')) > 1 else ''
         return queryset.filter(
-            Q(aluno__user__first_name__icontains=primeiro_nome) &
-            Q(aluno__user__last_name__icontains=segundo_nome) |
-            Q(aluno__user__username__icontains=value)
+            aluno__nome__icontains=value
         )
     
     def filter_atividades_status(self, queryset, name, value):

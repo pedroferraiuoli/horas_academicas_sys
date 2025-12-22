@@ -55,12 +55,20 @@ class UserService:
 
     @staticmethod
     def register_user_with_aluno(*, form):
-        user = form.save(commit=False)
-        user.set_password(form.cleaned_data['password'])
-        user.save()
+        from django.contrib.auth.models import User
+        
+        # Criar usuário usando matrícula como username
+        matricula = form.cleaned_data['matricula']
+        user = User.objects.create_user(
+            username=matricula,  # Matrícula é o username nos bastidores
+            email=form.cleaned_data['email'],
+            password=form.cleaned_data['password']
+        )
 
         Aluno.objects.create(
             user=user,
+            nome=form.cleaned_data['nome'],
+            matricula=matricula,
             curso=form.cleaned_data['curso'],
             semestre_ingresso=form.cleaned_data['semestre'],
         )

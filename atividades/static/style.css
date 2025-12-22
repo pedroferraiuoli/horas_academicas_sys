@@ -121,6 +121,14 @@ body {
     width: 500px;
 }
 
+.sidebar-gestor {
+    width: 360px;
+}
+
+.sidebar-coordenador {
+    width: 360px;
+}
+
 .sidebar-content {
     padding: 1rem;
 }
@@ -190,6 +198,15 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border-left: 4px solid var(--main-blue);
+}
+
+.sidebar-item-gestor {
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-item-gestor .sidebar-item-header {
+    margin-bottom: 0;
 }
 
 .sidebar-item:hover {

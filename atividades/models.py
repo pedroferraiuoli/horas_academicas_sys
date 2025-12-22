@@ -79,11 +79,18 @@ class Coordenador(BaseModel):
 
 class Aluno(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=200, help_text="Nome completo do aluno")
+    matricula = models.CharField(max_length=20, unique=True, help_text="Matrícula do aluno")
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name='alunos')
     semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['matricula'], name='aluno_matricula_idx'),
+        ]
+
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username} ({self.semestre_ingresso})"
+        return f"{self.nome} - {self.matricula} ({self.semestre_ingresso})"
 
 class Atividade(BaseModel):
 

@@ -1,3 +1,4 @@
+import re
 from django.contrib.auth.models import Group
 from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors, UserSelectors
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
@@ -157,39 +158,87 @@ class AtividadeForm(forms.ModelForm):
         return horas
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
-    username = forms.CharField(label='Usuário ou Email')
+    username = forms.CharField(label='Matrícula ou E-mail')
 
     def clean(self):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
+        
         if username and password:
-            # Tenta autenticar por username (case insensitive)
-            user_qs = User.objects.filter(username__iexact=username)
-            if user_qs.exists():
-                # Garante que o username usado é o correto (case insensitive)
-                self.cleaned_data['username'] = user_qs.first().username
+            # Se contém @, é email - busca o username correspondente
+            if '@' in username:
+                user_qs = User.objects.filter(email__iexact=username)
+                if user_qs.exists():
+                    # Usa o username do usuário encontrado
+                    self.cleaned_data['username'] = user_qs.first().username
             else:
-                # Se não existe username, tenta por email (case insensitive)
-                user_qs_email = User.objects.filter(email__iexact=username)
-                if user_qs_email.exists():
-                    self.cleaned_data['username'] = user_qs_email.first().username
+                # Se não tem @, trata como matrícula (que é o username)
+                # Apenas garante case-insensitive
+                user_qs = User.objects.filter(username__iexact=username)
+                if user_qs.exists():
+                    self.cleaned_data['username'] = user_qs.first().username
+        
         return super().clean()
 
-class UserRegistrationForm(forms.ModelForm):
-    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Confirme a senha', widget=forms.PasswordInput)
-    curso = forms.ModelChoiceField(queryset=Curso.objects.all(), label='Curso de Graduação')
+class UserRegistrationForm(forms.Form):
+    nome = forms.CharField(label='Nome Completo', max_length=200, required=True)
+    matricula = forms.CharField(label='Matrícula', max_length=50, required=True, widget=forms.NumberInput(attrs={'placeholder': 'Ex: 2023001234'}))
+    email = forms.EmailField(label='E-mail', required=True)
+    password = forms.CharField(label='Senha', widget=forms.PasswordInput, required=True)
+    password2 = forms.CharField(label='Confirme a senha', widget=forms.PasswordInput, required=True)
+    curso = forms.ModelChoiceField(queryset=Curso.objects.all(), label='Curso de Graduação', required=True)
     semestre = forms.ModelChoiceField(queryset=Semestre.objects.all(), label='Semestre de Ingresso')
-
-    class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email')
 
     def clean_password2(self):
         cd = self.cleaned_data
         if cd.get('password') != cd.get('password2'):
             raise forms.ValidationError('As senhas não coincidem.')
         return cd.get('password2')
+    
+    def clean_matricula(self):
+        matricula = self.cleaned_data.get('matricula')
+        if matricula and not matricula.isdigit():
+            raise forms.ValidationError('A matrícula deve conter apenas números.')
+        if Aluno.objects.filter(matricula=matricula).exists():
+            raise forms.ValidationError('Esta matrícula já está cadastrada.')
+        if User.objects.filter(username=matricula).exists():
+            raise forms.ValidationError('Esta matrícula já está em uso.')
+        return matricula
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Este e-mail já está cadastrado.')
+        return email
+    
+    def clean_nome(self):
+        nome = self.cleaned_data.get('nome', '').strip()
+
+        nome = re.sub(r'\s+', ' ', nome)
+
+        partes = nome.split(' ')
+        if len(partes) < 2:
+            raise forms.ValidationError('Informe nome e sobrenome.')
+
+        for parte in partes:
+            if len(parte) < 2:
+                raise forms.ValidationError(
+                    'Cada parte do nome deve ter ao menos 2 letras.'
+                )
+
+        if re.search(r'\d', nome):
+            raise forms.ValidationError(
+                'O nome não pode conter números.'
+            )
+
+        if not re.match(r'^[A-Za-zÀ-ÖØ-öø-ÿ ]+$', nome):
+            raise forms.ValidationError(
+                'O nome não pode conter símbolos especiais.'
+            )
+
+        nome = ' '.join(p.capitalize() for p in partes)
+
+        return nome
 
 class CategoriaCursoDiretaForm(forms.Form):
     curso = forms.ModelChoiceField(queryset=Curso.objects.all(), label='Curso')

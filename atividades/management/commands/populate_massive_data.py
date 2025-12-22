@@ -173,21 +173,25 @@ class Command(BaseCommand):
                     
                     # 1. Criar usuários em massa com SQL puro
                     usuarios_sql = []
-                    usernames_batch = []
+                    usernames_batch = []  # Agora são matrículas
+                    nomes_batch = []  # Nomes completos
                     
                     for i in range(60):
                         primeiro_nome = random.choice(primeiros_nomes)
                         sobrenome = random.choice(sobrenomes)
-                        username = f'{primeiro_nome.lower()}_{sobrenome.lower()}_{curso.nome.replace(" ", "")[:3].lower()}_{semestre.nome.replace(".", "")}_{i+1}'
-                        email = f'{username}@example.com'
+                        nome_completo = f'{primeiro_nome} {sobrenome}'
+                        # Gerar matrícula única com timestamp para evitar conflitos
+                        matricula = f'{curso.nome[:3].upper()}{semestre.nome.replace(".", "")}{i+1:03d}'
+                        email = f'{matricula.lower()}@example.com'
                         password = 'pbkdf2_sha256$600000$salt$hash'  # Senha dummy
                         
-                        usernames_batch.append(username)
+                        usernames_batch.append(matricula)
+                        nomes_batch.append(nome_completo)
                         usuarios_sql.append(
-                            f"('{username}', '{password}', '{email}', '{primeiro_nome}', '{sobrenome}', 0, 1, 1, datetime('now'), datetime('now'))"
+                            f"('{matricula}', '{password}', '{email}', '', '', 0, 1, 1, datetime('now'), datetime('now'))"
                         )
                     
-                    # Inserir usuários
+                    # Inserir usuários (com first_name e last_name vazios)
                     if usuarios_sql:
                         sql = f"""
                         INSERT OR IGNORE INTO auth_user 
@@ -196,7 +200,9 @@ class Command(BaseCommand):
                         """
                         with connection.cursor() as cursor:
                             cursor.execute(sql)
-                            total_alunos += cursor.rowcount
+                            rows_affected = cursor.rowcount
+                            if rows_affected > 0:
+                                total_alunos += rows_affected
                     
                     # 2. Buscar IDs dos usuários criados
                     usernames_escaped = ','.join([f"'{u}'" for u in usernames_batch])
@@ -206,18 +212,19 @@ class Command(BaseCommand):
                         )
                         user_ids = {row[1]: row[0] for row in cursor.fetchall()}
                     
-                    # 3. Criar alunos em massa
+                    # 3. Criar alunos em massa com nome e matrícula
                     alunos_sql = []
-                    for username in usernames_batch:
-                        if username in user_ids:
+                    for idx, matricula in enumerate(usernames_batch):
+                        if matricula in user_ids:
+                            nome_escapado = nomes_batch[idx].replace("'", "''")
                             alunos_sql.append(
-                                f"({user_ids[username]}, {curso.id}, {semestre.id})"
+                                f"({user_ids[matricula]}, '{nome_escapado}', '{matricula}', {curso.id}, {semestre.id})"
                             )
                     
                     if alunos_sql:
                         sql = f"""
                         INSERT OR IGNORE INTO atividades_aluno 
-                        (user_id, curso_id, semestre_ingresso_id)
+                        (user_id, nome, matricula, curso_id, semestre_ingresso_id)
                         VALUES {','.join(alunos_sql)}
                         """
                         with connection.cursor() as cursor:

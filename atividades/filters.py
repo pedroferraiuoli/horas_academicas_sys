@@ -102,7 +102,8 @@ class AtividadesFilter(django_filters.FilterSet):
     status = django_filters.ChoiceFilter(
         choices=(
             ('1', 'Aprovadas'),
-            ('0', 'Aguardando'),
+            ('2', 'Rejeitadas'),
+            ('0', 'Pendentes'),
         ),
         label='Status',
         method='filter_atividades_status',
@@ -147,11 +148,15 @@ class AtividadesFilter(django_filters.FilterSet):
 
         # Aprovadas
         if value == '1':
-            return queryset.filter(horas_aprovadas__isnull=False)
+            return queryset.filter(status='Aprovada')
+        
+        # Rejeitadas
+        if value == '2':
+            return queryset.filter(status='Rejeitada')
 
-        # Aguardando
+        # Pendentes
         if value == '0':
-            return queryset.filter(horas_aprovadas__isnull=True)
+            return queryset.filter(status='Pendente')
 
         return queryset
     
@@ -160,7 +165,8 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
     status = django_filters.ChoiceFilter(
         choices=(
             ('1', 'Aprovadas'),
-            ('0', 'Aguardando'),
+            ('2', 'Rejeitadas'),
+            ('0', 'Pendentes'),
         ),
         label='Status',
         method='filter_atividades_status',
@@ -176,22 +182,51 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
         )
     )
 
+    aluno_id = django_filters.NumberFilter(widget=forms.HiddenInput(), method='filter_aluno_id')
+
     class Meta:
         model = Atividade
-        fields = ['status', 'nome_aluno']
+        fields = ['status', 'nome_aluno', 'aluno_id']
+
+    def filter_aluno_id(self, queryset, name, value):
+        return queryset.filter(aluno__id=value)
 
     def filtrar_nome_aluno(self, queryset, name, value):
+        primeiro_nome = value.split(' ')[0]
+        segundo_nome = value.split(' ')[1] if len(value.split(' ')) > 1 else ''
         return queryset.filter(
-            Q(aluno__user__first_name__icontains=value) |
-            Q(aluno__user__last_name__icontains=value) |
+            Q(aluno__user__first_name__icontains=primeiro_nome) &
+            Q(aluno__user__last_name__icontains=segundo_nome) |
             Q(aluno__user__username__icontains=value)
         )
     
-    def __init__ (self, *args, show_status=True, **kwargs):
+    def filter_atividades_status(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        # Aprovadas
+        if value == '1':
+            return queryset.filter(status='Aprovada')
+        
+        # Rejeitadas
+        if value == '2':
+            return queryset.filter(status='Rejeitada')
+
+        # Pendentes
+        if value == '0':
+            return queryset.filter(status='Pendente')
+        return queryset
+    
+    def __init__ (self, *args, aluno_id=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if not show_status:
+        if aluno_id:
+            self.filters.pop('nome_aluno')
+
+        if not aluno_id:
+            self.filters.pop('aluno_id')
             self.filters.pop('status')
+
 
 class CursoFilter(django_filters.FilterSet):
     nome = django_filters.CharFilter(

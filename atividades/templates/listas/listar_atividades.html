@@ -5,7 +5,12 @@
 {% if filter.form.categoria.value %}
   <div class="alert alert-warning">Filtrando por categoria: <b>{{ filter.form.cleaned_data.categoria.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-blue ms-2">Remover filtro</a></div>
 {% endif %}
+
+{% if filter.form.categoria.value %}
 <a href="{% url 'cadastrar_atividade' %}?categoria={{ filter.form.categoria.value }}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
+{% else %}
+<a href="{% url 'cadastrar_atividade' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
+{% endif %}
 
 <form method="get" class="mb-3 filtros-atividades">
   <div class="row g-2 align-items-end">

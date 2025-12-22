@@ -2,13 +2,28 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from atividades.models import Curso, Categoria, CategoriaCurso, Aluno, Semestre, Atividade
 from datetime import datetime, timedelta
+from django.db import connection, transaction
 import random
+import time
 
 class Command(BaseCommand):
     help = 'Popula o sistema com dados massivos: 50 alunos por curso/semestre e 50 atividades por aluno.'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.WARNING('Iniciando população massiva de dados...'))
+        tempo_inicio = time.time()
+        
+        self.stdout.write(self.style.WARNING('='*60))
+        self.stdout.write(self.style.WARNING('POPULAÇÃO MASSIVA ULTRA-RÁPIDA (SQL PURO)'))
+        self.stdout.write(self.style.WARNING('='*60))
+        
+        # Otimizações SQLite
+        self.stdout.write('\n[OTIMIZAÇÃO] Configurando SQLite para máxima velocidade...')
+        with connection.cursor() as cursor:
+            cursor.execute("PRAGMA synchronous = OFF")
+            cursor.execute("PRAGMA journal_mode = MEMORY")
+            cursor.execute("PRAGMA temp_store = MEMORY")
+            cursor.execute("PRAGMA cache_size = 1000000")
+        self.stdout.write(self.style.SUCCESS('  ✓ SQLite otimizado'))
         
         # Buscar todos os cursos e semestres
         cursos = list(Curso.objects.all())
@@ -109,111 +124,206 @@ class Command(BaseCommand):
         
         total_alunos = 0
         total_atividades = 0
+        tempo_inicio = time.time()
         
-        # Para cada curso
+        # Contar total de combinações
+        total_combinacoes = 0
         for curso in cursos:
-            self.stdout.write(f'\nProcessando curso: {curso.nome}')
-            
-            # Buscar todas as categorias associadas a este curso
             categorias_curso = list(CategoriaCurso.objects.filter(curso=curso))
+            if categorias_curso:
+                for semestre in semestres:
+                    categorias_semestre = [cc for cc in categorias_curso if cc.semestre == semestre]
+                    if categorias_semestre:
+                        total_combinacoes += 1
+        
+        self.stdout.write(self.style.SUCCESS(f'\n[PLANEJAMENTO]'))
+        self.stdout.write(self.style.SUCCESS(f'  → Combinações curso/semestre: {total_combinacoes}'))
+        self.stdout.write(self.style.SUCCESS(f'  → Alunos a criar: ~{total_combinacoes * 60}'))
+        self.stdout.write(self.style.SUCCESS(f'  → Atividades a criar: ~{total_combinacoes * 60 * 60}'))
+        
+        combinacao_atual = 0
+        
+        # Usar uma grande transação para tudo
+        with transaction.atomic():
+            self.stdout.write(f'\n[PROCESSAMENTO] Iniciando inserção em lote...\n')
             
-            if not categorias_curso:
-                self.stdout.write(self.style.WARNING(f'  Nenhuma categoria encontrada para {curso.nome}. Pulando...'))
-                continue
-            
-            # Para cada semestre
-            for semestre in semestres:
-                self.stdout.write(f'  Semestre: {semestre.nome}')
+            # Para cada curso
+            for idx_curso, curso in enumerate(cursos, 1):
+                # Buscar todas as categorias associadas a este curso
+                categorias_curso = list(CategoriaCurso.objects.filter(curso=curso))
                 
-                # Filtrar categorias deste semestre
-                categorias_semestre = [cc for cc in categorias_curso if cc.semestre == semestre]
-                
-                if not categorias_semestre:
-                    self.stdout.write(self.style.WARNING(f'    Nenhuma categoria para este semestre. Pulando...'))
+                if not categorias_curso:
                     continue
                 
-                # Criar 50 alunos
-                for i in range(50):
-                    # Gerar nome único
-                    primeiro_nome = random.choice(primeiros_nomes)
-                    sobrenome = random.choice(sobrenomes)
-                    username = f'{primeiro_nome.lower()}_{sobrenome.lower()}_{curso.nome.replace(" ", "")[:3].lower()}_{semestre.nome.replace(".", "")}_{i+1}'
+                # Para cada semestre
+                for semestre in semestres:
+                    # Filtrar categorias deste semestre
+                    categorias_semestre = [cc for cc in categorias_curso if cc.semestre == semestre]
                     
-                    # Criar usuário
-                    user, created = User.objects.get_or_create(
-                        username=username,
-                        defaults={
-                            'email': f'{username}@example.com',
-                            'first_name': primeiro_nome,
-                            'last_name': sobrenome
-                        }
-                    )
+                    if not categorias_semestre:
+                        continue
                     
-                    if created:
-                        user.set_password('senha123')
-                        user.save()
+                    combinacao_atual += 1
+                    tempo_decorrido = time.time() - tempo_inicio
                     
-                    # Criar aluno
-                    aluno, created_aluno = Aluno.objects.get_or_create(
-                        user=user,
-                        defaults={
-                            'curso': curso,
-                            'semestre_ingresso': semestre
-                        }
-                    )
+                    self.stdout.write(f'[{combinacao_atual}/{total_combinacoes}] {curso.nome[:30]:30} | {semestre.nome} | {tempo_decorrido:.1f}s')
                     
-                    if created_aluno:
-                        total_alunos += 1
+                    # Preparar SQL em massa
+                    inicio_batch = time.time()
                     
-                    # Criar 50 atividades para este aluno
-                    for j in range(50):
-                        categoria = random.choice(categorias_semestre)
+                    # 1. Criar usuários em massa com SQL puro
+                    usuarios_sql = []
+                    usernames_batch = []
+                    
+                    for i in range(60):
+                        primeiro_nome = random.choice(primeiros_nomes)
+                        sobrenome = random.choice(sobrenomes)
+                        username = f'{primeiro_nome.lower()}_{sobrenome.lower()}_{curso.nome.replace(" ", "")[:3].lower()}_{semestre.nome.replace(".", "")}_{i+1}'
+                        email = f'{username}@example.com'
+                        password = 'pbkdf2_sha256$600000$salt$hash'  # Senha dummy
                         
-                        # Definir datas dentro do período do semestre
-                        if semestre.data_inicio and semestre.data_fim:
-                            data_inicio = datetime.strptime(str(semestre.data_inicio), '%Y-%m-%d')
-                            data_fim = datetime.strptime(str(semestre.data_fim), '%Y-%m-%d')
-                            dias_diferenca = (data_fim - data_inicio).days
-                            data_atividade = data_inicio + timedelta(days=random.randint(0, dias_diferenca))
-                        else:
-                            data_atividade = datetime.now()
-                        
-                        # Horas entre 2 e 40
-                        horas = random.randint(2, 40)
-                        
-                        # 70% das atividades já aprovadas
-                        if random.random() < 0.7:
-                            # Aprovadas com 80-100% das horas ou rejeitadas
-                            if random.random() < 0.9:  # 90% aprovadas
-                                horas_aprovadas = random.randint(int(horas * 0.8), horas)
-                            else:  # 10% rejeitadas
-                                horas_aprovadas = 0
-                        else:
-                            horas_aprovadas = None  # 30% aguardando aprovação
-                        
-                        nome_atividade = random.choice(atividades_nomes)
-                        descricao = random.choice(descricoes)
-                        
-                        # Criar atividade (pulando validação para agilizar)
-                        atividade = Atividade(
-                            aluno=aluno,
-                            categoria=categoria,
-                            nome=nome_atividade,
-                            descricao=descricao,
-                            horas=horas,
-                            horas_aprovadas=horas_aprovadas,
-                            data=data_atividade.date(),
-                            documento=None  # Sem documento
+                        usernames_batch.append(username)
+                        usuarios_sql.append(
+                            f"('{username}', '{password}', '{email}', '{primeiro_nome}', '{sobrenome}', 0, 1, 1, datetime('now'), datetime('now'))"
                         )
-                        
-                        # Salvar sem chamar clean() para ser mais rápido
-                        atividade.save_base(raw=True)
-                        total_atividades += 1
                     
-                    # Feedback a cada 10 alunos
-                    if (i + 1) % 10 == 0:
-                        self.stdout.write(f'    Criados {i + 1}/50 alunos...')
+                    # Inserir usuários
+                    if usuarios_sql:
+                        sql = f"""
+                        INSERT OR IGNORE INTO auth_user 
+                        (username, password, email, first_name, last_name, is_superuser, is_staff, is_active, date_joined, last_login)
+                        VALUES {','.join(usuarios_sql)}
+                        """
+                        with connection.cursor() as cursor:
+                            cursor.execute(sql)
+                            total_alunos += cursor.rowcount
+                    
+                    # 2. Buscar IDs dos usuários criados
+                    usernames_escaped = ','.join([f"'{u}'" for u in usernames_batch])
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            f"SELECT id, username FROM auth_user WHERE username IN ({usernames_escaped})"
+                        )
+                        user_ids = {row[1]: row[0] for row in cursor.fetchall()}
+                    
+                    # 3. Criar alunos em massa
+                    alunos_sql = []
+                    for username in usernames_batch:
+                        if username in user_ids:
+                            alunos_sql.append(
+                                f"({user_ids[username]}, {curso.id}, {semestre.id})"
+                            )
+                    
+                    if alunos_sql:
+                        sql = f"""
+                        INSERT OR IGNORE INTO atividades_aluno 
+                        (user_id, curso_id, semestre_ingresso_id)
+                        VALUES {','.join(alunos_sql)}
+                        """
+                        with connection.cursor() as cursor:
+                            cursor.execute(sql)
+                    
+                    # 4. Buscar IDs dos alunos
+                    user_ids_list = list(user_ids.values())
+                    user_ids_escaped = ','.join([str(uid) for uid in user_ids_list])
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            f"SELECT id, user_id FROM atividades_aluno WHERE user_id IN ({user_ids_escaped})"
+                        )
+                        aluno_ids = {row[1]: row[0] for row in cursor.fetchall()}
+                    
+                    # 5. Criar atividades em massa (SUPER OTIMIZADO)
+                    atividades_sql = []
+                    batch_size = 500  # Criar em lotes de 500
+                    
+                    for username in usernames_batch:
+                        if username not in user_ids or user_ids[username] not in aluno_ids:
+                            continue
+                        
+                        aluno_id = aluno_ids[user_ids[username]]
+                        
+                        for j in range(60):
+                            categoria = random.choice(categorias_semestre)
+                            
+                            # Definir datas
+                            if semestre.data_inicio and semestre.data_fim:
+                                data_inicio = datetime.strptime(str(semestre.data_inicio), '%Y-%m-%d')
+                                data_fim = datetime.strptime(str(semestre.data_fim), '%Y-%m-%d')
+                                dias_diferenca = (data_fim - data_inicio).days
+                                data_atividade = data_inicio + timedelta(days=random.randint(0, max(1, dias_diferenca)))
+                            else:
+                                data_atividade = datetime.now()
+                            
+                            horas = random.randint(2, 40)
+                            
+                            # 70% aprovadas
+                            if random.random() < 0.7:
+                                if random.random() < 0.9:
+                                    horas_aprovadas = random.randint(int(horas * 0.8), horas)
+                                    status = 'Aprovada'
+                                else:
+                                    horas_aprovadas = 0
+                                    status = 'Rejeitada'
+                                horas_aprovadas_sql = str(horas_aprovadas)
+                            else:
+                                horas_aprovadas_sql = 'NULL'
+                                status = 'Pendente'
+                            
+                            nome = random.choice(atividades_nomes).replace("'", "''")
+                            descricao = random.choice(descricoes).replace("'", "''")
+                            data_str = data_atividade.strftime('%Y-%m-%d')
+                            
+                            atividades_sql.append(
+                                f"({aluno_id}, {categoria.id}, '{nome}', '{descricao}', {horas}, {horas_aprovadas_sql}, '{data_str}', NULL, '{status}')"
+                            )
+                            
+                            # Inserir em lotes
+                            if len(atividades_sql) >= batch_size:
+                                sql = f"""
+                                INSERT INTO atividades_atividade 
+                                (aluno_id, categoria_id, nome, descricao, horas, horas_aprovadas, data, documento, status)
+                                VALUES {','.join(atividades_sql)}
+                                """
+                                with connection.cursor() as cursor:
+                                    cursor.execute(sql)
+                                    total_atividades += cursor.rowcount
+                                atividades_sql = []
+                    
+                    # Inserir atividades restantes
+                    if atividades_sql:
+                        sql = f"""
+                        INSERT INTO atividades_atividade 
+                        (aluno_id, categoria_id, nome, descricao, horas, horas_aprovadas, data, documento, status)
+                        VALUES {','.join(atividades_sql)}
+                        """
+                        with connection.cursor() as cursor:
+                            cursor.execute(sql)
+                            total_atividades += cursor.rowcount
+                    
+                    tempo_batch = time.time() - inicio_batch
+                    self.stdout.write(f'    ✓ Lote processado em {tempo_batch:.1f}s | Total: {total_alunos} alunos, {total_atividades} atividades')
+                
+                # Feedback a cada curso
+                if idx_curso % 5 == 0:
+                    self.stdout.write(self.style.SUCCESS(f'\n  → Progresso: {idx_curso}/{len(cursos)} cursos processados\n'))
         
-        self.stdout.write(self.style.SUCCESS(f'\n✓ População massiva concluída!'))
-        self.stdout.write(self.style.SUCCESS(f'  Total de alunos criados: {total_alunos}'))
-        self.stdout.write(self.style.SUCCESS(f'  Total de atividades criadas: {total_atividades}'))
+        # Restaurar configurações SQLite
+        self.stdout.write('\n[FINALIZAÇÃO] Restaurando configurações SQLite...')
+        with connection.cursor() as cursor:
+            cursor.execute("PRAGMA synchronous = FULL")
+            cursor.execute("PRAGMA journal_mode = DELETE")
+        self.stdout.write(self.style.SUCCESS('  ✓ Configurações restauradas'))
+        
+        tempo_total = time.time() - tempo_inicio
+        minutos = int(tempo_total // 60)
+        segundos = tempo_total % 60
+        
+        self.stdout.write(self.style.SUCCESS(f'\n{'='*60}'))
+        self.stdout.write(self.style.SUCCESS(f'✓ POPULAÇÃO MASSIVA CONCLUÍDA!'))
+        self.stdout.write(self.style.SUCCESS(f'{'='*60}'))
+        self.stdout.write(self.style.SUCCESS(f'  → Alunos criados: {total_alunos}'))
+        self.stdout.write(self.style.SUCCESS(f'  → Atividades criadas: {total_atividades}'))
+        self.stdout.write(self.style.SUCCESS(f'  → Tempo total: {minutos}min {segundos:.1f}s'))
+        if tempo_total > 0:
+            self.stdout.write(self.style.SUCCESS(f'  → Velocidade: {total_atividades/tempo_total:.0f} atividades/segundo'))
+        self.stdout.write(self.style.SUCCESS(f'{'='*60}'))

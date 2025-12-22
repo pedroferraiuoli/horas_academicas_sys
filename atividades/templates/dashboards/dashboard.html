@@ -14,9 +14,10 @@
 
 <p class="dashboard-course-info">Curso: <span class="fw-bold">{{ aluno.curso }}</span> | Horas requeridas: <span class="fw-bold">{{ aluno.curso.horas_requeridas }}h</span></p>
     {% if ultrapassou_limite %}
-      <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+      <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        Você possui categorias em que o total de horas cadastradas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
+        Você possui categorias em que o total de horas aprovadas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
       </div>
     {% endif %}
     <div class="dashboard-progress-section">

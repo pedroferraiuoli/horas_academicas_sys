@@ -1,9 +1,9 @@
-from atividades.selectors import CategoriaCursoSelectors, UserSelectors
+from atividades.selectors import AtividadeSelectors, CategoriaCursoSelectors, UserSelectors
 from .models import Aluno, Atividade, Categoria, Curso, Coordenador, CategoriaCurso, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Sum, QuerySet
 from django.core.cache import cache
 
     
@@ -111,6 +111,7 @@ class AtividadeService:
 
     @staticmethod
     def aprovar_horas(*, atividade: Atividade, horas_aprovadas: int):
+        
         if horas_aprovadas is None:
             raise ValueError('Informe a quantidade de horas.')
         
@@ -123,7 +124,7 @@ class AtividadeService:
         if atividade.status == 'Limite Atingido':
             raise ValueError('Não é possível aprovar horas para esta atividade, o limite da categoria já foi atingido.')
         
-        if atividade.categoria.atingiu_limite_pelo_aluno(atividade.aluno):
+        if atividade.categoria.atingiu_limite_pelo_aluno(atividade.aluno) and atividade.horas_aprovadas is None:
             raise ValueError('Não é possível aprovar horas para esta atividade, o limite da categoria já foi atingido para este aluno.')
 
         atividade.horas_aprovadas = horas_aprovadas
@@ -131,6 +132,61 @@ class AtividadeService:
         
         # Invalidar cache do aluno após aprovação
         AtividadeService.invalidar_cache_aluno(atividade.aluno_id)
+        AtividadeService.recalcular_status_atividade(atividade=atividade)
+
+    @staticmethod
+    def recalcular_status_atividades_qs(atividades: QuerySet[Atividade]):
+        for atividade in atividades:
+            if atividade.categoria.atingiu_limite_pelo_aluno(atividade.aluno):
+                atividade.status = 'Limite Atingido'
+            elif atividade.horas_aprovadas is None:
+                atividade.status = 'Pendente'
+            elif atividade.horas_aprovadas == 0:
+                atividade.status = 'Rejeitada'
+            else:
+                atividade.status = 'Aprovada' 
+            atividade.save()
+
+    @staticmethod
+    def recalcular_status_atividade(atividade: Atividade):
+        if atividade.horas_aprovadas is not None and atividade.horas_aprovadas > 0:
+            atividade.status = 'Aprovada'
+        else:
+            atividade.status = 'Rejeitada'
+        atividade.save()
+        atividades = AtividadeSelectors.get_atividades_aluno(
+            aluno=atividade.aluno,
+            curso_categoria=atividade.categoria,
+            aprovadas=False
+        ).exclude(id=atividade.id)
+        AtividadeService.recalcular_status_atividades_qs(atividades=atividades)
+
+    @staticmethod
+    def recalcular_status_atividades_apos_exclusao(aluno: Aluno, categoria: CategoriaCurso):
+        atividades = AtividadeSelectors.get_atividades_aluno(
+            aluno=aluno,
+            curso_categoria=categoria,
+            limite_atingido=True
+        )
+        AtividadeService.recalcular_status_atividades_qs(atividades=atividades)
+
+    @staticmethod
+    def exluir_atividade(atividade: Atividade):
+        aluno = atividade.aluno
+        categoria = atividade.categoria
+        atividade.delete()
+        AtividadeService.recalcular_status_atividades_apos_exclusao(aluno=aluno, categoria=categoria)
+        AtividadeService.invalidar_cache_aluno(aluno.id)
+
+    @staticmethod
+    def cadastrar_atividade(*, form, aluno: Aluno):
+        atividade = form.save(commit=False)
+        atividade.aluno = aluno
+        if atividade.categoria.atingiu_limite_pelo_aluno(aluno):
+            atividade.status = 'Limite Atingido'
+        atividade.save()
+        AtividadeService.invalidar_cache_aluno(aluno.id)
+        return atividade
 
 class CategoriaCursoService:
    

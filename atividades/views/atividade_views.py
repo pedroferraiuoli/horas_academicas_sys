@@ -19,16 +19,14 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        categoria_id = request.GET.get('categoria')
+        categoria_id = request.GET.get('categoria', None)
         form = AtividadeForm(aluno=self.aluno, categoria_id=categoria_id)
         return render(request, self.template_name, {'form': form})
     
     def post(self, request):
         form = AtividadeForm(request.POST, request.FILES, aluno=self.aluno)
         if form.is_valid():
-            atividade = form.save(commit=False)
-            atividade.aluno = self.aluno
-            atividade.save()
+            atividade = AtividadeService.cadastrar_atividade(form=form, aluno=self.aluno)
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
             return redirect('dashboard')
         return render(request, self.template_name, {'form': form})
@@ -67,7 +65,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         return render(request, self.template_name, {'atividade': self.atividade})
 
     def post(self, request):
-        self.atividade.delete()
+        AtividadeService.exluir_atividade(atividade=self.atividade)
         messages.success(request, f'Atividade {self.atividade.nome} excluída com sucesso!')
         return redirect('listar_atividades')
 
@@ -101,12 +99,10 @@ class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         if aluno_id:
             aluno = get_object_or_404(Aluno, id=aluno_id, curso=coordenador.curso)
             atividades = AtividadeSelectors.get_atividades_aluno(aluno)
-            show_status_filter = True
         else: 
             atividades = AtividadeSelectors.get_atividades_pendentes(curso=curso)
-            show_status_filter = False
 
-        filtro = AtividadesCoordenadorFilter(self.request.GET, queryset=atividades, show_status=show_status_filter)
+        filtro = AtividadesCoordenadorFilter(self.request.GET, queryset=atividades, aluno_id=aluno_id)
         atividades_filtradas = filtro.qs
 
         atividades_paginadas = paginate_queryset(qs=atividades_filtradas, page=self.request.GET.get('page'), per_page=10)

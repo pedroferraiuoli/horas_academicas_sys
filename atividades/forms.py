@@ -1,6 +1,6 @@
 import re
 from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors, UserSelectors
-from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
+from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras, ValidadorDeNome
 from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
@@ -211,32 +211,8 @@ class UserRegistrationForm(forms.Form):
         return email
     
     def clean_nome(self):
-        nome = self.cleaned_data.get('nome', '').strip()
-
-        nome = re.sub(r'\s+', ' ', nome)
-
-        partes = nome.split(' ')
-        if len(partes) < 2:
-            raise forms.ValidationError('Informe nome e sobrenome.')
-
-        for parte in partes:
-            if len(parte) < 2:
-                raise forms.ValidationError(
-                    'Cada parte do nome deve ter ao menos 2 letras.'
-                )
-
-        if re.search(r'\d', nome):
-            raise forms.ValidationError(
-                'O nome não pode conter números.'
-            )
-
-        if not re.match(r'^[A-Za-zÀ-ÖØ-öø-ÿ ]+$', nome):
-            raise forms.ValidationError(
-                'O nome não pode conter símbolos especiais.'
-            )
-
-        nome = ' '.join(p.capitalize() for p in partes)
-
+        nome = self.cleaned_data.get('nome')
+        ValidadorDeNome.validar_nome(nome)
         return nome
 
 class CategoriaCursoDiretaForm(forms.Form):

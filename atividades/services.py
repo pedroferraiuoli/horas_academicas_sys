@@ -286,10 +286,22 @@ class AlunoService:
     def calcular_horas_complementares_validas(
         *,
         aluno: Aluno,
-        apenas_aprovadas: bool = False
+        apenas_aprovadas: bool = False,
+        categoria: CategoriaCurso = None
     ) -> int:
         if not aluno.curso:
             return 0
+        
+        if categoria:
+            soma = AtividadeSelectors.get_total_horas_aluno(
+                aluno=aluno,
+                categoria=categoria,
+                apenas_aprovadas=apenas_aprovadas
+            )
+
+            limite = categoria.limite_horas or 0
+            total = min(soma, limite) if limite > 0 else soma
+            return total
 
         categorias = CategoriaCursoSelectors.get_categorias_curso(
             curso=aluno.curso,
@@ -299,20 +311,65 @@ class AlunoService:
         total = 0
 
         for curso_categoria in categorias:
-            qs = aluno.atividades.filter(categoria=curso_categoria)
-
-            if apenas_aprovadas:
-                soma = qs.aggregate(
-                    total=Sum('horas_aprovadas')
-                )['total'] or 0
-            else:
-                soma = qs.aggregate(
-                    total=Sum('horas')
-                )['total'] or 0
+            soma = AtividadeSelectors.get_total_horas_aluno(
+                aluno=aluno,
+                categoria=curso_categoria,
+                apenas_aprovadas=apenas_aprovadas
+            )
 
             limite = curso_categoria.limite_horas or 0
             total += min(soma, limite) if limite > 0 else soma
 
         return total
+    
 
+class RelatorioAlunoService:
+
+    @staticmethod
+    def gerar_dados_relatorio(*, aluno):
+        categorias = CategoriaCursoSelectors.get_categorias_curso(
+            curso=aluno.curso,
+            semestre=aluno.semestre_ingresso
+        )
+
+        categorias_dados = []
+
+        for categoria in categorias:
+            atividades = AtividadeSelectors.get_atividades_aluno(
+                aluno=aluno,
+                curso_categoria=categoria,
+                aprovadas=True
+            )
+
+            if not atividades.exists():
+                continue
+
+            horas_brutas = sum(a.horas_aprovadas for a in atividades)
+
+            horas_validas = AlunoService.calcular_horas_complementares_validas(
+                aluno=aluno,
+                apenas_aprovadas=True,
+                categoria=categoria
+            )
+
+            categorias_dados.append({
+                'categoria': categoria,
+                'atividades': atividades,
+                'horas_brutas': horas_brutas,
+                'horas_validas': horas_validas,
+            })
+
+        total_horas_validas = AlunoService.calcular_horas_complementares_validas(
+            aluno=aluno,
+            apenas_aprovadas=True
+        )
+
+        horas_requeridas = aluno.curso.horas_requeridas
+
+        return {
+            'aluno': aluno,
+            'categorias': categorias_dados,
+            'total_horas_validas': total_horas_validas,
+            'horas_requeridas': horas_requeridas,
+        }
 

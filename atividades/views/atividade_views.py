@@ -131,7 +131,7 @@ class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
         self.atividade = get_object_or_404(Atividade, id=atividade_id)
         if self.atividade.aluno.curso != self.coordenador.curso:
             messages.warning(request, 'Acesso negado à atividade deste aluno.')
-            return redirect('dashboard')
+            return redirect(request.META.get('HTTP_REFERER', 'listar_atividades_coordenador'))
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -145,7 +145,7 @@ class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
             AtividadeService.aprovar_horas(atividade=self.atividade, horas_aprovadas=horas_aprovadas)
         except ValueError as e:
             messages.warning(request, str(e))
-            return redirect('listar_atividades_coordenador')
+            return redirect(request.META.get('HTTP_REFERER', 'listar_atividades_coordenador'))
 
         messages.success(request, f'Atividade {self.atividade.nome} aprovada com {horas_aprovadas} horas!')
-        return redirect('listar_atividades_coordenador')
+        return redirect(request.META.get('HTTP_REFERER', 'listar_atividades_coordenador'))

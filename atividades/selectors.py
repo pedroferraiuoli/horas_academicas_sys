@@ -64,13 +64,22 @@ class AtividadeSelectors:
         return atividades.count()
 
     @staticmethod
-    def get_total_horas_por_aluno_categoria(*, aluno, curso_categoria):
-        return (
-            aluno.atividades
-            .filter(categoria=curso_categoria)
-            .aggregate(total=Sum('horas_aprovadas'))['total']
-            or 0
-        )
+    def get_total_horas_aluno(
+        *,
+        aluno: Aluno,
+        categoria: Optional[CategoriaCurso] = None,
+        apenas_aprovadas: bool = False
+    ) -> int:
+        qs = aluno.atividades
+
+        if categoria:
+            qs = qs.filter(categoria=categoria)
+
+        campo = 'horas_aprovadas' if apenas_aprovadas else 'horas'
+
+        return qs.aggregate(
+            total=Sum(campo)
+        )['total'] or 0
     
 class SemestreSelectors:
     
@@ -113,13 +122,12 @@ class CategoriaCursoSelectors:
     def get_categorias_curso(*, curso=None, semestre=None) -> QuerySet['CategoriaCurso']:
         """Busca categorias"""
 
-        cat = CategoriaCurso.objects.select_related('categoria').order_by('categoria__nome')
-
+        cat = CategoriaCurso.objects.all()
         if curso:
             cat = cat.filter(curso=curso)
         if semestre:
             cat = cat.filter(semestre=semestre)
-        return cat
+        return cat.select_related('categoria').order_by('categoria__nome')
     
     @staticmethod
     def get_categorias_curso_disponiveis_para_associar(curso, semestre):

@@ -29,6 +29,10 @@ from .curso_categoria_views import (
     AssociarCategoriasCursoView,
 )
 
+from .relatorio_views import (
+    GerarRelatorioAlunoView,
+)
+
 from .atividade_views import (
     CadastrarAtividadeView,
     EditarAtividadeView,

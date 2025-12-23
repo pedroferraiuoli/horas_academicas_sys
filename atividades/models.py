@@ -54,17 +54,17 @@ class CategoriaCurso(BaseModel):
     
     def ultrapassou_limite_pelo_aluno(self, aluno):
         from atividades.selectors import AtividadeSelectors
-        total_horas = AtividadeSelectors.get_total_horas_por_aluno_categoria(
+        total_horas = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,
-            curso_categoria=self
+            categoria=self
         )
         return total_horas > self.limite_horas
     
     def atingiu_limite_pelo_aluno(self, aluno):
         from atividades.selectors import AtividadeSelectors
-        total_horas = AtividadeSelectors.get_total_horas_por_aluno_categoria(
+        total_horas = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,
-            curso_categoria=self
+            categoria=self
         )
         return total_horas >= self.limite_horas
     

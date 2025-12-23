@@ -49,6 +49,7 @@ urlpatterns = [
     path('alunos-coordenador/', views.ListarAlunosCoordenadorView.as_view(), name='listar_alunos_coordenador'),
     path('atividades-coordenador/', views.ListarAtividadesCoordenadorView.as_view(), name='listar_atividades_coordenador'),
     path('aprovar-horas-atividade/<int:atividade_id>/', views.AprovarHorasAtividadeView.as_view(), name='aprovar_horas_atividade'),
+    path('relatorio/gerar/', views.GerarRelatorioAlunoView.as_view(), name='gerar_relatorio_aluno'),
     #LOGS
     path('visualizar-logs/', views.VisualizarLogsView.as_view(), name='visualizar_logs'),
 ]

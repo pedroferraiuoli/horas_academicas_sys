@@ -65,6 +65,10 @@ class CursoForm(forms.ModelForm):
     class Meta:
         model = Curso
         fields = ['nome', 'horas_requeridas']
+        widgets = {
+            'nome': forms.TextInput(attrs={'placeholder': 'Nome do curso'}),
+            'horas_requeridas': forms.NumberInput(attrs={'placeholder': 'Horas requeridas para conclusão'})
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -31,7 +31,7 @@ class Categoria(BaseModel):
 
 class Curso(BaseModel):
     nome = models.CharField(max_length=100)
-    horas_requeridas = models.PositiveIntegerField(help_text="Horas totais necessárias para conclusão do curso")
+    horas_requeridas = models.PositiveIntegerField(help_text="Horas totais necessárias para conclusão do curso. (Será aplicado somente para novos semestres!)")
 
     def __str__(self):
         return self.nome

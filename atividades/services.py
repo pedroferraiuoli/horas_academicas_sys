@@ -1,4 +1,4 @@
-from atividades.selectors import AtividadeSelectors, CategoriaCursoSelectors, UserSelectors
+from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, UserSelectors
 from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
@@ -364,7 +364,7 @@ class RelatorioAlunoService:
             apenas_aprovadas=True
         )
 
-        horas_requeridas = aluno.curso.horas_requeridas
+        horas_requeridas = AlunoSelectors.get_horas_necessarias_para_conclusao(aluno=aluno)
 
         return {
             'aluno': aluno,

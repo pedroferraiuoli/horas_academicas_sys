@@ -4,6 +4,7 @@ from .curso_views import (
     EditarCursoView,
     ExcluirCursoView,
     ListarCursosView,
+    AtualizarHorasSemestresView,
 )
 
 from .semestre_views import (

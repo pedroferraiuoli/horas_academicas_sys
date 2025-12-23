@@ -254,6 +254,12 @@ class AlunoSelectors:
         )
         return alunos.order_by('-tem_pendencia', 'user__first_name', 'user__last_name')
     
+    @staticmethod
+    def get_horas_necessarias_para_conclusao(aluno: Aluno) -> int:
+        return aluno.curso.configuracoes_semestre.filter(
+            semestre=aluno.semestre_ingresso
+        ).first().horas_requeridas
+    
 class UserSelectors:
 
     @staticmethod

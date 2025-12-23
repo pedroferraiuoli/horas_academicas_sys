@@ -36,6 +36,22 @@ class Curso(BaseModel):
     def __str__(self):
         return self.nome
     
+class CursoPorSemestre(BaseModel):
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='configuracoes_semestre')
+    semestre = models.ForeignKey(Semestre, on_delete=models.PROTECT)
+    horas_requeridas = models.PositiveIntegerField(
+        help_text="Horas totais necessárias neste semestre"
+    )
+    
+    class Meta:
+        unique_together = ('curso', 'semestre')
+        indexes = [
+            models.Index(fields=['curso', 'semestre'], name='curso_semestre_idx'),
+        ]
+    
+    def __str__(self):
+        return f"{self.curso.nome} - {self.semestre.nome} ({self.horas_requeridas}h)"
+    
 class CategoriaCurso(BaseModel):
     categoria = models.ForeignKey('Categoria', on_delete=models.CASCADE, related_name='categorias_curso')
     curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='categorias')

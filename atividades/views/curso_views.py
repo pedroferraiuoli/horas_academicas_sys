@@ -9,7 +9,7 @@ from ..utils import paginate_queryset
 
 from atividades.selectors import CursoSelectors, SemestreSelectors
 
-from ..models import Curso
+from ..models import Curso, CursoPorSemestre, Semestre
 from ..forms import CursoForm
 from ..mixins import GestorRequiredMixin
 
@@ -43,7 +43,13 @@ class EditarCursoView(GestorRequiredMixin, View):
 
     def get(self, request):
         form = CursoForm(instance=self.curso)
-        return render(request, self.template_name, {'form': form, 'curso': self.curso, 'edit': True})
+        semestres_config = self._get_semestres_config()
+        return render(request, self.template_name, {
+            'form': form, 
+            'curso': self.curso, 
+            'edit': True,
+            'semestres_config': semestres_config
+        })
 
     def post(self, request):
         form = CursoForm(request.POST, instance=self.curso)
@@ -53,7 +59,67 @@ class EditarCursoView(GestorRequiredMixin, View):
             messages.success(request, f'Curso {self.curso.nome} atualizado com sucesso!')
             return redirect('listar_cursos')
             
-        return render(request, self.template_name, {'form': form, 'curso': self.curso, 'edit': True})
+        semestres_config = self._get_semestres_config()
+        return render(request, self.template_name, {
+            'form': form, 
+            'curso': self.curso, 
+            'edit': True,
+            'semestres_config': semestres_config
+        })
+    
+    def _get_semestres_config(self):
+        """Retorna lista de semestres com suas configurações de horas"""
+        semestres_todos = Semestre.objects.all().order_by('-nome')
+        semestres_config = []
+        for semestre in semestres_todos:
+            config = CursoPorSemestre.objects.filter(curso=self.curso, semestre=semestre).first()
+            semestres_config.append({
+                'semestre': semestre,
+                'horas_requeridas': config.horas_requeridas if config else self.curso.horas_requeridas,
+                'id': config.id if config else None
+            })
+        return semestres_config
+
+
+class AtualizarHorasSemestresView(GestorRequiredMixin, View):
+    """View dedicada para atualizar horas requeridas dos semestres de um curso"""
+    
+    def dispatch(self, request, curso_id, *args, **kwargs):
+        self.curso = get_object_or_404(Curso, id=curso_id)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request):
+        semestres_atualizados = 0
+        
+        for key, value in request.POST.items():
+            if key.startswith('horas_semestre_'):
+                semestre_id = key.replace('horas_semestre_', '')
+                horas = int(value) if value else 0
+                
+                try:
+                    semestre = Semestre.objects.get(id=semestre_id)
+                    config, created = CursoPorSemestre.objects.get_or_create(
+                        curso=self.curso,
+                        semestre=semestre,
+                        defaults={'horas_requeridas': horas}
+                    )
+                    
+                    if not created and config.horas_requeridas != horas:
+                        config.horas_requeridas = horas
+                        config.save()
+                        semestres_atualizados += 1
+                    elif created:
+                        semestres_atualizados += 1
+                        
+                except Semestre.DoesNotExist:
+                    continue
+        
+        business_logger.warning(
+            f"HORAS DOS SEMESTRES ATUALIZADAS: Curso {self.curso.nome} | "
+            f"{semestres_atualizados} semestres | User: {request.user.username}"
+        )
+        messages.success(request, f'{semestres_atualizados} semestre(s) atualizado(s) com sucesso!')
+        return redirect('editar_curso', curso_id=self.curso.id)
 
 
 class ExcluirCursoView(GestorRequiredMixin, View):

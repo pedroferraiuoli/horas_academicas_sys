@@ -22,6 +22,7 @@ urlpatterns = [
     path('criar-curso/', views.CriarCursoView.as_view(), name='criar_curso'),
     path('cursos/', views.ListarCursosView.as_view(), name='listar_cursos'),
     path('cursos/<int:curso_id>/editar/', views.EditarCursoView.as_view(), name='editar_curso'),
+    path('cursos/<int:curso_id>/atualizar-horas-semestres/', views.AtualizarHorasSemestresView.as_view(), name='atualizar_horas_semestres'),
     path('cursos/<int:curso_id>/excluir/', views.ExcluirCursoView.as_view(), name='excluir_curso'),
     path('criar-categoria/', views.CriarCategoriaView.as_view(), name='criar_categoria'),
     path('categorias/', views.ListarCategoriasView.as_view(), name='listar_categorias'),

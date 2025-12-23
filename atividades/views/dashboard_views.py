@@ -37,7 +37,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
 
         total_horas = AlunoService.calcular_horas_complementares_validas(aluno=aluno, apenas_aprovadas=True)
-        horas_requeridas = aluno.curso.horas_requeridas if aluno.curso else 0
+        horas_requeridas = AlunoSelectors.get_horas_necessarias_para_conclusao(aluno=aluno)
 
         progresso = 0
         if horas_requeridas > 0:
@@ -59,6 +59,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'progresso_percentual': progresso,
             'atividades_recentes': atividades_recentes,
             'ultrapassou_limite': ultrapassou_limite,
+            'horas_requeridas': horas_requeridas,
         }
 
     def get_gestor_context(self):

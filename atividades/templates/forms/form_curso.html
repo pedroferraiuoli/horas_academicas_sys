@@ -27,7 +27,8 @@
 
     <!-- Form Body -->
     <div class="form-atividade-body">
-      <form method="post" enctype="multipart/form-data" autocomplete="off" class="modern-form">
+      <!-- Formulário de Edição do Curso -->
+      <form method="post" enctype="multipart/form-data" autocomplete="off" class="modern-form" id="curso-form">
         {% csrf_token %}
         
         <div class="form-fields-grid">
@@ -87,8 +88,96 @@
           </button>
         </div>
       </form>
+
+      <!-- Seção de Semestres Antigos (apenas na edição) -->
+      {% if edit and semestres_config %}
+      <div class="mt-4">
+        <div class="form-section-divider">
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="toggleSemestresAntigos()">
+            <i class="bi bi-clock-history me-2"></i>
+            <span id="toggle-text">Mostrar Configurações dos Semestres</span>
+            <i class="bi bi-chevron-down ms-2" id="toggle-icon"></i>
+          </button>
+        </div>
+
+        <div id="semestres-antigos-section" style="display: none;">
+          <!-- Formulário separado para atualizar semestres -->
+          <form method="post" action="{% url 'atualizar_horas_semestres' curso.id %}" autocomplete="off">
+            {% csrf_token %}
+            
+            <div class="alert alert-info mt-2">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Atenção:</strong> Estas configurações afetam apenas alunos que ingressaram no semestre correspondente.
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                  <tr>
+                    <th>Semestre</th>
+                    <th class="text-start">Horas Requeridas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for config in semestres_config %}
+                  <tr>
+                    <td class="text-center">
+                      <i class="bi bi-calendar3 me-2"></i>
+                      <strong>{{ config.semestre.nome }}</strong>
+                    </td>
+                    <td class="text-center">
+                      <input type="number" 
+                             name="horas_semestre_{{ config.semestre.id }}" 
+                             value="{{ config.horas_requeridas }}"
+                             min="0"
+                             class="form-control form-control-sm"
+                             style="max-width: 150px;">
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i>
+                Salvar Configurações dos Semestres
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="toggleSemestresAntigos()">
+                <i class="bi bi-x-circle"></i>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
+
+<script>
+function toggleSemestresAntigos() {
+  const section = document.getElementById('semestres-antigos-section');
+  const cursoForm = document.getElementById('curso-form');
+  const toggleText = document.getElementById('toggle-text');
+  const toggleIcon = document.getElementById('toggle-icon');
+  
+  if (section.style.display === 'none') {
+    cursoForm.style.display = 'none';
+    section.style.display = 'block';
+    toggleText.textContent = 'Ocultar Configurações dos Semestres';
+    toggleIcon.classList.remove('bi-chevron-down');
+    toggleIcon.classList.add('bi-chevron-up');
+  } else {
+    cursoForm.style.display = 'block';
+    section.style.display = 'none';
+    toggleText.textContent = 'Mostrar Configurações dos Semestres';
+    toggleIcon.classList.remove('bi-chevron-up');
+    toggleIcon.classList.add('bi-chevron-down');
+  }
+}
+</script>
 
 {% endblock %}

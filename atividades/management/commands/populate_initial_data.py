@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
-from atividades.models import Curso, Categoria, CategoriaCurso, Aluno, Coordenador, Semestre
+from atividades.models import Curso, Categoria, CategoriaCurso, Aluno, Coordenador, CursoPorSemestre, Semestre
 import random
 import time
 
@@ -115,6 +115,7 @@ class Command(BaseCommand):
                     nome=info['nome'],
                     horas_requeridas=info['horas_requeridas']
                 ))
+
         
         if cursos_para_criar:
             Curso.objects.bulk_create(cursos_para_criar)
@@ -125,6 +126,16 @@ class Command(BaseCommand):
         cursos = list(Curso.objects.all())
         self.stdout.write(self.style.SUCCESS(f'  ✓ Total de {len(cursos)} cursos em {time.time()-inicio:.2f}s'))
 
+        for curso in cursos:
+            for semestre in semestres:
+                    CursoPorSemestre.objects.get_or_create(
+                        curso=curso,
+                        semestre=semestre,
+                        defaults={'horas_requeridas': curso.horas_requeridas}
+                    )
+        
+        self.stdout.write(self.style.SUCCESS(f'  ✓ Configurações de CursoPorSemestre garantidas para todos os cursos e semestres'))
+        
         # Categorias
         self.stdout.write('\n[4/7] Criando categorias...')
         inicio = time.time()

@@ -13,7 +13,7 @@
               <span class="ativ-value">{{ atividade.aluno.nome }}</span>
             </div>
           </div>
-          <div class="col-lg-2 col-12">
+          <div class="col-lg-1 col-12">
             <div class="ativ-col">
               <span class="ativ-label">Matrícula</span>
               <span class="ativ-value">{{ atividade.aluno.matricula }}</span>
@@ -56,11 +56,36 @@
           </div>
           <div class="col-lg desktop-only">
             <div class="ativ-col">
+              <span class="ativ-label">Documento</span>
+              <div class="ativ-value">
+                {% if atividade.documento %}
+                  <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-main-blue btn-sm">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                  </a>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg desktop-only">
+            <div class="ativ-col">
+              <span class="ativ-label">Observação</span>
+              <div class="ativ-value">
+                {% if atividade.observacoes_para_aprovador %}
+                  <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#obsModal{{ forloop.counter }}">
+                    <i class="bi bi-chat-left-text"></i>
+                  </button>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg desktop-only">
+            <div class="ativ-col">
               <span class="ativ-label">Ações</span>
               <div class="ativ-actions">
-                {% if atividade.documento %}
-                  <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i></a>
-                {% endif %}
                 {% if atividade.status != 'Limite Atingido' %}
                 <button type="button" class="btn btn-outline-main-blue btn-sm" data-bs-toggle="modal" data-bs-target="#aprovarModal{{ forloop.counter }}">
                   <i class="bi bi-check2-circle"></i>
@@ -78,7 +103,7 @@
           {% if not aluno %}
           <div class="detail-row">
             <span class="detail-label">Aluno:</span>
-            <span class="detail-value">{{ atividade.aluno.user.get_full_name|default:atividade.aluno.user.username }}</span>
+            <span class="detail-value">{{ atividade.aluno.nome }}</span>
           </div>
           {% endif %}
           <div class="detail-row">

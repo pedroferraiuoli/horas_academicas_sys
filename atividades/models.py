@@ -72,7 +72,8 @@ class CategoriaCurso(BaseModel):
         from atividades.selectors import AtividadeSelectors
         total_horas = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,
-            categoria=self
+            categoria=self,
+            apenas_aprovadas=True
         )
         return total_horas > self.limite_horas
     
@@ -80,7 +81,8 @@ class CategoriaCurso(BaseModel):
         from atividades.selectors import AtividadeSelectors
         total_horas = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,
-            categoria=self
+            categoria=self,
+            apenas_aprovadas=True
         )
         return total_horas >= self.limite_horas
     

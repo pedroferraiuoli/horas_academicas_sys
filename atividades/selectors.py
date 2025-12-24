@@ -57,10 +57,12 @@ class AtividadeSelectors:
         ).order_by('created_at')
     
     @staticmethod
-    def get_num_atividades_pendentes(*, curso=None) -> int:
+    def get_num_atividades_pendentes(*, curso=None, aluno=None) -> int:
         atividades = Atividade.objects.filter(status='Pendente')
         if curso:
             atividades = atividades.filter(aluno__curso=curso)
+        if aluno:
+            atividades = atividades.filter(aluno=aluno)
         return atividades.count()
 
     @staticmethod

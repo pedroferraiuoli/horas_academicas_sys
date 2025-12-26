@@ -13,6 +13,7 @@ from ..mixins import AlunoRequiredMixin, CoordenadorRequiredMixin
 
 class CadastrarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'forms/form_atividade.html'
+    htmx_template_name = 'forms/htmx/atividade_modal.html'
 
     def dispatch(self, request, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -21,15 +22,21 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
     def get(self, request):
         categoria_id = request.GET.get('categoria', None)
         form = AtividadeForm(aluno=self.aluno, categoria_id=categoria_id)
+
+        if request.headers.get('HX-Request'):
+            save_url = request.path
+            context = {'form': form, 'save_url': save_url}
+            return render(request, self.htmx_template_name, context)
         return render(request, self.template_name, {'form': form})
     
     def post(self, request):
         form = AtividadeForm(request.POST, request.FILES, aluno=self.aluno)
+        url = request.META.get('HTTP_REFERER', 'dashboard')
         if form.is_valid():
             atividade = AtividadeService.cadastrar_atividade(form=form, aluno=self.aluno)
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
-            return redirect('dashboard')
-        return render(request, self.template_name, {'form': form})
+            return redirect(url)
+        return redirect(url)
 
 
 class EditarAtividadeView(AlunoRequiredMixin, View):

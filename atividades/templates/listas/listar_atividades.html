@@ -8,9 +8,25 @@
 
 <div class="mb-3">
 {% if filter.form.categoria.value %}
-<a href="{% url 'cadastrar_atividade' %}?categoria={{ filter.form.categoria.value }}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
+<button type="button" 
+                      class="btn btn-info"
+                      hx-get="{% url 'cadastrar_atividade' %}?categoria={{ filter.form.categoria.value }}"
+                      hx-trigger="click"
+                      hx-target="#modal-container"
+                      hx-swap="innerHTML"
+                      >
+                <i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span>
+              </button>
 {% else %}
-<a href="{% url 'cadastrar_atividade' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
+ <button type="button" 
+                      class="btn btn-info"
+                      hx-get="{% url 'cadastrar_atividade' %}"
+                      hx-trigger="click"
+                      hx-target="#modal-container"
+                      hx-swap="innerHTML"
+                      >
+                <i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span>
+              </button>
 {% endif %}
 <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
 </div>

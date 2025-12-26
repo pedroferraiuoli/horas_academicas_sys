@@ -26,7 +26,6 @@ class RegisterView(View):
             return redirect('login')
         return render(request, self.template_name, {'form': form})
 
-
 class AlterarEmailView(LoginRequiredMixin, View):
     template_name = 'auth/alterar_email.html'
 

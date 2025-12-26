@@ -55,6 +55,7 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
 
 class ExcluirAtividadeView(AlunoRequiredMixin, View):
     template_name = 'excluir/excluir_generic.html'
+    htmx_template_name = 'excluir/htmx/confirmar_exclusao_modal.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -64,11 +65,22 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
     def get(self, request):
         tipo_exclusao = "Atividade"
         nome_exclusao = self.atividade.nome
-        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
+        context = {
+            'tipo_exclusao': tipo_exclusao,
+            'nome_exclusao': nome_exclusao,
+            'delete_url': f'/atividades/{self.atividade.id}/excluir/',
+            'object_id': self.atividade.id
+        }
+        
+        if request.headers.get('HX-Request'):
+            return render(request, self.htmx_template_name, context)
+        return render(request, self.template_name, context)
 
     def post(self, request):
+        atividade_nome = self.atividade.nome
         AtividadeService.exluir_atividade(atividade=self.atividade)
-        messages.success(request, f'Atividade {self.atividade.nome} excluída com sucesso!')
+
+        messages.success(request, f'Atividade {atividade_nome} excluída com sucesso!')
         return redirect('listar_atividades')
 
 

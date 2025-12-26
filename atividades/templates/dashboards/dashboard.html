@@ -44,5 +44,8 @@
     <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda. <a href="{% url 'cadastrar_atividade' %}">Clique aqui</a> para adicionar sua primeira atividade.</p>
   {% endif %}
 
+<!-- Container para modais HTMX -->
+<div id="modal-container"></div>
+
 <script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

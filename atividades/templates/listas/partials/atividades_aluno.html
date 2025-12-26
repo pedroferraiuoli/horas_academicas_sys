@@ -47,7 +47,14 @@
             <span class="ativ-label">Ações</span>
             <div class="ativ-actions">
               <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
-              <a href="{% url 'excluir_atividade' atividade.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+              <button type="button" 
+                      class="btn btn-danger btn-sm"
+                      hx-get="{% url 'excluir_atividade' atividade.id %}"
+                      hx-trigger="click"
+                      hx-target="#modal-container"
+                      hx-swap="innerHTML">
+                <i class="bi bi-trash"></i>
+              </button>
               {% if atividade.documento %}
                 <a href="{{ atividade.documento.url }}" target="_blank" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-eye"></i></a>
                 <a href="{{ atividade.documento.url }}" download class="btn btn-outline-main-blue btn-sm"><i class="bi bi-download"></i></a>
@@ -85,9 +92,13 @@
           <a href="{% url 'editar_atividade' atividade.id %}" class="btn btn-outline-main-blue btn-sm w-100 mb-2">
             <i class="bi bi-pencil"></i> Editar
           </a>
-          <a href="{% url 'excluir_atividade' atividade.id %}" class="btn btn-danger btn-sm w-100">
+          <button type="button" 
+                  class="btn btn-danger btn-sm w-100"
+                  hx-get="{% url 'excluir_atividade' atividade.id %}"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML">
             <i class="bi bi-trash"></i> Excluir
-          </a>
+          </button>
         </div>
       </div>
     </div>

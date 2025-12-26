@@ -1,3 +1,4 @@
+import re
 import magic
 from django.core.exceptions import ValidationError
 
@@ -45,3 +46,34 @@ class ValidadorDeHoras:
                 raise ValidationError('A quantidade de horas aprovadas não pode ser negativa.')
             if horas_aprovadas > horas:
                 raise ValidationError('As horas aprovadas não podem exceder as horas da atividade.')
+            
+class ValidadorDeNome:
+    
+    @staticmethod
+    def validar_nome(nome: str):
+
+        nome = re.sub(r'\s+', ' ', nome)
+
+        partes = nome.split(' ')
+        if len(partes) < 2:
+            raise ValidationError('Informe nome e sobrenome.')
+
+        for parte in partes:
+            if len(parte) < 2:
+                raise ValidationError(
+                    'Cada parte do nome deve ter ao menos 2 letras.'
+                )
+
+        if re.search(r'\d', nome):
+            raise ValidationError(
+                'O nome não pode conter números.'
+            )
+
+        if not re.match(r'^[A-Za-zÀ-ÖØ-öø-ÿ ]+$', nome):
+            raise ValidationError(
+                'O nome não pode conter símbolos especiais.'
+            )
+
+        nome = ' '.join(p.capitalize() for p in partes)
+
+        return nome

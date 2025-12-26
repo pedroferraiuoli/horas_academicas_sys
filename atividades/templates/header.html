@@ -13,13 +13,20 @@
             </div>
             <span class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {% if user.aluno %}
+                  <i class="bi bi-person-circle"></i> <span class="user-name-text">{{ user.aluno.nome }}</span>
+                  {% else %}
                   <i class="bi bi-person-circle"></i> <span class="user-name-text">{{ user.get_full_name|default:user.username }}</span>
+                  {% endif %}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                  <li><span class="dropdown-item-text"><strong>Usuário:</strong> {{ user.username }}</span></li>
                   <li><span class="dropdown-item-text"><strong>Email:</strong> {{ user.email }}</span></li>
+                  {% if user.coordenador %}
+                    <li><span class="dropdown-item-text"><strong>Coordenador de:</strong> {{ user.coordenador.curso }}</span></li>
+                  {% endif %}
                   {% if user.aluno %}
-                    <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
+                  <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
+                    <li><span class="dropdown-item-text"><strong>Matrícula:</strong> {{ user.username }}</span></li>
                     <li><span class="dropdown-item-text"><strong>Semestre de ingresso:</strong> {{ user.aluno.semestre_ingresso }}</span></li>
                   {% endif %}
                   <li><hr class="dropdown-divider"></li>

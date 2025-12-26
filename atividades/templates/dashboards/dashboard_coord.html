@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load atividade_extras %}
 {% load static %}
 
 {% block title %}Dashboard{% endblock %}
@@ -7,45 +6,51 @@
   <div class="ms-4">
 
     <div class="d-flex justify-content-between align-items-center">
-      <h2 class="orange mt-4" style="font-weight: 600;">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
+      <h2 class="orange dashboard-title">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
     </div> 
-    <h5 class="main-blue">{{ user.coordenador.curso.nome }}</h5>
+    <h5 class="dashboard-subtitle">{{ user.coordenador.curso.nome }}</h5>
   
     <div class="row mt-4 mb-4 w-100">
 
-      <a class="col-md-4 mb-3 link-limpo" href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}">
-        <div class="card shadow-sm h-100" style="border-radius: 13px;">
-          <div class="card-body text-center">
-            <div class="main-blue" style="font-size: 2.5rem; font-weight: 700;">{{ stats.num_alunos|default:0 }}</div>
-            <div class="orange" style="font-size: 1.1rem; font-weight: 600;">Alunos no curso</div>
+      <div class="col-md-4 mb-3">
+        <a class="dashboard-card-link" href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}">
+          <div class="card dashboard-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="stat-number">{{ stats.num_alunos|default:0 }}</div>
+              <div class="stat-label">Alunos no curso</div>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
+      </div>
 
-      <a class="col-md-4 mb-3 link-limpo" href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}&tem_horas_a_validar=1">
-        <div class="card shadow-sm h-100" style="border-radius: 13px;">
-          <div class="card-body text-center">
-            <div class="main-blue" style="font-size: 2.5rem; font-weight: 700;">{{ stats.alunos_com_pendencias|floatformat:0|default:"0" }}</div>
-            <div class="orange" style="font-size: 1.1rem; font-weight: 600;">Alunos com horas pendentes</div>
+      <div class="col-md-4 mb-3">
+        <a class="dashboard-card-link" href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}&tem_horas_a_validar=1">
+          <div class="card dashboard-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="stat-number">{{ stats.alunos_com_pendencias|floatformat:0|default:"0" }}</div>
+              <div class="stat-label">Alunos com horas pendentes</div>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
+      </div>
 
-      <a class="col-md-4 mb-3 link-limpo" href="{% url 'listar_atividades_coordenador' %}">
-        <div class="card shadow-sm h-100" style="border-radius: 13px;">
-          <div class="card-body text-center">
-            <div class="main-blue" style="font-size: 2.5rem; font-weight: 700;">{{ stats.atividades_pendentes|floatformat:0|default:"0" }}</div>
-            <div class="orange" style="font-size: 1.1rem; font-weight: 600;">Atividades para validar</div>
+      <div class="col-md-4 mb-3">
+        <a class="dashboard-card-link" href="{% url 'listar_atividades_coordenador' %}">
+          <div class="card dashboard-card shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="stat-number">{{ stats.atividades_pendentes|floatformat:0|default:"0" }}</div>
+              <div class="stat-label">Atividades para validar</div>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
+      </div>
 
     </div>
 
 
     <!-- Tabela de Últimos Semestres -->
-    <div class="card shadow-sm mb-4" style="border-radius: 13px;">
-      <div class="card-header bg-transparent">
+    <div class="card dashboard-table-card shadow-sm mb-4">
+      <div class="card-header">
         <h5 class="main-blue mb-0">Últimos 5 Semestres - Alunos Ingressantes</h5>
       </div>
       <div class="card-body">
@@ -55,15 +60,13 @@
             <thead>
               <tr>
                 <th>Semestre</th>
-                <th>Período</th>
                 <th class="text-center">Alunos Ingressantes</th>
               </tr>
             </thead>
             <tbody>
               {% for item in ultimos_semestres %}
               <tr>
-                <td><strong>{{ item.semestre.nome }}</strong></td>
-                <td>{{ item.semestre.data_inicio|date:"d/m/Y" }} - {{ item.semestre.data_fim|date:"d/m/Y" }}</td>
+                <td class="text-center"><strong>{{ item.semestre.nome }}</strong></td>
                 <td class="text-center"><span class="badge bg-info">{{ item.num_alunos }}</span></td>
               </tr>
               {% endfor %}
@@ -76,11 +79,13 @@
       </div>
     </div>
 
-    <h5 class="main-blue mb-3">Ações Rápidas</h5>
-     <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
-    <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
-    <a href="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Categorias do Curso</a>
-    <a href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}" class="btn btn-info mb-3">Listar Alunos do Curso</a>
+    <h5 class="dashboard-actions-title">Ações Rápidas</h5>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <a href="{% url 'associar_categorias_ao_curso' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Associar Categorias ao Curso</a>
+      <a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Criar Categoria para o Curso</a>
+      <a href="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}" class="btn btn-info"><i class="bi bi-list"></i> Listar Categorias do Curso</a>
+      <a href="{% url 'listar_alunos_coordenador' %}?semestre_ingresso={{ semestre_atual.id }}" class="btn btn-info"><i class="bi bi-people"></i> Listar Alunos do Curso</a>
+    </div>
 
 
   </div>

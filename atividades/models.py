@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Sum
-from django.forms import ValidationError
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
 
 class BaseModel(models.Model):
@@ -16,6 +14,11 @@ class Semestre(BaseModel):
     data_inicio = models.DateField(null=True, blank=True)
     data_fim = models.DateField(null=True, blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['data_inicio', 'data_fim'], name='semestre_periodo_idx'),
+        ]
+
     def __str__(self):
         return self.nome
 
@@ -28,37 +31,56 @@ class Categoria(BaseModel):
 
 class Curso(BaseModel):
     nome = models.CharField(max_length=100)
-    horas_requeridas = models.PositiveIntegerField(help_text="Horas totais necessárias para conclusão do curso")
-
+    horas_requeridas = models.PositiveIntegerField(help_text="Horas totais necessárias para conclusão do curso. (Será aplicado somente para novos semestres!)")
+    
     def __str__(self):
         return self.nome
     
+class CursoPorSemestre(BaseModel):
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='configuracoes_semestre')
+    semestre = models.ForeignKey(Semestre, on_delete=models.PROTECT)
+    horas_requeridas = models.PositiveIntegerField(
+        help_text="Horas totais necessárias neste semestre"
+    )
+    
+    class Meta:
+        unique_together = ('curso', 'semestre')
+        indexes = [
+            models.Index(fields=['curso', 'semestre'], name='curso_semestre_idx'),
+        ]
+    
+    def __str__(self):
+        return f"{self.curso.nome} - {self.semestre.nome} ({self.horas_requeridas}h)"
+    
 class CategoriaCurso(BaseModel):
     categoria = models.ForeignKey('Categoria', on_delete=models.CASCADE, related_name='categorias_curso')
-    curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='categorias')
     limite_horas = models.PositiveIntegerField(help_text="Limite máximo de horas para esta categoria neste curso")
     equivalencia_horas = models.CharField(max_length=50, help_text="Equivalência de horas (e.g., 1h = 1h)", null=True, blank=True, default="1h = 1h")
-    semestre = models.ForeignKey('Semestre', on_delete=models.PROTECT)
-
+    curso_semestre = models.ForeignKey(CursoPorSemestre, on_delete=models.CASCADE, related_name='categorias_curso')
     class Meta:
-        unique_together = ('curso', 'categoria', 'semestre')
+        unique_together = ('curso_semestre', 'categoria')
+        indexes = [
+            models.Index(fields=['curso_semestre', 'categoria'], name='cat_curso_semestre_idx'),
+        ]
 
     def __str__(self):
-        return f"{self.curso.nome} - {self.categoria.nome} (Limite: {self.limite_horas}h) - {self.semestre.nome}"
+        return f"{self.categoria.nome} ({self.limite_horas}h)"
     
     def ultrapassou_limite_pelo_aluno(self, aluno):
         from atividades.selectors import AtividadeSelectors
-        total_horas = AtividadeSelectors.get_total_horas_por_aluno_categoria(
+        total_horas = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,
-            curso_categoria=self
+            categoria=self,
+            apenas_aprovadas=True
         )
         return total_horas > self.limite_horas
     
     def atingiu_limite_pelo_aluno(self, aluno):
         from atividades.selectors import AtividadeSelectors
-        total_horas = AtividadeSelectors.get_total_horas_por_aluno_categoria(
+        total_horas = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,
-            curso_categoria=self
+            categoria=self,
+            apenas_aprovadas=True
         )
         return total_horas >= self.limite_horas
     
@@ -71,14 +93,28 @@ class Coordenador(BaseModel):
 
 class Aluno(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=200, help_text="Nome completo do aluno")
+    matricula = models.CharField(max_length=20, unique=True, help_text="Matrícula do aluno")
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name='alunos')
     semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
-    
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['matricula'], name='aluno_matricula_idx'),
+        ]
 
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username} ({self.semestre_ingresso})"
+        return f"{self.nome} - {self.matricula} ({self.semestre_ingresso})"
 
 class Atividade(BaseModel):
+
+    status_choices = [
+        ('Pendente', 'Pendente'),
+        ('Aprovada', 'Aprovada'),
+        ('Rejeitada', 'Rejeitada'),
+        ('Limite Atingido', 'Limite Atingido'),
+    ]
+
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='atividades')
     categoria = models.ForeignKey(CategoriaCurso, on_delete=models.PROTECT)
     nome = models.CharField(max_length=200)
@@ -88,16 +124,13 @@ class Atividade(BaseModel):
     horas_aprovadas = models.PositiveIntegerField(null=True, blank=True)
     data = models.DateField()
     documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
+    status = models.CharField(max_length=20, choices=status_choices, default='Pendente')
 
-    @property
-    def status(self):
-        if self.categoria.atingiu_limite_pelo_aluno(self.aluno) and self.horas_aprovadas is None:
-            return 'Limite Atingido'
-        if self.horas_aprovadas is None:
-            return 'Aguardando'
-        if self.horas_aprovadas == 0:
-            return 'Rejeitada'    
-        return f'{self.horas_aprovadas}h'
+    class Meta:
+        indexes = [
+            models.Index(fields=['aluno', 'categoria'], name='ativ_aluno_cat_idx'),
+            models.Index(fields=['aluno', 'status'], name='ativ_aluno_status_idx'),
+        ]
 
     def __str__(self):
         return f"{self.nome} ({self.aluno})"

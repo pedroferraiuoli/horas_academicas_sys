@@ -8,108 +8,28 @@
 <a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
 </div>
 
-<!-- Lista Responsiva -->
-<div class="atividades-list">
-  {% for curso in cursos %}
-  <div class="atividade-item" id="curso-{{ curso.id }}">
-    <div class="atividade-main" data-bs-toggle="collapse" data-bs-target="#collapse-curso-{{ curso.id }}" aria-expanded="false">
-      <div class="row g-2">
-        <div class="col-lg-3 col-12">
-          <div class="ativ-col">
-            <span class="ativ-label">Nome</span>
-            <span class="ativ-value">{{ curso.nome }}</span>
-          </div>
-        </div>
-        <div class="col-lg-4 col-6 desktop-only">
-          <div class="ativ-col">
-            <span class="ativ-label">Categorias ({{ semestre_atual.nome }})</span>
-            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalCategorias-{{ curso.id }}">
-              <i class="bi bi-list-ul"></i> Ver Categorias
-            </button>
-          </div>
-        </div>
-        <div class="col-lg-2 col-6">
-          <div class="ativ-col">
-            <span class="ativ-label">Horas Requeridas</span>
-            <span class="ativ-value"><span class="badge bg-success bg-opacity-75">{{ curso.horas_requeridas }}h</span></span>
-          </div>
-        </div>
-        <div class="col-lg-3 desktop-only">
-          <div class="ativ-col">
-            <span class="ativ-label">Ações</span>
-            <div class="ativ-actions">
-              <a href="{% url 'editar_curso' curso.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
-              <a href="{% url 'excluir_curso' curso.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
-            </div>
-          </div>
-        </div>
+<div class="mb-3">
+  <form method="get"
+      class="row g-2 align-items-center filtros-atividades"
+      hx-get="{% url 'listar_cursos' %}"
+      hx-trigger="change, keyup delay:200ms"
+      hx-target="#cursos-container"
+      hx-push-url="true">
+    {% for field in filter.form %}
+      <div class="col-12 col-md-3">
+        <label for="{{ field.id_for_label }}" class="filtro-label">{{ field.label }}</label>
+        {{ field }}
       </div>
+    {% endfor %}
+    <div class="col-12 col-md filtros-buttons">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
     </div>
-    
-    <div class="collapse atividade-details" id="collapse-curso-{{ curso.id }}">
-      <div class="details-content">
-        <div class="detail-row">
-          <button type="button" class="btn btn-info btn-sm w-100" data-bs-toggle="modal" data-bs-target="#modalCategorias-{{ curso.id }}">
-              <i class="bi bi-list-ul"></i> Ver Categorias
-          </button>
-        </div>
-        <div class="detail-actions">
-          <a href="{% url 'editar_curso' curso.id %}" class="btn btn-outline-main-blue btn-sm w-100 mb-2">
-            <i class="bi bi-pencil"></i> Editar
-          </a>
-          <a href="{% url 'excluir_curso' curso.id %}" class="btn btn-danger btn-sm w-100">
-            <i class="bi bi-trash"></i> Excluir
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Modal de Categorias do Semestre Atual -->
-  <div class="modal fade" id="modalCategorias-{{ curso.id }}" tabindex="-1" aria-labelledby="modalCategoriasLabel-{{ curso.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalCategoriasLabel-{{ curso.id }}">Categorias - {{ curso.nome }} ({{ semestre_atual.nome }})</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {% if curso.categorias_semestre_atual %}
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Categoria</th>
-                  <th>Limite de Horas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for cat in curso.categorias_semestre_atual %}
-                <tr>
-                  <td>{{ cat.categoria.nome }}</td>
-                  <td><span class="badge bg-success bg-opacity-75">{{ cat.limite_horas }}h</span></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <p class="text-muted">Nenhuma categoria associada a este curso no semestre atual.</p>
-          {% endif %}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% empty %}
-  <div class="text-center text-muted py-4">
-    Nenhum curso cadastrado.
-  </div>
-  {% endfor %}
-</div>
+  </form>
 </div>
 
-<script src="{% static 'js/listar_atividades.js' %}"></script>
+  <div id="cursos-container">
+      {% include "listas/htmx/cursos_list.html" %}
+  </div>
+</div>
+
 {% endblock %}

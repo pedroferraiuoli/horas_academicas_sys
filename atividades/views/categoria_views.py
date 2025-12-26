@@ -4,7 +4,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
 
-from atividades.selectors import CategoriaSelectors
+from atividades.filters import CategoriaFilter
+from ..utils import paginate_queryset
+
+from atividades.selectors import CategoriaSelectors, SemestreSelectors
 
 from ..models import Categoria
 from ..forms import CategoriaForm
@@ -52,15 +55,17 @@ class EditarCategoriaView(GestorRequiredMixin, View):
 
 
 class ExcluirCategoriaView(GestorRequiredMixin, View):
-    template_name = 'excluir/excluir_categoria.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(Categoria, id=categoria_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, {'categoria': self.categoria})
-
+        tipo_exclusao = "Categoria"
+        nome_exclusao = self.categoria.nome
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
+    
     def post(self, request):
         categoria_nome = self.categoria.nome
         self.categoria.delete()
@@ -71,8 +76,23 @@ class ExcluirCategoriaView(GestorRequiredMixin, View):
 
 class ListarCategoriasView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_categorias.html'
+    htmx_template_name = 'listas/htmx/categorias_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categorias'] = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
+        
+        categorias = CategoriaSelectors.listar_categorias_geral_com_cursos_semestre_atual()
+        filter = CategoriaFilter(self.request.GET, queryset=categorias)
+        categorias = filter.qs
+
+        categorias_paginados = paginate_queryset(qs=categorias, page=self.request.GET.get('page'), per_page=15)
+    
+        context['categorias'] = categorias_paginados
+        context['semestre_atual'] = SemestreSelectors.get_semestre_atual()
+        context['filter'] = filter
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]

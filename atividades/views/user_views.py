@@ -1,12 +1,13 @@
 from django.views import View
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib import messages
+from ..utils import paginate_queryset
 
 from ..forms import UserRegistrationForm, AlterarEmailForm, AdminUserForm
 from ..selectors import AlunoSelectors, UserSelectors
 from ..services import UserService
-from ..filters import AlunosFilter
+from ..filters import AlunosFilter, UsuarioFilter
 from ..mixins import LoginRequiredMixin, GestorRequiredMixin, CoordenadorRequiredMixin
 
 
@@ -24,7 +25,6 @@ class RegisterView(View):
             messages.success(request, 'Registro realizado com sucesso!')
             return redirect('login')
         return render(request, self.template_name, {'form': form})
-
 
 class AlterarEmailView(LoginRequiredMixin, View):
     template_name = 'auth/alterar_email.html'
@@ -60,18 +60,31 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
 
 class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_usuarios_admin.html'
+    htmx_template_name = 'listas/htmx/users_admin_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         gestores = UserSelectors.get_gestor_users()
         coordenadores = UserSelectors.get_coordenador_users()
+
+        filter_coord = UsuarioFilter(self.request.GET, queryset=coordenadores)
+        coordenadores = filter_coord.qs
+
+        coordenadores = paginate_queryset(qs=coordenadores, page=self.request.GET.get('page'), per_page=10)
         context['gestores'] = gestores
         context['coordenadores'] = coordenadores
+        context['filter'] = filter_coord
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
     template_name = 'listas/listar_alunos_coordenador.html'
+    htmx_template_name = 'listas/htmx/alunos_coord_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,10 +97,18 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         filtro = AlunosFilter(self.request.GET, queryset=alunos_base)
         alunos_filtrados = filtro.qs
 
+        # Paginação
+        alunos_paginados = paginate_queryset(qs=alunos_filtrados, page=self.request.GET.get('page'), per_page=20)
+
         context['curso'] = curso
-        context['alunos'] = alunos_filtrados
+        context['alunos'] = alunos_paginados
         context['filter'] = filtro
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 def ativar_desativar_usuario(request, user_id):

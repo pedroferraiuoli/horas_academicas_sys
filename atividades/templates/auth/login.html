@@ -3,55 +3,81 @@
 {% load static %}
 {% block content %}
 
-<div class="d-flex login-wrapper">
-
-  <div class="d-flex login-left-side">
-
-    <div class="login-border"></div>
-    <div class="div-login">
-    <img src="{% static 'images/ifformou1.png' %}" alt="Logo IFFormou" class="login-logo-top">
-      <div class="div-login-logo-alt">
-        <div class="login-text">Sistema acadêmico de <br><span class="login-text-bold">Horas Complementares</span></div>
-        <img src="{% static 'images/logoiff.png' %}" alt="Logo IFF" class="login-logo-bottom">
+<div class="login-wrapper">
+  <!-- Lado Esquerdo com Branding -->
+  <div class="login-left-side">
+    <div class="login-brand-container">
+      <div class="login-brand-accent"></div>
+      <div class="login-brand-content">
+        <img src="{% static 'images/ifformouClaro.png' %}" alt="Logo IFFormou" class="login-brand-logo">
+        <div class="login-brand-text">
+          <h1 class="login-brand-title">Sistema Acadêmico de</h1>
+          <h2 class="login-brand-subtitle">Horas Complementares</h2>
+        </div>
+        <img src="{% static 'images/logoiff.png' %}" alt="Logo IFF" class="login-institution-logo">
       </div>
     </div>
-
   </div>
 
+  <!-- Lado Direito com Formulário -->
+  <div class="login-right-side">
+    <div class="login-form-wrapper">
+      <div class="login-form-header">
+        <h3 class="login-form-title">Bem-vindo</h3>
+        <p class="login-form-subtitle">Faça login para continuar</p>
+      </div>
 
-  <div class="card login-card" >
-    <div class="text-center main-blue login-title">
-    Login
-    </div>
-    <div class="card-body">
-      <form method="post">
+      <form method="post" class="login-form">
         {% csrf_token %}
-        <div class="mb-3 login-form-content">
-          {# Exibe erros gerais do formulário (ex: usuário ou senha incorretos) #}
-          {% if form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-              {% for error in form.non_field_errors %}
-                <div class="text-center">Por favor, entre com um usuário e senha corretos.</div>
+        
+        {% if form.non_field_errors %}
+          <div class="login-alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>Usuário ou senha incorretos. Tente novamente.</span>
+          </div>
+        {% endif %}
+
+        <div class="login-form-body">
+          {% for field in form.visible_fields %}
+            <div class="login-form-group">
+              <label for="{{ field.id_for_label }}" class="login-form-label">
+                <i class="bi bi-{% if 'username' in field.name %}person-circle{% else %}lock-fill{% endif %}"></i>
+                {{ field.label }}
+              </label>
+              {{ field|add_class:'login-form-input' }}
+              {% for error in field.errors %}
+                <div class="login-field-error">
+                  <i class="bi bi-exclamation-circle"></i>
+                  {{ error }}
+                </div>
               {% endfor %}
             </div>
-          {% endif %}
-          {% for field in form.visible_fields %}
-            <label for="{{ field.id_for_label }}" class="form-label main-blue login-label">{{ field.label }}:</label>
-            {{ field|add_class:'form-control-login' }}
-            {% for error in field.errors %}
-              <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
           {% endfor %}
-          <button type="submit" class="btn bg-orange text-white w-100 mt-5 login-submit-btn"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
-          <div class="d-flex justify-content-between mt-3 login-links">
-            <a href="{% url 'password_reset' %}" class="small main-blue">Esqueceu a senha?</a>
-            <a href="{% url 'register' %}" class="small main-blue">Cadastre-se</a>
+
+          <button type="submit" class="login-submit-btn">
+            <span>Entrar</span>
+            <i class="bi bi-arrow-right-circle"></i>
+          </button>
+
+          <div class="login-links">
+            <a href="{% url 'password_reset' %}" class="login-link">
+              <i class="bi bi-key"></i>
+              Esqueceu a senha?
+            </a>
+            <span class="login-divider">•</span>
+            <a href="{% url 'register' %}" class="login-link">
+              <i class="bi bi-person-plus"></i>
+              Cadastre-se
+            </a>
           </div>
-          <div class="login-bottom-logo"><img src="{% static 'images/logo2fundo.png' %}" alt="Logo"></div>
         </div>
       </form>
+
+      <div class="login-footer-logo">
+        <img src="{% static 'images/logo2fundo.png' %}" alt="Logo">
+      </div>
     </div>
   </div>
-
 </div>
+
 {% endblock %}

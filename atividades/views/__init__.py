@@ -4,6 +4,7 @@ from .curso_views import (
     EditarCursoView,
     ExcluirCursoView,
     ListarCursosView,
+    AtualizarHorasSemestresView,
 )
 
 from .semestre_views import (
@@ -27,6 +28,10 @@ from .curso_categoria_views import (
     ListarCategoriasCursoView,
     CriarCategoriaCursoDiretaView,
     AssociarCategoriasCursoView,
+)
+
+from .relatorio_views import (
+    GerarRelatorioAlunoView,
 )
 
 from .atividade_views import (

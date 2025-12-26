@@ -1,19 +1,50 @@
 {% extends 'base.html' %}
-{% load atividade_extras %}
 {% load static %}
 {% block content %}
 <h2 class="text-main-blue mt-3">Minhas Atividades</h2>
 {% if filter.form.categoria.value %}
   <div class="alert alert-warning">Filtrando por categoria: <b>{{ filter.form.cleaned_data.categoria.categoria.nome }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-blue ms-2">Remover filtro</a></div>
 {% endif %}
-<a href="{% url 'cadastrar_atividade' %}?categoria={{ filter.form.categoria.value }}" class="btn btn-info mb-3"><i class="bi bi-plus-circle"></i> Nova Atividade</a>
 
-<form method="get" class="mb-3 filtros-atividades">
-  <div class="row g-2 align-items-center">
+<div class="mb-3">
+{% if filter.form.categoria.value %}
+<button type="button" 
+                      class="btn btn-info"
+                      hx-get="{% url 'cadastrar_atividade' %}?categoria={{ filter.form.categoria.value }}"
+                      hx-trigger="click"
+                      hx-target="#modal-container"
+                      hx-swap="innerHTML"
+                      >
+                <i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span>
+              </button>
+{% else %}
+ <button type="button" 
+                      class="btn btn-info"
+                      hx-get="{% url 'cadastrar_atividade' %}"
+                      hx-trigger="click"
+                      hx-target="#modal-container"
+                      hx-swap="innerHTML"
+                      >
+                <i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span>
+              </button>
+{% endif %}
+<a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<div class="mb-3">
+  <form method="get"
+      class="row g-2 align-items-center filtros-atividades"
+      hx-get="{% url 'listar_atividades' %}"
+      hx-trigger="change, keyup delay:200ms"
+      hx-target="#atividades-container"
+      hx-push-url="true">
+  <div class="row g-2 align-items-end">
     <div class="col-4">
+      <label for="{{ filter.form.status.id_for_label }}" class="filtro-label">{{ filter.form.status.label }}</label>
       {{ filter.form.status }}
     </div>
     <div class="col-4">
+      <label for="{{ filter.form.categoria.id_for_label }}" class="filtro-label">{{ filter.form.categoria.label }}</label>
       {{ filter.form.categoria }}
     </div>
     <div class="col-3">
@@ -21,22 +52,15 @@
     </div>
   </div>
 </form>
-
-<!-- Tabela Responsiva -->
-<div class="atividades-list">
-  {% for atividade in atividades %}
- {% include 'listas/partials/atividades_aluno.html' %}
-  {% empty %}
-  <div class="text-center text-muted py-4">
-    Nenhuma atividade cadastrada.
-  </div>
-  {% endfor %}
 </div>
 
-<a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue mt-3"><i class="bi bi-arrow-left"></i> Voltar</a>
+<div id="atividades-container">
+    {% include "listas/htmx/atividades_list.html" %}
+</div>
 
-<script src="{% static 'js/filtros.js' %}"></script>
-<script src="{% static 'js/listar_atividades.js' %}"></script>
+<!-- Container para modais HTMX -->
+<div id="modal-container"></div>
+
 {% endblock %}
 
 

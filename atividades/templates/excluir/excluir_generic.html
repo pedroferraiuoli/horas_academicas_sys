@@ -1,10 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Excluir {{ tipo_exclusao }}: {{ nome_exclusao }}</h2>
-<p>Tem certeza que deseja excluir?</p>
-<form method="post">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Excluir</button>
-  <a href="{% url 'listar_atividades' %}" class="btn btn-secondary">Cancelar</a>
-</form>
+
+<div class="form-atividade-container">
+  <div class="form-atividade-wrapper">
+    
+    <!-- Header -->
+    <div class="form-atividade-header bg-danger bg-opacity-10 border-danger">
+      <div class="form-header-icon text-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="form-header-content">
+        <h3 class="form-header-title text-danger">Confirmar Exclusão</h3>
+        <p class="form-header-subtitle">{{ tipo_exclusao }}: <strong>{{ nome_exclusao }}</strong></p>
+      </div>
+    </div>
+
+    <!-- Form Body -->
+    <div class="form-atividade-body">
+      <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+        <div>
+          <strong>Atenção!</strong> Esta ação não pode ser desfeita. Todos os dados relacionados serão permanentemente removidos.
+        </div>
+      </div>
+
+      <form method="post" class="modern-form">
+        {% csrf_token %}
+        
+        <div class="d-flex gap-3 justify-content-end mt-4">
+          <a href="javascript:history.back()" class="btn btn-secondary px-4">
+            <i class="bi bi-arrow-left"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-danger px-4">
+            <i class="bi bi-trash"></i> Confirmar Exclusão
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}

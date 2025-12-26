@@ -55,15 +55,17 @@ class EditarCategoriaView(GestorRequiredMixin, View):
 
 
 class ExcluirCategoriaView(GestorRequiredMixin, View):
-    template_name = 'excluir/excluir_categoria.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(Categoria, id=categoria_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, {'categoria': self.categoria})
-
+        tipo_exclusao = "Categoria"
+        nome_exclusao = self.categoria.nome
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
+    
     def post(self, request):
         categoria_nome = self.categoria.nome
         self.categoria.delete()

@@ -23,7 +23,7 @@
             <span class="ativ-label">Ações</span>
             <div class="ativ-actions">
               <a href="{% url 'editar_categoria_curso' categoria.id %}?next={{ request.get_full_path }}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
-              <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}" style="display:inline;">
+              <form method="get" action="{% url 'excluir_categoria_curso' categoria.id %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm" title="Desassociar"><i class="bi bi-x-circle"></i></button>
               </form>

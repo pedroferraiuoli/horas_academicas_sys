@@ -33,15 +33,15 @@
       </div>
     </div>
 
-  {% if atividades_recentes %}
     <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>
+  {% if atividades_recentes %}
     
     <!-- Lista Responsiva de Atividades -->
-    <div class="atividades-list">
-      {% for atividade in atividades_recentes %}
-       {% include 'listas/partials/atividades_aluno.html' %}
-      {% endfor %}
-    </div>
+<div id="atividades-container">
+    {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
+</div>
+  {% else %}
+    <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda. <a href="{% url 'cadastrar_atividade' %}">Clique aqui</a> para adicionar sua primeira atividade.</p>
   {% endif %}
 
 <script src="{% static 'js/listar_atividades.js' %}"></script>

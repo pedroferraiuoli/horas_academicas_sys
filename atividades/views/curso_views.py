@@ -109,14 +109,16 @@ class AtualizarHorasSemestresView(GestorRequiredMixin, View):
 
 
 class ExcluirCursoView(GestorRequiredMixin, View):
-    template_name = 'excluir/excluir_curso.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, curso_id, *args, **kwargs):
         self.curso = get_object_or_404(Curso, id=curso_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, {'curso': self.curso})
+        tipo_exclusao = "Curso"
+        nome_exclusao = self.curso.nome
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
 
     def post(self, request):
         curso_nome = self.curso.nome

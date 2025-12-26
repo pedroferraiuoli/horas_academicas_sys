@@ -54,7 +54,7 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
 
 
 class ExcluirAtividadeView(AlunoRequiredMixin, View):
-    template_name = 'excluir/excluir_atividade.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -62,7 +62,9 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, {'atividade': self.atividade})
+        tipo_exclusao = "Atividade"
+        nome_exclusao = self.atividade.nome
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
 
     def post(self, request):
         AtividadeService.exluir_atividade(atividade=self.atividade)

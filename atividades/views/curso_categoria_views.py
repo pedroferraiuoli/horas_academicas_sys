@@ -73,7 +73,7 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
 
 
 class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
-    template_name = 'excluir/excluir_categoria.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(CategoriaCurso, id=categoria_id)
@@ -88,7 +88,9 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
             )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
-        return render(request, self.template_name, {'categoria': self.categoria})
+        tipo_exclusao = "Categoria do Curso"
+        nome_exclusao = f"{self.categoria.categoria.nome} -> {self.categoria.curso_semestre.curso.nome} ({self.categoria.curso_semestre.semestre.nome})"
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
 
     def post(self, request):
         if self.coordenador and self.coordenador.curso.id != self.categoria.curso_semestre.curso.id:

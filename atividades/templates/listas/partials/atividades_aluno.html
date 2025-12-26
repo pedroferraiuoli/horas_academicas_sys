@@ -52,7 +52,8 @@
                       hx-get="{% url 'excluir_atividade' atividade.id %}"
                       hx-trigger="click"
                       hx-target="#modal-container"
-                      hx-swap="innerHTML">
+                      hx-swap="innerHTML"
+                      >
                 <i class="bi bi-trash"></i>
               </button>
               {% if atividade.documento %}

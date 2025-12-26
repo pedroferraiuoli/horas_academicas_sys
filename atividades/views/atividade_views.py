@@ -65,6 +65,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
     def get(self, request):
         tipo_exclusao = "Atividade"
         nome_exclusao = self.atividade.nome
+
         context = {
             'tipo_exclusao': tipo_exclusao,
             'nome_exclusao': nome_exclusao,
@@ -81,7 +82,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         AtividadeService.exluir_atividade(atividade=self.atividade)
 
         messages.success(request, f'Atividade {atividade_nome} excluída com sucesso!')
-        return redirect('listar_atividades')
+        return redirect(request.META.get('HTTP_REFERER', 'listar_atividades'))
 
 
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):

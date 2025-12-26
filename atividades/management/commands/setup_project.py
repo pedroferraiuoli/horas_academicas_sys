@@ -25,7 +25,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.NOTICE('Populando dados iniciais...'))
         call_command('populate_initial_data')
 
-        self.stdout.write(self.style.NOTICE('Iniciando servidor de desenvolvimento...'))
-        call_command('runserver')
+        self.stdout.write(self.style.NOTICE('Populando dados massivos para testes...'))
+        call_command('populate_massive_data')
+
+        # self.stdout.write(self.style.NOTICE('Iniciando servidor de desenvolvimento...'))
+        # call_command('runserver')
 
         self.stdout.write(self.style.SUCCESS('Projeto configurado e servidor iniciado.'))

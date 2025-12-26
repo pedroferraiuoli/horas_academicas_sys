@@ -3,68 +3,64 @@
 {% if user.is_authenticated and user.groups.all.0.name == 'Gestor' %}
 
 <!-- Toggle button for mobile - Fixed position -->
-<button class="sidebar-toggle-btn d-lg-none" type="button" onclick="toggleSidebar()">
+<button class="sidebar-toggle-btn d-lg-none" type="button" id="sidebar-toggle">
     <i class="bi bi-list"></i>
 </button>
 
-<nav class="sidebar" id="sidebarMenu">
+<nav class="sidebar sidebar-gestor" id="sidebarMenu">
     <!-- Close button for mobile -->
-    <button class="sidebar-close-btn d-lg-none" onclick="closeSidebar()">
+    <button class="sidebar-close-btn d-lg-none" id="sidebar-close">
         <i class="bi bi-x-lg"></i>
     </button>
     
     <div class="sidebar-content">
         <!-- Info do Gestor -->
-        <div class="sidebar-header mb-4">
+        <div class="sidebar-header mb-3">
             <div class="sidebar-item-header">
-                <div class="sidebar-item-name" style="font-size: 1.1rem; color: #FF6B35;">Painel Administrativo</div>
+                <div class="sidebar-item-name" style="font-size: 1rem; color: #FF6B35;">Painel Administrativo</div>
             </div>
         </div>
 
         <!-- Menu de navegação -->
-        <div class="sidebar-item {% if request.path == '/' %}active{% endif %}" data-url="{% url 'dashboard' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if request.path == '/' %}active{% endif %}" data-url="{% url 'dashboard' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-house-door me-2"></i>
                 <div class="sidebar-item-name">Dashboard</div>
             </div>
         </div>
 
-        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
-
         <!-- Seção de Cursos -->
-        <div class="sidebar-section-title mb-2">
+        <div class="sidebar-section-title mt-3 mb-2">
             <small class="text-muted">CURSOS</small>
         </div>
 
-        <div class="sidebar-item {% if 'cursos' in request.path %}active{% endif %}" data-url="{% url 'listar_cursos' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'cursos' in request.path %}active{% endif %}" data-url="{% url 'listar_cursos' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-list-ul me-2"></i>
                 <div class="sidebar-item-name">Listar Cursos</div>
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'criar-curso' in request.path %}active{% endif %}" data-url="{% url 'criar_curso' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'criar-curso' in request.path %}active{% endif %}" data-url="{% url 'criar_curso' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-plus-circle me-2"></i>
                 <div class="sidebar-item-name">Criar Curso</div>
             </div>
         </div>
 
-        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
-
         <!-- Seção de Categorias -->
-        <div class="sidebar-section-title mb-2">
+        <div class="sidebar-section-title mt-3 mb-2">
             <small class="text-muted">CATEGORIAS</small>
         </div>
 
-        <div class="sidebar-item {% if 'categorias' in request.path and 'curso' not in request.path %}active{% endif %}" data-url="{% url 'listar_categorias' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'categorias' in request.path and 'curso' not in request.path %}active{% endif %}" data-url="{% url 'listar_categorias' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-list-ul me-2"></i>
                 <div class="sidebar-item-name">Listar Categorias Gerais</div>
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'categorias-curso' in request.path %}active{% endif %}" 
+        <div class="sidebar-item sidebar-item-gestor {% if 'categorias-curso' in request.path %}active{% endif %}" 
         data-url="{% url 'listar_categorias_curso' %}?semestre={{ semestre_atual.id }}&curso=1">
             <div class="sidebar-item-header">
                 <i class="bi bi-diagram-3 me-2"></i>
@@ -72,77 +68,71 @@
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'criar-categoria' in request.path and 'direta' not in request.path %}active{% endif %}" data-url="{% url 'criar_categoria' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'criar-categoria' in request.path and 'direta' not in request.path %}active{% endif %}" data-url="{% url 'criar_categoria' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-plus-circle me-2"></i>
                 <div class="sidebar-item-name">Criar Categoria Geral</div>
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'criar-categoria-curso-direta' in request.path %}active{% endif %}" data-url="{% url 'criar_categoria_curso_direta' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'criar-categoria-curso-direta' in request.path %}active{% endif %}" data-url="{% url 'criar_categoria_curso_direta' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-plus-circle me-2"></i>
                 <div class="sidebar-item-name">Criar Categoria Especifica</div>
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'associar-categorias-ao-curso' in request.path %}active{% endif %}" data-url="{% url 'associar_categorias_ao_curso' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'associar-categorias-ao-curso' in request.path %}active{% endif %}" data-url="{% url 'associar_categorias_ao_curso' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-link-45deg me-2"></i>
                 <div class="sidebar-item-name">Associar categoria ao Curso</div>
             </div>
         </div>
 
-        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
-
         <!-- Seção de Semestres -->
-        <div class="sidebar-section-title mb-2">
+        <div class="sidebar-section-title mt-3 mb-2">
             <small class="text-muted">SEMESTRES</small>
         </div>
 
-        <div class="sidebar-item {% if 'semestres' in request.path %}active{% endif %}" data-url="{% url 'listar_semestres' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'semestres' in request.path %}active{% endif %}" data-url="{% url 'listar_semestres' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-list-ul me-2"></i>
                 <div class="sidebar-item-name">Listar Semestres</div>
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'criar-semestre' in request.path %}active{% endif %}" data-url="{% url 'criar_semestre' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'criar-semestre' in request.path %}active{% endif %}" data-url="{% url 'criar_semestre' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-plus-circle me-2"></i>
                 <div class="sidebar-item-name">Criar Semestre</div>
             </div>
         </div>
 
-        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
-
         <!-- Seção de Usuários -->
-        <div class="sidebar-section-title mb-2">
+        <div class="sidebar-section-title mt-3 mb-2">
             <small class="text-muted">USUÁRIOS</small>
         </div>
 
-        <div class="sidebar-item {% if 'listar-usuarios-admin' in request.path %}active{% endif %}" data-url="{% url 'listar_usuarios_admin' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'listar-usuarios-admin' in request.path %}active{% endif %}" data-url="{% url 'listar_usuarios_admin' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-people me-2"></i>
                 <div class="sidebar-item-name">Usuários Admin</div>
             </div>
         </div>
 
-        <div class="sidebar-item {% if 'criar-usuario-admin' in request.path %}active{% endif %}" data-url="{% url 'criar_usuario_admin' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'criar-usuario-admin' in request.path %}active{% endif %}" data-url="{% url 'criar_usuario_admin' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-person-plus me-2"></i>
                 <div class="sidebar-item-name">Criar Admin</div>
             </div>
         </div>
 
-        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
-
         <!-- Seção de Logs -->
-        <div class="sidebar-section-title mb-2">
+        <div class="sidebar-section-title mt-3 mb-2">
             <small class="text-muted">SISTEMA</small>
         </div>
 
-        <div class="sidebar-item {% if 'visualizar-logs' in request.path %}active{% endif %}" data-url="{% url 'visualizar_logs' %}">
+        <div class="sidebar-item sidebar-item-gestor {% if 'visualizar-logs' in request.path %}active{% endif %}" data-url="{% url 'visualizar_logs' %}">
             <div class="sidebar-item-header">
                 <i class="bi bi-file-text me-2"></i>
                 <div class="sidebar-item-name">Visualizar Logs</div>
@@ -152,33 +142,4 @@
 </nav>
 {% endif %}
 
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebarMenu');
-    const overlay = document.querySelector('.sidebar-overlay');
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-}
-
-function closeSidebar() {
-    const sidebar = document.getElementById('sidebarMenu');
-    const overlay = document.querySelector('.sidebar-overlay');
-    sidebar.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// Fechar ao clicar em um item (mobile)
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebarItems = document.querySelectorAll('.sidebar-item');
-    sidebarItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (window.innerWidth < 992) {
-                closeSidebar();
-            }
-        });
-    });
-});
-</script>
 <script src="{% static 'js/navbar.js' %}"></script>

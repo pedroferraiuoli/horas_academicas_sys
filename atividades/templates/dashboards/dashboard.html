@@ -4,43 +4,55 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="dashboard-header">
-    <h2 class="orange dashboard-welcome">Bem-vindo, {{ user.get_full_name|default:user.username }}!</h2>
+    <h2 class="orange dashboard-welcome">Bem-vindo, {{ aluno.nome }}!</h2>
     <div class="dashboard-actions">
-        <a href="{% url 'cadastrar_atividade' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span></a>
+      <button type="button" 
+                      class="btn btn-info"
+                      hx-get="{% url 'cadastrar_atividade' %}"
+                      hx-trigger="click"
+                      hx-target="#modal-container"
+                      hx-swap="innerHTML"
+                      >
+                <i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span>
+              </button>
         <a href="{% url 'listar_atividades' %}" class="btn btn-info"><i class="bi bi-list"></i> <span class="btn-text">Listar Atividades</span></a>
+        <a href="{% url 'gerar_relatorio_aluno' %}" class="btn btn-primary" title="Gerar relatório em PDF"><i class="bi bi-file-earmark-pdf"></i> <span class="btn-text">Gerar Relatório</span></a>
     </div>
 </div>
-      
 
-<p class="dashboard-course-info">Curso: <span class="fw-bold">{{ aluno.curso }}</span> | Horas requeridas: <span class="fw-bold">{{ aluno.curso.horas_requeridas }}h</span></p>
+<p class="dashboard-course-info">Curso: <span class="fw-bold">{{ aluno.curso }}</span> | Horas requeridas: <span class="fw-bold">{{ horas_requeridas }}h</span></p>
     {% if ultrapassou_limite %}
-      <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+      <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        Você possui categorias em que o total de horas cadastradas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
+        Você possui categorias em que o total de horas aprovadas excede o limite permitido. Apenas as horas dentro do limite serão consideradas para a conclusão.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
       </div>
     {% endif %}
     <div class="dashboard-progress-section">
       <div class="progress-info">
         <span class="progress-percentage">{{progresso_percentual}}%</span>
-        <span class="progress-hours">{{ total_horas }}h / {{ aluno.curso.horas_requeridas }}h</span>
+        <span class="progress-hours">{{ total_horas }}h / {{ horas_requeridas }}h</span>
       </div>
       <div class="progress dashboard-progress-bar">
           <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;" aria-valuenow="{{ progresso_percentual }}" aria-valuemin="0" aria-valuemax="100">
-            <span class="fw-bold">{{ total_horas }} / {{ aluno.curso.horas_requeridas }}h</span>
+            <span class="fw-bold">{{ total_horas }} / {{ horas_requeridas }}h</span>
         </div>
       </div>
     </div>
 
-  {% if atividades_recentes %}
     <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>
+  {% if atividades_recentes %}
     
     <!-- Lista Responsiva de Atividades -->
-    <div class="atividades-list">
-      {% for atividade in atividades_recentes %}
-       {% include 'listas/partials/atividades_aluno.html' %}
-      {% endfor %}
-    </div>
+<div id="atividades-container">
+    {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
+</div>
+  {% else %}
+    <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda.</p>
   {% endif %}
+
+<!-- Container para modais HTMX -->
+<div id="modal-container"></div>
 
 <script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

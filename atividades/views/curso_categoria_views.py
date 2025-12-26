@@ -29,10 +29,10 @@ class CriarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         if form.is_valid():
             categoria = form.save()
             business_logger.warning(
-                f"CURSO-CATEGORIA CRIADA: {categoria.categoria.nome} -> {categoria.curso.nome} | "
+                f"CURSO-CATEGORIA CRIADA: {categoria.categoria.nome} -> {categoria.curso_semestre.curso.nome} | "
                 f"User: {request.user.username}"
             )
-            messages.success(request, f'Categoria {categoria.categoria.nome} associada a {categoria.curso.nome} com sucesso!')
+            messages.success(request, f'Categoria {categoria.categoria.nome} associada a {categoria.curso_semestre.curso.nome} com sucesso!')
             return redirect('dashboard')
 
         return render(request, self.template_name, {'form': form, 'coordenador': coordenador})
@@ -44,35 +44,36 @@ class EditarCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(CategoriaCurso, id=categoria_id)
         self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
-        if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+        if self.coordenador and self.coordenador.curso.id != self.categoria.curso_semestre.curso.id:
             security_logger.warning(
                 f"ACESSO NEGADO: Coordenador {request.user.username} ({self.coordenador.curso.nome}) "
-                f"tentou editar categoria do curso {self.categoria.curso.nome}"
+                f"tentou editar categoria do curso {self.categoria.curso_semestre.curso.nome}"
             )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        form = CategoriaCursoForm(instance=self.categoria, user=request.user)
+        form = CategoriaCursoForm(instance=self.categoria)
         return render(request, self.template_name, {'form': form, 'categoria': self.categoria, 'edit': True, 'coordenador': self.coordenador})
     
     def post(self, request):
-        form = CategoriaCursoForm(request.POST, instance=self.categoria, user=request.user)
+        next_url = request.GET.get('next') or request.META.get('PATH_INFO')
+        form = CategoriaCursoForm(request.POST, instance=self.categoria)
         if form.is_valid():
             form.save()
             business_logger.warning(
-                f"CURSO-CATEGORIA EDITADA: {self.categoria.categoria.nome} -> {self.categoria.curso.nome} | "
+                f"CURSO-CATEGORIA EDITADA: {self.categoria.categoria.nome} -> {self.categoria.curso_semestre.curso.nome} | "
                 f"User: {request.user.username}"
             )
             messages.success(request, f'Categoria {self.categoria.categoria.nome} atualizada com sucesso!')
-            return redirect('listar_categorias')
+            return redirect(next_url, 'listar_categorias_curso')
         
         return render(request, self.template_name, {'form': form, 'categoria': self.categoria, 'edit': True, 'coordenador': self.coordenador})
 
 
 class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
-    template_name = 'excluir/excluir_categoria.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(CategoriaCurso, id=categoria_id)
@@ -80,26 +81,28 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+        if self.coordenador and self.coordenador.curso.id != self.categoria.curso_semestre.curso.id:
             security_logger.warning(
                 f"ACESSO NEGADO: Coordenador {request.user.username} ({self.coordenador.curso.nome}) "
-                f"tentou acessar categoria do curso {self.categoria.curso.nome}"
+                f"tentou acessar categoria do curso {self.categoria.curso_semestre.curso.nome}"
             )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
-        return render(request, self.template_name, {'categoria': self.categoria})
+        tipo_exclusao = "Categoria do Curso"
+        nome_exclusao = f"{self.categoria.categoria.nome} -> {self.categoria.curso_semestre.curso.nome} ({self.categoria.curso_semestre.semestre.nome})"
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
 
     def post(self, request):
-        if self.coordenador and self.coordenador.curso.id != self.categoria.curso.id:
+        if self.coordenador and self.coordenador.curso.id != self.categoria.curso_semestre.curso.id:
             security_logger.warning(
                 f"ACESSO NEGADO: Coordenador {request.user.username} ({self.coordenador.curso.nome}) "
-                f"tentou excluir categoria do curso {self.categoria.curso.nome}"
+                f"tentou excluir categoria do curso {self.categoria.curso_semestre .curso.nome}"
             )
             messages.warning(request, 'Acesso negado.')
             return redirect('dashboard')
         
         cat_nome = self.categoria.categoria.nome
-        curso_nome = self.categoria.curso.nome
+        curso_nome = self.categoria.curso_semestre.curso.nome
         self.categoria.delete()
         business_logger.warning(
             f"CURSO-CATEGORIA EXCLUÍDA: {cat_nome} -> {curso_nome} | User: {request.user.username}"
@@ -110,6 +113,7 @@ class ExcluirCategoriaCursoView(GestorOuCoordenadorRequiredMixin, View):
 
 class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
     template_name = 'listas/listar_categorias_curso.html'
+    htmx_template_name = 'listas/htmx/categorias_curso_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -121,6 +125,11 @@ class ListarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, TemplateView):
         context['categorias'] = paginate_queryset(qs=categorias, page=self.request.GET.get('page'), per_page=15)
         context['filter'] = filtro
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 class CriarCategoriaCursoDiretaView(GestorOuCoordenadorRequiredMixin, View):
@@ -131,14 +140,14 @@ class CriarCategoriaCursoDiretaView(GestorOuCoordenadorRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = CategoriaCursoDiretaForm(request.POST)
+        form = CategoriaCursoDiretaForm(request.POST, user=request.user)
         if form.is_valid():
             categoria_curso = CategoriaCursoService.create_categoria_curso_especifica(form=form, user=request.user)
             business_logger.warning(
-                f"CURSO-CATEGORIA CRIADA ESPECIFICAMENTE: {categoria_curso.categoria.nome} -> {categoria_curso.curso.nome} | "
+                f"CURSO-CATEGORIA CRIADA ESPECIFICAMENTE: {categoria_curso.categoria.nome} -> {categoria_curso.curso_semestre.curso.nome} | "
                 f"User: {request.user.username}"
             )
-            messages.success(request, f'Categoria {categoria_curso.categoria.nome} criada e vinculada ao curso {categoria_curso.curso.nome}!')
+            messages.success(request, f'Categoria {categoria_curso.categoria.nome} criada e vinculada ao curso {categoria_curso.curso_semestre.curso.nome}!')
             return redirect('dashboard')
         return render(request, self.template_name, {'form': form})
 
@@ -171,21 +180,15 @@ class AssociarCategoriasCursoView(GestorOuCoordenadorRequiredMixin, View):
         semestre_selecionado = None
         
         if curso_id:
-            try:
-                curso_selecionado = Curso.objects.get(id=curso_id)
-                # Se é coordenador, validar que é o curso dele
-                if self.coordenador and curso_selecionado != self.coordenador.curso:
-                    curso_selecionado = self.coordenador.curso
-            except Curso.DoesNotExist:
-                pass
+            curso_selecionado = get_object_or_404(Curso, id=curso_id)
+            # Se é coordenador, validar que é o curso dele
+            if self.coordenador and curso_selecionado != self.coordenador.curso:
+                curso_selecionado = self.coordenador.curso
         elif self.curso_fixo:
             curso_selecionado = self.curso_fixo
             
         if semestre_id:
-            try:
-                semestre_selecionado = Semestre.objects.get(id=semestre_id)
-            except Semestre.DoesNotExist:
-                pass
+            semestre_selecionado = get_object_or_404(Semestre, id=semestre_id)
         
         return render(request, self.template_name, self.get_context(
             curso=curso_selecionado,

@@ -56,6 +56,7 @@ body {
 .container {
     margin-top: 1rem;
     margin-bottom: 1rem;
+    max-width: 100% !important;
 }
 
 @media (max-width: 768px) {
@@ -119,6 +120,14 @@ body {
     overflow-y: auto;
     background-color: var(--main-bg);
     width: 500px;
+}
+
+.sidebar-gestor {
+    width: 360px;
+}
+
+.sidebar-coordenador {
+    width: 360px;
 }
 
 .sidebar-content {
@@ -190,6 +199,15 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border-left: 4px solid var(--main-blue);
+}
+
+.sidebar-item-gestor {
+    padding: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-item-gestor .sidebar-item-header {
+    margin-bottom: 0;
 }
 
 .sidebar-item:hover {
@@ -463,7 +481,6 @@ body {
 .form-atividade-wrapper {
     width: 100%;
     max-width: 900px;
-    background: white;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     overflow: hidden;
@@ -519,6 +536,7 @@ body {
 /* === FORM BODY === */
 .form-atividade-body {
     padding: 2.5rem;
+    background: white;
 }
 
 .modern-form {
@@ -872,6 +890,12 @@ body {
 /* Textos secundários */
 .text-main-green {
     color: var(--main-green) !important;
+}
+
+.close-position {
+    position: absolute;
+    top: 15px;
+    right: 15px;
 }
 
 /* Botões padrão Bootstrap */

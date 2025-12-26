@@ -25,6 +25,7 @@ staticfiles/
 # Windows
 Thumbs.db
 Desktop.ini
+logs/
 
 # VSCode
 .history/

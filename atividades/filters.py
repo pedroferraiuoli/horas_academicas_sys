@@ -3,17 +3,20 @@ from django.contrib.auth.models import User
 from atividades.selectors import AlunoSelectors, CategoriaCursoSelectors, UserSelectors
 from .models import Atividade, Curso, CategoriaCurso, Semestre, Aluno
 from django import forms
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Q
 
 
 class CategoriaCursoFilter(django_filters.FilterSet):
     semestre = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={
-            'class': 'form-select',   # coloque as classes que quiser
-        }))
+            'class': 'form-select',
+        }),
+        method='filter_semestre'
+    )
     
     curso = django_filters.ModelChoiceFilter(queryset=Curso.objects.all(), label='Curso', empty_label='Todos', widget=forms.Select(attrs={
             'class': 'form-select',
-        }))
+        }),
+        method='filter_curso')
     
     especifica = django_filters.BooleanFilter(
         field_name='categoria__especifica',
@@ -47,6 +50,16 @@ class CategoriaCursoFilter(django_filters.FilterSet):
         return queryset.filter(
             categoria__nome__icontains=value
         )
+    
+    def filter_semestre(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(curso_semestre__semestre=value)
+    
+    def filter_curso(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(curso_semestre__curso=value)
 
 class AlunosFilter(django_filters.FilterSet):
     semestre_ingresso = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={
@@ -77,10 +90,7 @@ class AlunosFilter(django_filters.FilterSet):
 
     def filtrar_nome(self, queryset, name, value):
         return queryset.filter(
-            Q(user__first_name__icontains=value) |
-            Q(user__last_name__icontains=value) |
-            Q(user__username__icontains=value)
-        )
+            nome__icontains=value)
 
     def filter_tem_horas_a_validar(self, queryset, name, value):
         # se nenhum valor enviado, não filtra
@@ -102,7 +112,8 @@ class AtividadesFilter(django_filters.FilterSet):
     status = django_filters.ChoiceFilter(
         choices=(
             ('1', 'Aprovadas'),
-            ('0', 'Aguardando'),
+            ('2', 'Rejeitadas'),
+            ('0', 'Pendentes'),
         ),
         label='Status',
         method='filter_atividades_status',
@@ -147,11 +158,15 @@ class AtividadesFilter(django_filters.FilterSet):
 
         # Aprovadas
         if value == '1':
-            return queryset.filter(horas_aprovadas__isnull=False)
+            return queryset.filter(status='Aprovada')
+        
+        # Rejeitadas
+        if value == '2':
+            return queryset.filter(status='Rejeitada')
 
-        # Aguardando
+        # Pendentes
         if value == '0':
-            return queryset.filter(horas_aprovadas__isnull=True)
+            return queryset.filter(status='Pendente')
 
         return queryset
     
@@ -160,7 +175,8 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
     status = django_filters.ChoiceFilter(
         choices=(
             ('1', 'Aprovadas'),
-            ('0', 'Aguardando'),
+            ('2', 'Rejeitadas'),
+            ('0', 'Pendentes'),
         ),
         label='Status',
         method='filter_atividades_status',
@@ -176,22 +192,61 @@ class AtividadesCoordenadorFilter(django_filters.FilterSet):
         )
     )
 
+    matricula_aluno = django_filters.CharFilter(
+        method='filtrar_matricula_aluno',
+        label='Matrícula do Aluno',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Buscar por matrícula do aluno...'}
+        )
+    )
+
+    aluno_id = django_filters.NumberFilter(widget=forms.HiddenInput(), method='filter_aluno_id')
+
     class Meta:
         model = Atividade
-        fields = ['status', 'nome_aluno']
+        fields = ['status', 'nome_aluno', 'aluno_id']
+
+    def filter_aluno_id(self, queryset, name, value):
+        return queryset.filter(aluno__id=value)
 
     def filtrar_nome_aluno(self, queryset, name, value):
         return queryset.filter(
-            Q(aluno__user__first_name__icontains=value) |
-            Q(aluno__user__last_name__icontains=value) |
-            Q(aluno__user__username__icontains=value)
+            aluno__nome__icontains=value
         )
     
-    def __init__ (self, *args, show_status=True, **kwargs):
+    def filtrar_matricula_aluno(self, queryset, name, value):
+        return queryset.filter(
+            aluno__matricula__icontains=value
+        )
+    
+    def filter_atividades_status(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        # Aprovadas
+        if value == '1':
+            return queryset.filter(status='Aprovada')
+        
+        # Rejeitadas
+        if value == '2':
+            return queryset.filter(status='Rejeitada')
+
+        # Pendentes
+        if value == '0':
+            return queryset.filter(status='Pendente')
+        return queryset
+    
+    def __init__ (self, *args, aluno_id=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if not show_status:
+        if aluno_id:
+            self.filters.pop('nome_aluno')
+            self.filters.pop('matricula_aluno')
+
+        if not aluno_id:
+            self.filters.pop('aluno_id')
             self.filters.pop('status')
+
 
 class CursoFilter(django_filters.FilterSet):
     nome = django_filters.CharFilter(

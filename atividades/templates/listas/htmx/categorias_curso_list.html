@@ -1,0 +1,61 @@
+<!-- Lista Responsiva de Categorias -->
+  {% load static %}
+<div class="atividades-list">
+  {% for categoria in categorias %}
+  <div class="atividade-item" id="categoria-{{ categoria.id }}">
+    <!-- Desktop: linha de tabela / Mobile: card compacto -->
+    <div class="atividade-main" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ categoria.id }}" aria-expanded="false">
+      <div class="row g-2">
+        <div class="col-lg-5 col-8">
+          <div class="ativ-col">
+            <span class="ativ-label">Nome</span>
+            <span class="ativ-value">{{ categoria.categoria.nome }} ({{categoria.curso_semestre.semestre.nome}})</span>
+          </div>
+        </div>
+        <div class="col-lg col-4">
+          <div class="ativ-col">
+            <span class="ativ-label">Limite de Horas</span>
+            <span class="ativ-value"><span class="">{{ categoria.limite_horas }}h</span></span>
+          </div>
+        </div>
+        <div class="col-lg desktop-only">
+          <div class="ativ-col">
+            <span class="ativ-label">Ações</span>
+            <div class="ativ-actions">
+              <a href="{% url 'editar_categoria_curso' categoria.id %}?next={{ request.get_full_path }}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
+              <form method="get" action="{% url 'excluir_categoria_curso' categoria.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" title="Desassociar"><i class="bi bi-x-circle"></i></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Detalhes expandidos (mobile) -->
+    <div class="collapse atividade-details" id="collapse-cat-{{ categoria.id }}">
+      <div class="details-content">
+        <div class="detail-actions">
+          <a href="{% url 'editar_categoria_curso' categoria.id %}" class="btn btn-outline-main-blue btn-sm w-100 mb-2">
+            <i class="bi bi-pencil"></i> Editar Categoria
+          </a>
+          <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}?next={{ request.get_full_path }}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm w-100" title="Desassociar">
+              <i class="bi bi-x-circle"></i> Desassociar do Curso
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center text-muted py-4">
+    Nenhuma categoria cadastrada.
+  </div>
+  {% endfor %}
+</div>
+
+{% include 'pagination.html' with qs=categorias %}
+<script src="{% static 'js/listar_atividades.js' %}"></script>

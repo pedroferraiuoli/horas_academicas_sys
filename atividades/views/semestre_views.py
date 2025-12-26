@@ -56,15 +56,17 @@ class EditarSemestreView(GestorRequiredMixin, View):
 
 
 class ExcluirSemestreView(GestorRequiredMixin, View):
-    template_name = 'excluir/excluir_semestre.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, semestre_id, *args, **kwargs):
         self.semestre = get_object_or_404(Semestre, id=semestre_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, {'semestre': self.semestre})
-
+        nome_exclusao = self.semestre.nome
+        tipo_exclusao = "Semestre"
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
+    
     def post(self, request):
         semestre_nome = self.semestre.nome
         self.semestre.delete()

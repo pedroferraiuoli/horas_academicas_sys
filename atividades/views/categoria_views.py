@@ -55,15 +55,17 @@ class EditarCategoriaView(GestorRequiredMixin, View):
 
 
 class ExcluirCategoriaView(GestorRequiredMixin, View):
-    template_name = 'excluir/excluir_categoria.html'
+    template_name = 'excluir/excluir_generic.html'
 
     def dispatch(self, request, categoria_id, *args, **kwargs):
         self.categoria = get_object_or_404(Categoria, id=categoria_id)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        return render(request, self.template_name, {'categoria': self.categoria})
-
+        tipo_exclusao = "Categoria"
+        nome_exclusao = self.categoria.nome
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
+    
     def post(self, request):
         categoria_nome = self.categoria.nome
         self.categoria.delete()
@@ -74,6 +76,7 @@ class ExcluirCategoriaView(GestorRequiredMixin, View):
 
 class ListarCategoriasView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_categorias.html'
+    htmx_template_name = 'listas/htmx/categorias_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,3 +91,8 @@ class ListarCategoriasView(GestorRequiredMixin, TemplateView):
         context['semestre_atual'] = SemestreSelectors.get_semestre_atual()
         context['filter'] = filter
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]

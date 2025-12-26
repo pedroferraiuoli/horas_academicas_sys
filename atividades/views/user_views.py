@@ -1,5 +1,5 @@
 from django.views import View
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib import messages
 from ..utils import paginate_queryset
@@ -25,7 +25,6 @@ class RegisterView(View):
             messages.success(request, 'Registro realizado com sucesso!')
             return redirect('login')
         return render(request, self.template_name, {'form': form})
-
 
 class AlterarEmailView(LoginRequiredMixin, View):
     template_name = 'auth/alterar_email.html'
@@ -61,6 +60,7 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
 
 class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_usuarios_admin.html'
+    htmx_template_name = 'listas/htmx/users_admin_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -75,10 +75,16 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
         context['coordenadores'] = coordenadores
         context['filter'] = filter_coord
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
     template_name = 'listas/listar_alunos_coordenador.html'
+    htmx_template_name = 'listas/htmx/alunos_coord_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,6 +104,11 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
         context['alunos'] = alunos_paginados
         context['filter'] = filtro
         return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]
 
 
 def ativar_desativar_usuario(request, user_id):

@@ -36,11 +36,12 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
             atividade = AtividadeService.cadastrar_atividade(form=form, aluno=self.aluno)
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
             return redirect(url)
-        return redirect(url)
+        return render(request, self.template_name, {'form': form})
 
 
 class EditarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'forms/form_atividade.html'
+    htmx_template_name = 'forms/htmx/atividade_modal.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -49,14 +50,19 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
 
     def get(self, request):
         form = AtividadeForm(instance=self.atividade, aluno=self.aluno)
+        if request.headers.get('HX-Request'):
+            save_url = request.path
+            context = {'form': form, 'atividade': self.atividade, 'save_url': save_url, 'edit': True}
+            return render(request, self.htmx_template_name, context)
         return render(request, self.template_name, {'form': form, 'atividade': self.atividade, 'edit': True})
 
     def post(self, request):
+        url = request.META.get('HTTP_REFERER', 'dashboard')
         form = AtividadeForm(request.POST, request.FILES, instance=self.atividade, aluno=self.aluno)
         if form.is_valid():
             form.save()
             messages.success(request, f'Atividade {self.atividade.nome} atualizada com sucesso!')
-            return redirect('listar_atividades')
+            return redirect(url)
         return render(request, self.template_name, {'form': form, 'atividade': self.atividade, 'edit': True})
 
 

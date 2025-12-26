@@ -3,13 +3,13 @@
 {% if user.is_authenticated and user.coordenador %}
 
 <!-- Toggle button for mobile - Fixed position -->
-<button class="sidebar-toggle-btn d-lg-none" type="button" onclick="toggleSidebar()">
+<button class="sidebar-toggle-btn d-lg-none" type="button" id="sidebar-toggle">
     <i class="bi bi-list"></i>
 </button>
 
 <nav class="sidebar sidebar-coordenador" id="sidebarMenu">
     <!-- Close button for mobile -->
-    <button class="sidebar-close-btn d-lg-none" onclick="closeSidebar()">
+    <button class="sidebar-close-btn d-lg-none" id="sidebar-close">
         <i class="bi bi-x-lg"></i>
     </button>
     
@@ -94,33 +94,4 @@
 </nav>
 {% endif %}
 
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebarMenu');
-    const overlay = document.querySelector('.sidebar-overlay');
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-}
-
-function closeSidebar() {
-    const sidebar = document.getElementById('sidebarMenu');
-    const overlay = document.querySelector('.sidebar-overlay');
-    sidebar.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// Fechar ao clicar em um item (mobile)
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebarItems = document.querySelectorAll('.sidebar-item');
-    sidebarItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (window.innerWidth < 992) {
-                closeSidebar();
-            }
-        });
-    });
-});
-</script>
 <script src="{% static 'js/navbar.js' %}"></script>

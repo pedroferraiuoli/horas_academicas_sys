@@ -184,7 +184,7 @@ class Command(BaseCommand):
         
         # Buscar associações existentes
         associacoes_existentes = set(
-            CategoriaCurso.objects.values_list('curso_id', 'categoria_id', 'semestre_id')
+            CategoriaCurso.objects.values_list('curso_semestre_id', 'categoria_id')
         )
         
         associacoes_para_criar = []
@@ -194,14 +194,13 @@ class Command(BaseCommand):
             for categoria in categorias:
                 for semestre in semestres:
                     # Verificar se já existe
-                    if (curso.id, categoria.id, semestre.id) not in associacoes_existentes:
+                    if (CursoPorSemestre.objects.get(curso=curso, semestre=semestre).id, categoria.id) not in associacoes_existentes:
                         limite_horas = random.randint(10, 60)
                         associacoes_para_criar.append(CategoriaCurso(
-                            curso=curso,
                             categoria=categoria,
                             limite_horas=limite_horas,
                             equivalencia_horas='1h = 1h',
-                            semestre=semestre
+                            curso_semestre=CursoPorSemestre.objects.get(curso=curso, semestre=semestre)
                         ))
                     
                     total_processadas += 1

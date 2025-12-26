@@ -9,7 +9,7 @@
         <div class="col-lg-5 col-8">
           <div class="ativ-col">
             <span class="ativ-label">Nome</span>
-            <span class="ativ-value">{{ categoria.categoria.nome }} ({{categoria.semestre}})</span>
+            <span class="ativ-value">{{ categoria.categoria.nome }} ({{categoria.curso_semestre.semestre.nome}})</span>
           </div>
         </div>
         <div class="col-lg col-4">
@@ -22,7 +22,7 @@
           <div class="ativ-col">
             <span class="ativ-label">Ações</span>
             <div class="ativ-actions">
-              <a href="{% url 'editar_categoria_curso' categoria.id %}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'editar_categoria_curso' categoria.id %}?next={{ request.get_full_path }}" class="btn btn-outline-main-blue btn-sm"><i class="bi bi-pencil"></i></a>
               <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm" title="Desassociar"><i class="bi bi-x-circle"></i></button>
@@ -40,7 +40,7 @@
           <a href="{% url 'editar_categoria_curso' categoria.id %}" class="btn btn-outline-main-blue btn-sm w-100 mb-2">
             <i class="bi bi-pencil"></i> Editar Categoria
           </a>
-          <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}">
+          <form method="post" action="{% url 'excluir_categoria_curso' categoria.id %}?next={{ request.get_full_path }}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger btn-sm w-100" title="Desassociar">
               <i class="bi bi-x-circle"></i> Desassociar do Curso

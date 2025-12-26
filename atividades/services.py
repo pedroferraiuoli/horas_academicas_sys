@@ -1,5 +1,6 @@
-from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, UserSelectors
-from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, Semestre
+from django.shortcuts import get_object_or_404
+from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, UserSelectors
+from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
@@ -25,26 +26,24 @@ class SemestreService:
 
         to_create = []
         with transaction.atomic():
-            origem_qs = CategoriaCurso.objects.filter(semestre=source_semestre).select_related('categoria', 'curso')
-            cursos_por_id = {}
-            for cc in origem_qs:
-                cursos_por_id.setdefault(cc.curso_id, []).append(cc)
-
-            for curso_id, curso_categorias in cursos_por_id.items():
-                # ids já existentes no semestre destino para este curso
-                existing_cat_ids = set(
-                    CategoriaCurso.objects.filter(curso_id=curso_id, semestre=semestre_novo).values_list('categoria_id', flat=True)
+            origem_qs = CategoriaCurso.objects.filter(curso_semestre__semestre=source_semestre).select_related('categoria', 'curso_semestre', 'curso_semestre__curso')
+            for cat in origem_qs:
+                curso_semestre = CursoPorSemestreSelectors.get_curso_por_semestre(
+                    curso=cat.curso_semestre.curso,
+                    semestre=semestre_novo
                 )
-                for cc in curso_categorias:
-                    if cc.categoria_id in existing_cat_ids:
-                        continue
-                    to_create.append(CategoriaCurso(
-                        curso_id=curso_id,
-                        categoria_id=cc.categoria_id,
-                        limite_horas=cc.limite_horas,
-                        equivalencia_horas=cc.equivalencia_horas,
-                        semestre=semestre_novo
-                    ))
+                if not curso_semestre:
+                    curso_semestre = CursoPorSemestre.objects.create(
+                        curso=cat.curso_semestre.curso,
+                        semestre=semestre_novo,
+                        horas_requeridas=cat.curso_semestre.curso.horas_requeridas
+                    )
+                to_create.append(CategoriaCurso(
+                    curso_semestre=curso_semestre,
+                    categoria=cat.categoria,
+                    limite_horas=cat.limite_horas,
+                    equivalencia_horas=cat.equivalencia_horas,
+                ))
 
             if to_create:
                 CategoriaCurso.objects.bulk_create(to_create)
@@ -200,19 +199,21 @@ class CategoriaCursoService:
    
    @staticmethod
    def create_categoria_curso_especifica(*, form, user: User):
-        curso = form.cleaned_data['curso']
-
         if UserSelectors.is_user_coordenador(user):
             coordenador = UserSelectors.get_coordenador_by_user(user)
-            if coordenador.curso != curso:
-                raise ValueError('Coordenador só pode criar categorias para seu próprio curso.')
+            curso = coordenador.curso
+        else:       
+            curso = form.cleaned_data['curso']
             
         categoria = Categoria.objects.create(nome=form.cleaned_data['nome'], especifica=True)
+        curso_semestre = CursoPorSemestreSelectors.get_curso_por_semestre(
+            curso=curso,
+            semestre=form.cleaned_data['semestre']
+        )
         curso_categoria = CategoriaCurso.objects.create(
-            curso=form.cleaned_data['curso'],
+            curso_semestre=curso_semestre,
             categoria=categoria,
             limite_horas=form.cleaned_data['limite_horas'],
-            semestre=form.cleaned_data['semestre']
         )
         return curso_categoria
    
@@ -265,11 +266,14 @@ class CategoriaCursoService:
             if item['categoria_id'] not in categorias_disponiveis_ids:
                 continue  # Ignora categorias já associadas ou inválidas
             
-            to_create.append(CategoriaCurso(
+            curso_semestre = CursoPorSemestreSelectors.get_curso_por_semestre(
                 curso=curso,
+                semestre=semestre
+            )
+            to_create.append(CategoriaCurso(
+                curso_semestre=curso_semestre,
                 categoria_id=item['categoria_id'],
                 limite_horas=item['limite_horas'],
-                semestre=semestre
             ))
         
         if not to_create:
@@ -372,4 +376,47 @@ class RelatorioAlunoService:
             'total_horas_validas': total_horas_validas,
             'horas_requeridas': horas_requeridas,
         }
+    
+class CursoService:
+
+    @staticmethod
+    def atualizar_horas_semestres(curso, post_data):
+        """
+        Atualiza/cria configurações de horas por semestre de um curso
+        com base nos dados do POST.
+
+        Retorna a quantidade de semestres afetados.
+        """
+        semestres_atualizados = 0
+
+        for key, value in post_data.items():
+            if not key.startswith('horas_semestre_'):
+                continue
+
+            semestre_id = key.replace('horas_semestre_', '')
+
+            try:
+                horas = int(value) if value else 0
+            except ValueError:
+                horas = 0
+
+            try:
+                semestre = Semestre.objects.get(id=semestre_id)
+            except Semestre.DoesNotExist:
+                continue
+
+            config, created = CursoPorSemestre.objects.get_or_create(
+                curso=curso,
+                semestre=semestre,
+                defaults={'horas_requeridas': horas}
+            )
+
+            if created:
+                semestres_atualizados += 1
+            elif config.horas_requeridas != horas:
+                config.horas_requeridas = horas
+                config.save(update_fields=['horas_requeridas'])
+                semestres_atualizados += 1
+
+        return semestres_atualizados         
 

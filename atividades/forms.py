@@ -1,5 +1,5 @@
 import re
-from atividades.selectors import CategoriaCursoSelectors, SemestreSelectors, UserSelectors
+from atividades.selectors import CategoriaCursoSelectors, UserSelectors
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras, ValidadorDeNome
 from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno
 from django.contrib.auth.forms import AuthenticationForm
@@ -87,29 +87,7 @@ class CategoriaCursoForm(forms.ModelForm):
 
     class Meta:
         model = CategoriaCurso
-        fields = ['curso', 'categoria', 'limite_horas', 'semestre']
-
-
-    def __init__(self, *args, user=None, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if not user:
-            return
-
-        coordenador = getattr(user, 'coordenador', None)
-
-        if coordenador:
-            self.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso_id)
-            self.fields['curso'].initial = coordenador.curso
-
-            semestre_atual = SemestreSelectors.get_semestre_atual()
-
-            self.fields['categoria'].queryset = (CategoriaCursoSelectors.get_categorias_curso_disponiveis_para_associar(
-                    coordenador.curso,
-                    semestre_atual
-                )
-            )
-
+        fields = ['limite_horas']
 
 class AtividadeForm(forms.ModelForm):
 
@@ -215,8 +193,8 @@ class UserRegistrationForm(forms.Form):
         return email
     
     def clean_nome(self):
-        nome = self.cleaned_data.get('nome')
-        ValidadorDeNome.validar_nome(nome)
+        nome_validar = self.cleaned_data.get('nome')
+        nome = ValidadorDeNome.validar_nome(nome_validar)
         return nome
 
 class CategoriaCursoDiretaForm(forms.Form):
@@ -228,6 +206,4 @@ class CategoriaCursoDiretaForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if UserSelectors.is_user_coordenador(user=user):
-            coordenador = UserSelectors.get_coordenador_by_user(user)
-            self.fields['curso'].queryset = Curso.objects.filter(id=coordenador.curso_id)
-            self.fields['curso'].initial = coordenador.curso
+            self.fields.pop('curso')

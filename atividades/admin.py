@@ -11,8 +11,8 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 @admin.register(CategoriaCurso)
 class CategoriaCursoAdmin(admin.ModelAdmin):
-    list_display = ("curso", "categoria", "limite_horas")
-    list_filter = ("curso", "categoria")
+    list_display = ("curso_semestre", "categoria", "limite_horas")
+    list_filter = ("curso_semestre", "categoria")
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):

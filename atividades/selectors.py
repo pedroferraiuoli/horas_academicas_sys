@@ -1,7 +1,7 @@
 from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, Q
 from django.db.models.functions import Coalesce
 from typing import Optional, List
-from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, Semestre
+from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, CursoPorSemestre, Semestre
 from django.utils import timezone
 
 class AtividadeSelectors:
@@ -13,9 +13,8 @@ class AtividadeSelectors:
             return Atividade.objects.select_related(
                 'aluno__user',
                 'aluno__curso',
-                'categoria__curso',
+                'categoria__curso_semestre',
                 'categoria__categoria',
-                'categoria__semestre'
             ).get(id=atividade_id)
         except Atividade.DoesNotExist:
             return None
@@ -34,8 +33,7 @@ class AtividadeSelectors:
             atividades = atividades.exclude(status='Aprovada')
         return atividades.select_related(
             'categoria__categoria',
-            'categoria__curso',
-            'categoria__semestre'
+            'categoria__curso_semestre',
         ).order_by('horas_aprovadas', '-created_at')
     
     @staticmethod
@@ -126,9 +124,9 @@ class CategoriaCursoSelectors:
 
         cat = CategoriaCurso.objects.all()
         if curso:
-            cat = cat.filter(curso=curso)
+            cat = cat.filter(curso_semestre__curso=curso)
         if semestre:
-            cat = cat.filter(semestre=semestre)
+            cat = cat.filter(curso_semestre__semestre=semestre)
         return cat.select_related('categoria').order_by('categoria__nome')
     
     @staticmethod
@@ -140,11 +138,11 @@ class CategoriaCursoSelectors:
         - Categorias específicas (especifica=True): apenas se já foram associadas ao mesmo curso em outro semestre
         """
         # IDs já associados neste curso+semestre
-        CategoriaCurso_qs = CategoriaCurso.objects.filter(curso=curso, semestre=semestre).values_list('categoria_id', flat=True)
+        CategoriaCurso_qs = CategoriaCurso.objects.filter(curso_semestre__curso=curso, curso_semestre__semestre=semestre).values_list('categoria_id', flat=True)
         
         # IDs de categorias específicas já usadas neste curso (em qualquer semestre)
         categorias_especificas_do_curso = CategoriaCurso.objects.filter(
-            curso=curso,
+            curso_semestre__curso=curso,
             categoria__especifica=True
         ).values_list('categoria_id', flat=True).distinct()
         
@@ -159,11 +157,11 @@ class CategoriaCursoSelectors:
     def get_categorias_curso_usuario(user) -> QuerySet['CategoriaCurso']:
         """Retorna categorias de curso visíveis para o usuário"""
         if user.groups.filter(name='Gestor').exists():
-            return CategoriaCurso.objects.select_related('curso', 'categoria', 'semestre').all()
+            return CategoriaCurso.objects.select_related('curso_semestre', 'categoria').all()
         elif user.groups.filter(name='Coordenador').exists():
             try:
                 coordenador = Coordenador.objects.get(user=user)
-                return CategoriaCurso.objects.select_related('curso', 'categoria', 'semestre').filter(curso=coordenador.curso)
+                return CategoriaCurso.objects.select_related('curso_semestre', 'categoria').filter(curso_semestre__curso=coordenador.curso)
             except Coordenador.DoesNotExist:
                 return CategoriaCurso.objects.none()
         return CategoriaCurso.objects.none()
@@ -173,8 +171,8 @@ class CategoriaCursoSelectors:
         return (
             CategoriaCurso.objects
             .filter(
-                curso_id=aluno.curso_id, 
-                semestre_id=aluno.semestre_ingresso_id,
+                curso_semestre__curso_id=aluno.curso_id, 
+                curso_semestre__semestre_id=aluno.semestre_ingresso_id,
             )
             .annotate(
                 horas_aprovadas_total=Coalesce(
@@ -326,19 +324,30 @@ class CursoSelectors:
     def listar_cursos_com_categorias_semestre_atual():
         semestre_atual = SemestreSelectors.get_semestre_atual()
 
+        # Prefetch das configurações do semestre atual
+        config_semestre_atual = Prefetch(
+            'configuracoes_semestre',
+            queryset=CursoPorSemestre.objects.filter(semestre=semestre_atual),
+            to_attr='config_semestre_atual_list'
+        )
+        
+        # Prefetch das categorias dentro das configurações
         categorias_prefetch = Prefetch(
-            'categorias',
+            'config_semestre_atual_list__categorias_curso',
             queryset=(
                 CategoriaCurso.objects
-                .filter(semestre=semestre_atual)
                 .select_related('categoria')
                 .order_by('categoria__nome')
             ),
             to_attr='categorias_semestre_atual'
         )
 
-        return Curso.objects.prefetch_related(categorias_prefetch)
-
+        return (
+            Curso.objects
+            .prefetch_related(config_semestre_atual, categorias_prefetch)
+            .distinct()
+        )
+   
 class CategoriaSelectors:
 
     @staticmethod
@@ -354,12 +363,21 @@ class CategoriaSelectors:
                     'categorias_curso',
                     queryset=(
                         CategoriaCurso.objects
-                        .filter(semestre=semestre_atual)
-                        .select_related('curso')
+                        .filter(curso_semestre__semestre=semestre_atual)
+                        .select_related('curso_semestre__curso')
                     ),
                     to_attr='cursos_no_semestre_atual'
                 )
             )
         )
+    
+class CursoPorSemestreSelectors:
+
+    @staticmethod
+    def get_curso_por_semestre(curso: Curso, semestre: Semestre) -> Optional[CursoPorSemestre]:
+        try:
+            return CursoPorSemestre.objects.get(curso=curso, semestre=semestre)
+        except CursoPorSemestre.DoesNotExist:
+            return None
 
     

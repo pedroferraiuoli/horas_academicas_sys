@@ -129,10 +129,10 @@ class Command(BaseCommand):
         # Contar total de combinações
         total_combinacoes = 0
         for curso in cursos:
-            categorias_curso = list(CategoriaCurso.objects.filter(curso=curso))
+            categorias_curso = list(CategoriaCurso.objects.filter(curso_semestre__curso=curso))
             if categorias_curso:
                 for semestre in semestres:
-                    categorias_semestre = [cc for cc in categorias_curso if cc.semestre == semestre]
+                    categorias_semestre = [cc for cc in categorias_curso if cc.curso_semestre.semestre == semestre]
                     if categorias_semestre:
                         total_combinacoes += 1
         
@@ -150,7 +150,7 @@ class Command(BaseCommand):
             # Para cada curso
             for idx_curso, curso in enumerate(cursos, 1):
                 # Buscar todas as categorias associadas a este curso
-                categorias_curso = list(CategoriaCurso.objects.filter(curso=curso))
+                categorias_curso = list(CategoriaCurso.objects.filter(curso_semestre__curso=curso))
                 
                 if not categorias_curso:
                     continue
@@ -158,7 +158,7 @@ class Command(BaseCommand):
                 # Para cada semestre
                 for semestre in semestres:
                     # Filtrar categorias deste semestre
-                    categorias_semestre = [cc for cc in categorias_curso if cc.semestre == semestre]
+                    categorias_semestre = [cc for cc in categorias_curso if cc.curso_semestre.semestre == semestre]
                     
                     if not categorias_semestre:
                         continue

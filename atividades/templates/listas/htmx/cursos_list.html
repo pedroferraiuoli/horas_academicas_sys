@@ -65,7 +65,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          {% if curso.categorias_semestre_atual %}
+          {% if curso.config_semestre_atual_list %}
           <div class="table-responsive">
             <table class="table table-hover">
               <thead>
@@ -75,7 +75,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for cat in curso.categorias_semestre_atual %}
+                {% for cat in curso.config_semestre_atual_list.0.categorias_semestre_atual %}
                 <tr>
                   <td class="text-center">{{ cat.categoria.nome }}</td>
                   <td class="text-center"><span class="badge bg-success bg-opacity-75">{{ cat.limite_horas }}h</span></td>

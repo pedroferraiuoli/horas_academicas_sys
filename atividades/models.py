@@ -32,7 +32,7 @@ class Categoria(BaseModel):
 class Curso(BaseModel):
     nome = models.CharField(max_length=100)
     horas_requeridas = models.PositiveIntegerField(help_text="Horas totais necessárias para conclusão do curso. (Será aplicado somente para novos semestres!)")
-
+    
     def __str__(self):
         return self.nome
     
@@ -54,15 +54,13 @@ class CursoPorSemestre(BaseModel):
     
 class CategoriaCurso(BaseModel):
     categoria = models.ForeignKey('Categoria', on_delete=models.CASCADE, related_name='categorias_curso')
-    curso = models.ForeignKey('Curso', on_delete=models.CASCADE, related_name='categorias')
     limite_horas = models.PositiveIntegerField(help_text="Limite máximo de horas para esta categoria neste curso")
     equivalencia_horas = models.CharField(max_length=50, help_text="Equivalência de horas (e.g., 1h = 1h)", null=True, blank=True, default="1h = 1h")
-    semestre = models.ForeignKey('Semestre', on_delete=models.PROTECT)
-
+    curso_semestre = models.ForeignKey(CursoPorSemestre, on_delete=models.CASCADE, related_name='categorias_curso')
     class Meta:
-        unique_together = ('curso', 'categoria', 'semestre')
+        unique_together = ('curso_semestre', 'categoria')
         indexes = [
-            models.Index(fields=['curso', 'semestre'], name='cat_curso_semestre_idx'),
+            models.Index(fields=['curso_semestre', 'categoria'], name='cat_curso_semestre_idx'),
         ]
 
     def __str__(self):

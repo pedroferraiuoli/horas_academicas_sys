@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from django.contrib import messages
 
 from atividades.filters import CursoFilter
+from atividades.services import CursoService
 from ..utils import paginate_queryset
 
 from atividades.selectors import CursoSelectors, SemestreSelectors
@@ -83,42 +84,27 @@ class EditarCursoView(GestorRequiredMixin, View):
 
 class AtualizarHorasSemestresView(GestorRequiredMixin, View):
     """View dedicada para atualizar horas requeridas dos semestres de um curso"""
-    
+
     def dispatch(self, request, curso_id, *args, **kwargs):
         self.curso = get_object_or_404(Curso, id=curso_id)
         return super().dispatch(request, *args, **kwargs)
-    
+
     def post(self, request):
-        semestres_atualizados = 0
-        
-        for key, value in request.POST.items():
-            if key.startswith('horas_semestre_'):
-                semestre_id = key.replace('horas_semestre_', '')
-                horas = int(value) if value else 0
-                
-                try:
-                    semestre = Semestre.objects.get(id=semestre_id)
-                    config, created = CursoPorSemestre.objects.get_or_create(
-                        curso=self.curso,
-                        semestre=semestre,
-                        defaults={'horas_requeridas': horas}
-                    )
-                    
-                    if not created and config.horas_requeridas != horas:
-                        config.horas_requeridas = horas
-                        config.save()
-                        semestres_atualizados += 1
-                    elif created:
-                        semestres_atualizados += 1
-                        
-                except Semestre.DoesNotExist:
-                    continue
-        
+        semestres_atualizados = CursoService.atualizar_horas_semestres(
+            curso=self.curso,
+            post_data=request.POST
+        )
+
         business_logger.warning(
             f"HORAS DOS SEMESTRES ATUALIZADAS: Curso {self.curso.nome} | "
             f"{semestres_atualizados} semestres | User: {request.user.username}"
         )
-        messages.success(request, f'{semestres_atualizados} semestre(s) atualizado(s) com sucesso!')
+
+        messages.success(
+            request,
+            f'{semestres_atualizados} semestre(s) atualizado(s) com sucesso!'
+        )
+
         return redirect('editar_curso', curso_id=self.curso.id)
 
 

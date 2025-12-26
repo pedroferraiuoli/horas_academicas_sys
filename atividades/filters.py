@@ -8,12 +8,15 @@ from django.db.models import Q
 
 class CategoriaCursoFilter(django_filters.FilterSet):
     semestre = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={
-            'class': 'form-select',   # coloque as classes que quiser
-        }))
+            'class': 'form-select',
+        }),
+        method='filter_semestre'
+    )
     
     curso = django_filters.ModelChoiceFilter(queryset=Curso.objects.all(), label='Curso', empty_label='Todos', widget=forms.Select(attrs={
             'class': 'form-select',
-        }))
+        }),
+        method='filter_curso')
     
     especifica = django_filters.BooleanFilter(
         field_name='categoria__especifica',
@@ -47,6 +50,16 @@ class CategoriaCursoFilter(django_filters.FilterSet):
         return queryset.filter(
             categoria__nome__icontains=value
         )
+    
+    def filter_semestre(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(curso_semestre__semestre=value)
+    
+    def filter_curso(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(curso_semestre__curso=value)
 
 class AlunosFilter(django_filters.FilterSet):
     semestre_ingresso = django_filters.ModelChoiceFilter(queryset=Semestre.objects.all(), label='Semestre', empty_label='Todos', widget=forms.Select(attrs={

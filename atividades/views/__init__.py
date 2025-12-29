@@ -45,6 +45,7 @@ from .atividade_views import (
 
 from .user_views import (
     RegisterView,
+    ConfirmarRegistroModalView,
     AlterarEmailView,
     CriarUsuarioAdminView,
     ListarUsuariosAdminView,

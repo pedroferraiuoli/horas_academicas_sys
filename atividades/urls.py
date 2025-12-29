@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
+    path('confirmar-registro-modal/', views.ConfirmarRegistroModalView.as_view(), name='confirmar_registro_modal'),
     path('login/', auth_views.LoginView.as_view(
         template_name='auth/login.html',
         authentication_form=EmailOrUsernameAuthenticationForm

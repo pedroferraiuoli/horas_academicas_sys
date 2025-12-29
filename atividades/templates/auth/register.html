@@ -20,7 +20,10 @@
 
     <!-- Body -->
     <div class="form-atividade-body">
-      <form method="post" class="modern-form">
+      <form method="post" class="modern-form" data-register-form
+            hx-post="{% url 'confirmar_registro_modal' %}"
+            hx-target="body"
+            hx-swap="beforeend">
         {% csrf_token %}
         
         <div class="form-fields-grid">
@@ -81,4 +84,6 @@
     </div>
   </div>
 </div>
+
+<script src="{% static 'js/confirmar_registro_modal.js' %}"></script>
 {% endblock %}

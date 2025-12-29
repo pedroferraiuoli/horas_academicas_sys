@@ -26,6 +26,26 @@ class RegisterView(View):
             return redirect('login')
         return render(request, self.template_name, {'form': form})
 
+
+class ConfirmarRegistroModalView(View):
+    """View que retorna o modal de confirmação de registro via HTMX"""
+    template_name = 'auth/confirmar_registro_modal.html'
+
+    def post(self, request):
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            # Extrai os dados do formulário para exibir no modal
+            context = {
+                'nome': form.cleaned_data['nome'],
+                'matricula': form.cleaned_data['matricula'],
+                'curso': form.cleaned_data['curso'].nome,
+                'semestre': form.cleaned_data['semestre'].nome,
+            }
+            return render(request, self.template_name, context)
+        else:
+            # Se houver erros, retorna os erros do formulário
+            return render(request, 'auth/register.html', {'form': form})
+
 class AlterarEmailView(LoginRequiredMixin, View):
     template_name = 'auth/alterar_email.html'
 

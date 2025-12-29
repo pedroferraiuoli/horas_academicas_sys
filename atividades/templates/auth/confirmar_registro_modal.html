@@ -1,0 +1,72 @@
+<!-- Modal de Confirmação de Semestre -->
+<div id="modal-confirmacao-backdrop" class="modal-confirmacao-backdrop"></div>
+
+<div id="modal-confirmacao" class="modal-confirmacao-container">
+  <div class="modal-confirmacao-content">
+    <!-- Header do Modal -->
+    <div class="modal-confirmacao-header">
+      <div class="modal-confirmacao-header-icon">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+      <h2 class="modal-confirmacao-title">Confirmar Semestre de Ingresso</h2>
+      <button type="button" class="modal-confirmacao-close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Body do Modal -->
+    <div class="modal-confirmacao-body">
+      <div class="confirmacao-info">
+        <div class="confirmacao-info-item">
+          <span class="confirmacao-info-label">
+            <i class="bi bi-person"></i>
+            Nome:
+          </span>
+          <span class="confirmacao-info-value">{{ nome }}</span>
+        </div>
+        
+        <div class="confirmacao-info-item">
+          <span class="confirmacao-info-label">
+            <i class="bi bi-card-text"></i>
+            Matrícula:
+          </span>
+          <span class="confirmacao-info-value">{{ matricula }}</span>
+        </div>
+        
+        <div class="confirmacao-info-item">
+          <span class="confirmacao-info-label">
+            <i class="bi bi-book"></i>
+            Curso:
+          </span>
+          <span class="confirmacao-info-value">{{ curso }}</span>
+        </div>
+        
+        <div class="confirmacao-info-item highlight">
+          <span class="confirmacao-info-label">
+            <i class="bi bi-calendar-event"></i>
+            Semestre de Ingresso:
+          </span>
+          <span class="confirmacao-info-value">{{ semestre }}</span>
+        </div>
+      </div>
+
+      <div class="confirmacao-message">
+        <i class="bi bi-exclamation-circle"></i>
+        <p>Confirma que o semestre de ingresso <strong>{{ semestre }}</strong> está correto?</p>
+      </div>
+    </div>
+
+    <!-- Footer do Modal -->
+    <div class="modal-confirmacao-footer">
+      <button type="button" class="modal-confirmacao-btn modal-confirmacao-btn-cancel">
+        <i class="bi bi-x-circle"></i>
+        <span>Cancelar</span>
+      </button>
+      
+      <button type="button" class="modal-confirmacao-btn modal-confirmacao-btn-confirm">
+        <i class="bi bi-check-circle"></i>
+        <span>Confirmar</span>
+      </button>
+    </div>
+  </div>
+</div>

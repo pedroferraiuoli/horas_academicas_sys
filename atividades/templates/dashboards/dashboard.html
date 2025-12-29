@@ -20,7 +20,7 @@
     </div>
 </div>
 
-<p class="dashboard-course-info">Curso: <span class="fw-bold">{{ aluno.curso }}</span> | Horas requeridas: <span class="fw-bold">{{ horas_requeridas }}h</span></p>
+<p class="dashboard-course-info">Curso: <span class="fw-bold">{{ aluno.curso }} ({{horas_requeridas}}h)</span></p>
     {% if ultrapassou_limite %}
       <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -38,6 +38,7 @@
             <span class="fw-bold">{{ total_horas }} / {{ horas_requeridas }}h</span>
         </div>
       </div>
+      <span class="dashboard-course-info">Horas pendentes: {{ horas_pendentes }}h | Horas válidas: {{ total_horas }}h | Total: {{ horas_totais }}h</span>
     </div>
 
     <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>

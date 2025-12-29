@@ -6,14 +6,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Função para fechar o modal
     window.fecharModalConfirmacao = function() {
-        const modal = document.getElementById('modal-confirmacao');
-        const backdrop = document.getElementById('modal-confirmacao-backdrop');
-        
-        if (modal) {
-            modal.remove();
-        }
-        if (backdrop) {
-            backdrop.remove();
+        const modalContainer = document.getElementById('modal-container');
+        if (modalContainer) {
+            modalContainer.innerHTML = '';
         }
     };
 
@@ -26,9 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
             form.removeAttribute('hx-post');
             form.removeAttribute('hx-target');
             form.removeAttribute('hx-swap');
-            
-            // Define a action para a URL de registro
-            form.method = 'post';
             
             // Submete o formulário
             form.submit();
@@ -70,7 +62,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Confirmar ao clicar no botão confirmar
         if (e.target && e.target.closest('.modal-confirmacao-btn-confirm')) {
             e.preventDefault();
-            confirmarRegistro();
+            const modalBody = e.target.closest('.modal-confirmacao-content');
+            
+            // Se o modal tem lista de erros, apenas fecha
+            if (modalBody && modalBody.querySelector('ul')) {
+                fecharModalConfirmacao();
+            } else {
+                // Se é o modal de confirmação de semestre, submete o formulário
+                confirmarRegistro();
+            }
         }
     });
 });

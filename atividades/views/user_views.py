@@ -30,6 +30,7 @@ class RegisterView(View):
 class ConfirmarRegistroModalView(View):
     """View que retorna o modal de confirmação de registro via HTMX"""
     template_name = 'auth/confirmar_registro_modal.html'
+    error_template = 'auth/registro_erros_modal.html'
 
     def post(self, request):
         form = UserRegistrationForm(request.POST)
@@ -43,8 +44,8 @@ class ConfirmarRegistroModalView(View):
             }
             return render(request, self.template_name, context)
         else:
-            # Se houver erros, retorna os erros do formulário
-            return render(request, 'auth/register.html', {'form': form})
+            # Se houver erros, retorna modal com os erros
+            return render(request, self.error_template, {'form': form})
 
 class AlterarEmailView(LoginRequiredMixin, View):
     template_name = 'auth/alterar_email.html'

@@ -1,0 +1,51 @@
+<!-- Modal de Erros de Validação -->
+<div id="modal-confirmacao-backdrop" class="modal-confirmacao-backdrop"></div>
+
+<div id="modal-confirmacao" class="modal-confirmacao-container">
+  <div class="modal-confirmacao-content">
+    <!-- Header do Modal -->
+    <div class="modal-confirmacao-header">
+      <div class="modal-confirmacao-header-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <h2 class="modal-confirmacao-title">Erros no Formulário</h2>
+      <button type="button" class="modal-confirmacao-close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Body do Modal -->
+    <div class="modal-confirmacao-body">
+      <div class="confirmacao-message" style="background: #ffe6e6; border-left-color: #dc3545;">
+        <i class="bi bi-x-circle" style="color: #dc3545;"></i>
+        <div>
+          <p style="margin-bottom: 1rem;"><strong>Por favor, corrija os seguintes erros:</strong></p>
+          <ul style="margin: 0; padding-left: 1.5rem; color: var(--text-secondary);">
+            {% for field in form %}
+              {% if field.errors %}
+                {% for error in field.errors %}
+                  <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+            
+            {% if form.non_field_errors %}
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer do Modal -->
+    <div class="modal-confirmacao-footer">
+      <button type="button" class="modal-confirmacao-btn modal-confirmacao-btn-confirm" 
+              style="width: 100%;">
+        <i class="bi bi-check-circle"></i>
+        <span>Entendi, vou corrigir</span>
+      </button>
+    </div>
+  </div>
+</div>

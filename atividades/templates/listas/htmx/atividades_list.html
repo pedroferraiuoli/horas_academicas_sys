@@ -1,5 +1,9 @@
 <!-- Tabela Responsiva -->
- {% load static %}
+{% load static %}
+
+<!-- Mensagens via Out-of-Band Swap -->
+{% include 'components/messages_oob.html' %}
+
 <div class="atividades-list">
   {% for atividade in atividades %}
  {% include 'listas/partials/atividades_aluno.html' %}

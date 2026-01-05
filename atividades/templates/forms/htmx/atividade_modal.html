@@ -31,7 +31,7 @@
 
     <!-- Form Body -->
     <div class="form-atividade-body">
-      <form method="post" action="{{save_url}}" enctype="multipart/form-data" autocomplete="off" class="modern-form">
+      <form method="post" hx-post="{{save_url}}" hx-target="#atividades-container" hx-swap="innerHTML" enctype="multipart/form-data" autocomplete="off" class="modern-form">
         {% csrf_token %}
         
         <div class="form-fields-grid">

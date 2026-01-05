@@ -490,7 +490,7 @@ body {
 /* === HEADER === */
 .form-atividade-header {
     background: linear-gradient(135deg, var(--main-blue) 0%, #0d1630 100%);
-    padding: 2rem 2.5rem;
+    padding: 1.5rem 2.5rem;
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -499,19 +499,10 @@ body {
 }
 
 .form-header-icon {
-    width: 60px;
-    height: 60px;
-    background: var(--main-orange);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    z-index: 1;
 }
 
 .form-header-icon i {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     color: white;
 }
 
@@ -704,7 +695,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    margin-top: 2.5rem;
+    margin-top: 2rem;
     padding-top: 2rem;
     border-top: 2px solid var(--bg-light);
 }
@@ -774,8 +765,7 @@ body {
     }
     
     .form-header-icon {
-        width: 50px;
-        height: 50px;
+
     }
     
     .form-header-icon i {
@@ -820,12 +810,12 @@ body {
     }
     
     .form-atividade-header {
-        padding: 1.5rem 1.25rem;
+        padding: 1rem 1.25rem;
+        gap: 0.5rem;
     }
     
     .form-header-icon {
-        width: 45px;
-        height: 45px;
+
     }
     
     .form-header-icon i {
@@ -896,6 +886,7 @@ body {
     position: absolute;
     top: 15px;
     right: 15px;
+    min-height: 25px !important;
 }
 
 /* Botões padrão Bootstrap */
@@ -2773,3 +2764,241 @@ header button:hover {
 }
 
 /* Fim Dashboard */
+
+/* ===================================
+   Modal de Confirmação de Semestre
+   =================================== */
+
+.semestre-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.semestre-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.25s ease-out;
+}
+
+.semestre-modal-content {
+    position: relative;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(21, 34, 79, 0.4);
+    max-width: 550px;
+    width: 90%;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 3px solid var(--main-blue);
+}
+
+.semestre-modal-header {
+    background: linear-gradient(135deg, var(--main-blue) 0%, #0d1630 100%);
+    color: white;
+    padding: 1.75rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 4px solid var(--main-orange);
+}
+
+.semestre-modal-header i {
+    font-size: 2.5rem;
+    color: var(--main-orange);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.semestre-modal-header h3 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.semestre-modal-body {
+    padding: 2rem 2rem 1.5rem;
+    background: var(--main-bg);
+}
+
+.semestre-info {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.semestre-destaque {
+    background: var(--main-green-dark);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 1rem 0 1.5rem;
+    box-shadow: 0 6px 20px rgba(0, 79, 45, 0.35);
+    letter-spacing: 0.5px;
+}
+
+.semestre-aviso {
+    display: flex;
+    align-items: start;
+    gap: 0.85rem;
+    background: #e8f1f9;
+    border-left: 5px solid var(--main-blue);
+    padding: 1.15rem 1.25rem;
+    border-radius: 8px;
+    color: var(--main-blue);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(21, 34, 79, 0.1);
+}
+
+.semestre-aviso i {
+    margin-top: 0.15rem;
+    font-size: 1.2rem;
+    color: var(--main-blue);
+    flex-shrink: 0;
+}
+
+.semestre-modal-footer {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 2px solid #e0e7ed;
+}
+
+.semestre-btn {
+    padding: 0.85rem 1.75rem;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.3px;
+}
+
+.semestre-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.25s;
+}
+
+.semestre-btn:hover i {
+    transform: scale(1.15);
+}
+
+.semestre-btn-cancelar {
+    background: white;
+    color: var(--text-muted);
+    border: 2px solid #d1d5db;
+}
+
+.semestre-btn-cancelar:hover {
+    background: #f9fafb;
+    border-color: var(--main-blue);
+    color: var(--main-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(21, 34, 79, 0.15);
+}
+
+.semestre-btn-confirmar {
+    background: linear-gradient(135deg, var(--main-green) 0%, var(--main-green-dark) 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 79, 45, 0.25);
+}
+
+.semestre-btn-confirmar:hover {
+    background: linear-gradient(135deg, var(--main-green-dark) 0%, #002a17 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 79, 45, 0.4);
+}
+
+.semestre-confirmado {
+    border-color: var(--main-green) !important;
+    background-color: #f0fdf4 !important;
+    box-shadow: 0 0 0 3px rgba(0, 79, 45, 0.1) !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(60px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .semestre-modal-content {
+        max-width: 95%;
+        margin: 1rem;
+    }
+
+    .semestre-modal-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .semestre-modal-header i {
+        font-size: 2rem;
+    }
+
+    .semestre-modal-header h3 {
+        font-size: 1.15rem;
+    }
+
+    .semestre-modal-body {
+        padding: 1.5rem;
+    }
+
+    .semestre-destaque {
+        font-size: 1.2rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .semestre-modal-footer {
+        padding: 1.25rem 1.5rem;
+        flex-direction: column;
+    }
+
+    .semestre-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Fim Modal de Confirmação de Semestre */

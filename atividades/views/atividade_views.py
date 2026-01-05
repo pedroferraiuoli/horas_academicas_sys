@@ -14,6 +14,7 @@ from ..mixins import AlunoRequiredMixin, CoordenadorRequiredMixin
 class CadastrarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'forms/form_atividade.html'
     htmx_template_name = 'forms/htmx/atividade_modal.html'
+    htmx_atividades_list_template = 'listas/htmx/atividades_list.html'
 
     def dispatch(self, request, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -32,10 +33,24 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
     def post(self, request):
         form = AtividadeForm(request.POST, request.FILES, aluno=self.aluno)
         url = request.META.get('HTTP_REFERER', 'dashboard')
+        
         if form.is_valid():
             atividade = AtividadeService.cadastrar_atividade(form=form, aluno=self.aluno)
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
+            
+            if request.headers.get('HX-Request'):
+                response = render(request, self.htmx_atividades_list_template, {'atividades': AtividadeSelectors.get_atividades_recentes_aluno(self.aluno)})
+                response['HX-Trigger'] = 'atividadeCriada'
+                return response
             return redirect(url)
+        
+        # Se houver erros no formulário
+        if request.headers.get('HX-Request'):
+            save_url = request.path
+            context = {'form': form, 'save_url': save_url}
+            response = render(request, self.htmx_template_name, context)
+            response['HX-Retarget'] = '#modal-container'
+            return response
         return render(request, self.template_name, {'form': form})
 
 
@@ -59,16 +74,33 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
     def post(self, request):
         url = request.META.get('HTTP_REFERER', 'dashboard')
         form = AtividadeForm(request.POST, request.FILES, instance=self.atividade, aluno=self.aluno)
+        
         if form.is_valid():
             form.save()
             messages.success(request, f'Atividade {self.atividade.nome} atualizada com sucesso!')
+            
+            if request.headers.get('HX-Request'):
+                # Busca todas as atividades para o contexto correto
+                atividades = AtividadeSelectors.get_atividades_recentes_aluno(self.aluno)
+                response = render(request, 'listas/htmx/atividades_list.html', {'atividades': atividades})
+                response['HX-Trigger'] = 'atividadeCriada'
+                return response
             return redirect(url)
+        
+        # Se houver erros no formulário
+        if request.headers.get('HX-Request'):
+            save_url = request.path
+            context = {'form': form, 'atividade': self.atividade, 'save_url': save_url, 'edit': True}
+            response = render(request, self.htmx_template_name, context)
+            response['HX-Retarget'] = '#modal-container'
+            return response
         return render(request, self.template_name, {'form': form, 'atividade': self.atividade, 'edit': True})
 
 
 class ExcluirAtividadeView(AlunoRequiredMixin, View):
     template_name = 'excluir/excluir_generic.html'
     htmx_template_name = 'excluir/htmx/confirmar_exclusao_modal.html'
+    htmx_atividades_list_template = 'listas/htmx/atividades_list.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -95,6 +127,7 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         AtividadeService.exluir_atividade(atividade=self.atividade)
 
         messages.success(request, f'Atividade {atividade_nome} excluída com sucesso!')
+        
         return redirect(request.META.get('HTTP_REFERER', 'listar_atividades'))
 
 

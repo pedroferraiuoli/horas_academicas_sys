@@ -68,18 +68,22 @@ class AtividadeSelectors:
         *,
         aluno: Aluno,
         categoria: Optional[CategoriaCurso] = None,
-        apenas_aprovadas: bool = False
+        apenas_aprovadas: bool = False,
+        apenas_pendentes: bool = False
     ) -> int:
         qs = aluno.atividades
 
         if categoria:
             qs = qs.filter(categoria=categoria)
+        if apenas_pendentes:
+            qs = qs.filter(status='Pendente')
 
         campo = 'horas_aprovadas' if apenas_aprovadas else 'horas'
 
         return qs.aggregate(
             total=Sum(campo)
         )['total'] or 0
+    
     
 class SemestreSelectors:
     

@@ -53,6 +53,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 for c in categorias
             )
 
+        horas_pendentes = AtividadeSelectors.get_total_horas_aluno(
+            aluno=aluno,
+            apenas_pendentes=True
+        )
+
         return {
             'aluno': aluno,
             'total_horas': total_horas,
@@ -60,6 +65,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'atividades_recentes': atividades_recentes,
             'ultrapassou_limite': ultrapassou_limite,
             'horas_requeridas': horas_requeridas,
+            'horas_pendentes': horas_pendentes,
+            'horas_totais': horas_pendentes + total_horas,
         }
 
     def get_gestor_context(self):

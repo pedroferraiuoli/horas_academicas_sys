@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
+from django.utils.formats import date_format
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
@@ -20,7 +21,9 @@ class Semestre(BaseModel):
         ]
 
     def __str__(self):
-        return self.nome
+        inicio = date_format(self.data_inicio, "F/Y") if self.data_inicio else ''
+        fim = date_format(self.data_fim, "F/Y") if self.data_fim else ''
+        return f"{self.nome} ({inicio} até {fim})"
 
 class Categoria(BaseModel):
     nome = models.CharField(max_length=100)

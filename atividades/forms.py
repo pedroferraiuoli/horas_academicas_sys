@@ -97,7 +97,7 @@ class AtividadeForm(forms.ModelForm):
         widgets = {
             'data': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}, format='%d/%m/%Y'),
             'descricao': forms.Textarea(attrs={'rows': 4}),
-            'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 4}),
+            'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 0}),
             'documento': forms.ClearableFileInput(attrs={'accept': (
             '.pdf,'
             'application/pdf,'
@@ -125,7 +125,7 @@ class AtividadeForm(forms.ModelForm):
                 categoria = CategoriaCurso.objects.get(id=categoria_id)
                 self.fields['categoria'].initial = categoria
             except CategoriaCurso.DoesNotExist:
-                pass
+                pass         
     
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')
@@ -137,6 +137,14 @@ class AtividadeForm(forms.ModelForm):
         horas = self.cleaned_data.get('horas')
         ValidadorDeHoras.validar_horas(horas)
         return horas
+    
+    def clean_data(self):
+        data = self.cleaned_data.get('data')
+        if data is None:
+            raise forms.ValidationError('Data inválida.')
+        if data > forms.fields.datetime.date.today():
+            raise forms.ValidationError('A data da atividade não pode ser no futuro.')
+        return data
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
     username = forms.CharField(label='Matrícula ou E-mail')

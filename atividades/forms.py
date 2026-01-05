@@ -97,7 +97,7 @@ class AtividadeForm(forms.ModelForm):
         widgets = {
             'data': forms.DateInput(attrs={'type': 'text', 'class': 'datepicker'}, format='%d/%m/%Y'),
             'descricao': forms.Textarea(attrs={'rows': 4}),
-            'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 4}),
+            'observacoes_para_aprovador': forms.Textarea(attrs={'rows': 0}),
             'documento': forms.ClearableFileInput(attrs={'accept': (
             '.pdf,'
             'application/pdf,'

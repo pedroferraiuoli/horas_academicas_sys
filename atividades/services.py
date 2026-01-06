@@ -138,6 +138,7 @@ class AtividadeService:
         
         # Invalidar cache do aluno após aprovação
         AtividadeService.invalidar_cache_aluno(atividade.aluno_id)
+        StatsService.invalidar_cache_coordenador(atividade.aluno.curso_id)
         AtividadeService.recalcular_status_atividade(atividade=atividade)
 
     @staticmethod
@@ -192,6 +193,7 @@ class AtividadeService:
             atividade.status = 'Limite Atingido'
         atividade.save()
         AtividadeService.invalidar_cache_aluno(aluno.id)
+        StatsService.invalidar_cache_coordenador(aluno.curso_id)
         return atividade
 
 class CategoriaCursoService:
@@ -422,7 +424,7 @@ class CursoService:
 class StatsService:
 
     @staticmethod
-    def get_stats():
+    def get_stats_gestor():
         CACHE_KEY = 'gestor_dashboard_stats'
         TTL = 600
 
@@ -437,5 +439,31 @@ class StatsService:
         }
 
         cache.set(CACHE_KEY, stats, TTL)
-        return stats  
+        return stats
+    
+    @staticmethod
+    def get_stats_coordenador(curso):
+        CACHE_KEY = f'coordenador_{curso.id}_dashboard_stats'
+        TTL = 600
+
+        stats = cache.get(CACHE_KEY)
+        if stats is not None:
+            return stats
+
+        stats = {
+            'num_alunos': AlunoSelectors.get_num_alunos(curso=curso),
+            'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(curso=curso),
+            'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(curso=curso),
+        }
+
+        cache.set(CACHE_KEY, stats, TTL)
+        return stats
+    
+    @staticmethod
+    def invalidar_cache_coordenador(curso_id: int):
+        try:
+            cache_key = f'coordenador_{curso_id}_dashboard_stats'
+            cache.delete(cache_key)
+        except Exception:
+            pass
 

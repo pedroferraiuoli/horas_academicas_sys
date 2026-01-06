@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from atividades.services import AlunoService
+from atividades.services import AlunoService, StatsService
 
 from ..selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, SemestreSelectors, UserSelectors
 from ..mixins import LoginRequiredMixin
@@ -90,14 +90,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     'atividades_pendentes': atividades_pendentes,
                 }
         elif grupo == 'Gestor':
-            alunos = AlunoSelectors.get_num_alunos()
-            alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias()
-            atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes()
-            stats = {
-                'num_alunos': alunos,
-                'alunos_com_pendencias': alunos_com_pendencias,
-                'atividades_pendentes': atividades_pendentes,
-            }
+            stats = StatsService.get_stats()
 
         context = {
             'grupo': grupo,

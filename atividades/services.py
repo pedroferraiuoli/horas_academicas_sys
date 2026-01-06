@@ -1,10 +1,9 @@
-from django.shortcuts import get_object_or_404
 from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, UserSelectors
 from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
-from django.db.models import Sum, QuerySet
+from django.db.models import QuerySet
 from django.core.cache import cache
 
     
@@ -418,5 +417,25 @@ class CursoService:
                 config.save(update_fields=['horas_requeridas'])
                 semestres_atualizados += 1
 
-        return semestres_atualizados         
+        return semestres_atualizados      
+
+class StatsService:
+
+    @staticmethod
+    def get_stats():
+        CACHE_KEY = 'gestor_dashboard_stats'
+        TTL = 600
+
+        stats = cache.get(CACHE_KEY)
+        if stats is not None:
+            return stats
+
+        stats = {
+            'num_alunos': AlunoSelectors.get_num_alunos(),
+            'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(),
+            'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(),
+        }
+
+        cache.set(CACHE_KEY, stats, TTL)
+        return stats  
 

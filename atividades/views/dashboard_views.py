@@ -81,16 +81,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             coordenador = getattr(user, 'coordenador', None)
             if coordenador:
                 curso = coordenador.curso
-                alunos = AlunoSelectors.get_num_alunos(curso=curso)
-                alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias(curso=curso)
-                atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes(curso=curso)
-                stats = {
-                    'num_alunos': alunos,
-                    'alunos_com_pendencias':alunos_com_pendencias,
-                    'atividades_pendentes': atividades_pendentes,
-                }
+                stats = StatsService.get_stats_coordenador(curso=curso)
         elif grupo == 'Gestor':
-            stats = StatsService.get_stats()
+            stats = StatsService.get_stats_gestor()
 
         context = {
             'grupo': grupo,

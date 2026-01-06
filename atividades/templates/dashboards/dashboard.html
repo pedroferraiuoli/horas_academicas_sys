@@ -42,15 +42,15 @@
     </div>
 
     <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>
-  {% if atividades_recentes %}
     
+    <div id="atividades-container">
+    {% if atividades_recentes %}
     <!-- Lista Responsiva de Atividades -->
-<div id="atividades-container">
     {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
-</div>
-  {% else %}
+    {% else %}
     <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda.</p>
-  {% endif %}
+    {% endif %}
+  </div>
 
 <!-- Container para modais HTMX -->
 <div id="modal-container"></div>

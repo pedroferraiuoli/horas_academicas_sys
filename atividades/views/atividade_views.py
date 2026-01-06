@@ -33,6 +33,7 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
     def post(self, request):
         form = AtividadeForm(request.POST, request.FILES, aluno=self.aluno)
         url = request.META.get('HTTP_REFERER', 'dashboard')
+        print(request.POST.get('categoria', None))
         
         if form.is_valid():
             atividade = AtividadeService.cadastrar_atividade(form=form, aluno=self.aluno)

@@ -91,12 +91,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 }
         elif grupo == 'Gestor':
             alunos = AlunoSelectors.get_num_alunos()
-            alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias()
-            # atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes()
+            # alunos_com_pendencias = AlunoSelectors.get_num_alunos_com_pendencias()
+            atividades_pendentes = AtividadeSelectors.get_num_atividades_pendentes()
             stats = {
                 'num_alunos': alunos,
-                'alunos_com_pendencias': alunos_com_pendencias,
-                # 'atividades_pendentes': atividades_pendentes,
+                # 'alunos_com_pendencias': alunos_com_pendencias,
+                'atividades_pendentes': atividades_pendentes,
             }
 
         context = {

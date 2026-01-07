@@ -39,9 +39,7 @@ class AtividadeSelectors:
     @staticmethod
     def get_atividades_recentes_aluno(aluno: Aluno, limite: int = 5) -> List[Atividade]:
         """Busca atividades recentes de um aluno"""
-        return list(
-            AtividadeSelectors.get_atividades_aluno(aluno)[:limite]
-        )
+        return aluno.atividades.order_by('-created_at')[:limite]
     
     @staticmethod
     def get_atividades_pendentes(curso=None):

@@ -54,6 +54,8 @@ urlpatterns = [
     path('relatorio/gerar/', views.GerarRelatorioAlunoView.as_view(), name='gerar_relatorio_aluno'),
     #LOGS
     path('visualizar-logs/', views.VisualizarLogsView.as_view(), name='visualizar_logs'),
+    #Mensagens HTMX
+    path('get-messages/', views.GetMessagesView.as_view(), name='get_messages'),
 ]
 
 if settings.DEBUG:

@@ -15,7 +15,6 @@ from ..mixins import AlunoRequiredMixin, CoordenadorRequiredMixin
 class CadastrarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'forms/form_atividade.html'
     htmx_template_name = 'forms/htmx/atividade_modal.html'
-    htmx_atividades_list_template = 'listas/htmx/atividades_list.html'
 
     def dispatch(self, request, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -40,7 +39,7 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
             
             if request.headers.get('HX-Request'):
-                return HttpResponse(status=204, headers={'HX-Trigger': 'atividadeModified'})
+                return HttpResponse(status=204, headers={'HX-Trigger': 'atividadeModified, showMessages'})
 
             return redirect(url)
         
@@ -50,22 +49,6 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
             response = render(request, self.htmx_template_name, context)
             return response
         return render(request, self.template_name, {'form': form})
-    
-class ListarAtividadesRecentesView(AlunoRequiredMixin, TemplateView):
-    htmx_template_name = 'listas/htmx/atividades_list.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
-        atividades = AtividadeSelectors.get_atividades_recentes_aluno(aluno, limite=5)
-        context['atividades'] = atividades
-        return context
-
-    def get_template_names(self):
-        if self.request.headers.get('HX-Request'):
-            return [self.htmx_template_name]
-        return None
-
 
 class EditarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'forms/form_atividade.html'
@@ -93,11 +76,7 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
             messages.success(request, f'Atividade {self.atividade.nome} atualizada com sucesso!')
             
             if request.headers.get('HX-Request'):
-                # Busca todas as atividades para o contexto correto
-                atividades = AtividadeSelectors.get_atividades_recentes_aluno(self.aluno)
-                response = render(request, 'listas/htmx/atividades_list.html', {'atividades': atividades})
-                response['HX-Trigger'] = 'atividadeCriada'
-                return response
+                return HttpResponse(status=204, headers={'HX-Trigger': 'atividadeModified, showMessages'})
             return redirect(url)
         
         # Se houver erros no formulário
@@ -105,7 +84,6 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
             save_url = request.path
             context = {'form': form, 'atividade': self.atividade, 'save_url': save_url, 'edit': True}
             response = render(request, self.htmx_template_name, context)
-            response['HX-Retarget'] = '#modal-container'
             return response
         return render(request, self.template_name, {'form': form, 'atividade': self.atividade, 'edit': True})
 
@@ -113,7 +91,6 @@ class EditarAtividadeView(AlunoRequiredMixin, View):
 class ExcluirAtividadeView(AlunoRequiredMixin, View):
     template_name = 'excluir/excluir_generic.html'
     htmx_template_name = 'excluir/htmx/confirmar_exclusao_modal.html'
-    htmx_atividades_list_template = 'listas/htmx/atividades_list.html'
 
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.aluno = AlunoSelectors.get_aluno_by_user(request.user)
@@ -143,6 +120,20 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         
         return redirect(request.META.get('HTTP_REFERER', 'listar_atividades'))
 
+class ListarAtividadesRecentesView(AlunoRequiredMixin, TemplateView):
+    htmx_template_name = 'listas/htmx/atividades_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
+        atividades = AtividadeSelectors.get_atividades_recentes_aluno(aluno, limite=5)
+        context['atividades'] = atividades
+        return context
+
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return None
 
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
     template_name = 'listas/listar_atividades.html'

@@ -51,6 +51,7 @@ from .user_views import (
     ListarUsuariosAdminView,
     ListarAlunosCoordenadorView,
     ativar_desativar_usuario,
+    GetMessagesView,
 )
 
 from .dashboard_views import DashboardView

@@ -117,3 +117,7 @@ def ativar_desativar_usuario(request, user_id):
         return redirect('login')
     UserService.toggle_user_active_status(user_id=user_id)
     return redirect('listar_usuarios_admin')
+
+class GetMessagesView(View):
+    def get(self, request):
+        return render(request, 'components/messages.html')

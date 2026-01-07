@@ -1,8 +1,11 @@
 <!-- Tabela Responsiva -->
 {% load static %}
 
-<!-- Mensagens via Out-of-Band Swap -->
-{% include 'components/messages_oob.html' %}
+{% if categoria_filtrada %}
+  <div class="alert alert-warning">Filtrando por categoria: <b>{{ categoria_filtrada }}</b> <a href="{% url 'listar_atividades' %}" class="btn btn-sm
+  btn-outline-main-blue ms-2">Remover filtro</a></div>
+{% endif %}
+
 
 <div class="atividades-list">
   {% for atividade in atividades %}

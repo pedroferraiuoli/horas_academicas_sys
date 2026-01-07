@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
 from ..utils import paginate_queryset
-from ..models import Atividade, Aluno
+from ..models import Atividade, Aluno, CategoriaCurso
 from ..forms import AtividadeForm
 from ..selectors import AlunoSelectors, AtividadeSelectors, UserSelectors
 from ..services import AtividadeService
@@ -40,16 +40,14 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
             
             if request.headers.get('HX-Request'):
-                return HttpResponse(status=204)
+                return HttpResponse(status=204, headers={'HX-Trigger': 'atividadeModified'})
 
             return redirect(url)
         
-        # Se houver erros no formulário
         if request.headers.get('HX-Request'):
             save_url = request.path
             context = {'form': form, 'save_url': save_url}
             response = render(request, self.htmx_template_name, context)
-            response['HX-Retarget'] = '#modal-container'
             return response
         return render(request, self.template_name, {'form': form})
     
@@ -160,6 +158,14 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         atividades_paginadas = paginate_queryset(qs=atividades_filtradas, page=self.request.GET.get('page'), per_page=10)
         context['atividades'] = atividades_paginadas
         context['filter'] = filtro
+
+        # Adiciona categoria selecionada se existir
+        categoria_id = self.request.GET.get('categoria', None)
+        if categoria_id and categoria_id != 'None':
+            try:
+                context['categoria_filtrada'] = CategoriaCurso.objects.get(id=categoria_id).categoria.nome
+            except CategoriaCurso.DoesNotExist:
+                pass
         return context
     
     def get_template_names(self):

@@ -26,11 +26,4 @@ toggleCollapseByScreenSize();
 // Executar ao redimensionar a janela
 window.addEventListener('resize', toggleCollapseByScreenSize);
 
-// Listener HTMX: fechar modal quando atividade for criada/editada
-document.body.addEventListener('refresh', function() {
-  const modalContainer = document.getElementById('modal-container');
-  if (modalContainer) {
-    modalContainer.innerHTML = '';
-  }
-});
 

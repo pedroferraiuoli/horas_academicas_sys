@@ -45,8 +45,8 @@
     
     <div id="atividades-recentes-container" 
     hx-get="{% url 'listar_atividades_recentes' %}"
-    hx-trigger="refresh"
-    hx-swap="outerHTML">
+    hx-trigger="atividadeModified from:body"
+    hx-swap="innerHTML">
     {% if atividades_recentes %}
     <!-- Lista Responsiva de Atividades -->
     {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
@@ -55,10 +55,11 @@
     {% endif %}
   </div>
 
-<!-- Container para modais HTMX -->
-<div id="modal-container" hx-on="refresh:
-    this.reset()
-  "></div>
+<!-- Container para modais HTMX (Usado para form de atividade) -->
+<div id="modal-container" 
+     hx-get="data:text/html,"
+     hx-trigger="atividadeModified from:body"
+     hx-swap="innerHTML"></div>
 
 <script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

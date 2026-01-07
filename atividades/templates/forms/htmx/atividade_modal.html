@@ -31,12 +31,7 @@
 
     <!-- Form Body -->
     <div class="form-atividade-body">
-      <form method="post" hx-post="{{save_url}}" hx-on="
-            htmx:afterRequest:
-              htmx.trigger('#atividades-recentes-container', 'refresh');
-              if (event.detail.successful)
-                htmx.trigger('#modal-container', 'refresh')
-          " enctype="multipart/form-data" autocomplete="off" class="modern-form">
+      <form method="post" hx-post="{{save_url}}" enctype="multipart/form-data" autocomplete="off" class="modern-form">
         {% csrf_token %}
         
         <div class="form-fields-grid">

@@ -30,6 +30,7 @@ urlpatterns = [
     path('categorias/<int:categoria_id>/excluir/', views.ExcluirCategoriaView.as_view(), name='excluir_categoria'),
     path('cadastrar-atividade/', views.CadastrarAtividadeView.as_view(), name='cadastrar_atividade'),
     path('atividades/', views.ListarAtividadesView.as_view(), name='listar_atividades'),
+    path('atividades/recentes/', views.ListarAtividadesRecentesView.as_view(), name='listar_atividades_recentes'),
     path('atividades/<int:atividade_id>/editar/', views.EditarAtividadeView.as_view(), name='editar_atividade'),
     path('atividades/<int:atividade_id>/excluir/', views.ExcluirAtividadeView.as_view(), name='excluir_atividade'),
     path('criar-semestre/', views.CriarSemestreView.as_view(), name='criar_semestre'),

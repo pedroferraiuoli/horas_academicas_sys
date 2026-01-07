@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
@@ -33,16 +34,14 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
     def post(self, request):
         form = AtividadeForm(request.POST, request.FILES, aluno=self.aluno)
         url = request.META.get('HTTP_REFERER', 'dashboard')
-        print(request.POST.get('categoria', None))
         
         if form.is_valid():
             atividade = AtividadeService.cadastrar_atividade(form=form, aluno=self.aluno)
             messages.success(request, f'Atividade {atividade.nome} cadastrada com sucesso!')
             
             if request.headers.get('HX-Request'):
-                response = render(request, self.htmx_atividades_list_template, {'atividades': AtividadeSelectors.get_atividades_recentes_aluno(self.aluno)})
-                response['HX-Trigger'] = 'atividadeCriada'
-                return response
+                return HttpResponse(status=204)
+
             return redirect(url)
         
         # Se houver erros no formulário
@@ -53,6 +52,21 @@ class CadastrarAtividadeView(AlunoRequiredMixin, View):
             response['HX-Retarget'] = '#modal-container'
             return response
         return render(request, self.template_name, {'form': form})
+    
+class ListarAtividadesRecentesView(AlunoRequiredMixin, TemplateView):
+    htmx_template_name = 'listas/htmx/atividades_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
+        atividades = AtividadeSelectors.get_atividades_recentes_aluno(aluno, limite=5)
+        context['atividades'] = atividades
+        return context
+
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return None
 
 
 class EditarAtividadeView(AlunoRequiredMixin, View):

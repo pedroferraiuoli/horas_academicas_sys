@@ -41,6 +41,7 @@ from .atividade_views import (
     ListarAtividadesView,
     ListarAtividadesCoordenadorView,
     AprovarHorasAtividadeView,
+    ListarAtividadesRecentesView,
 )
 
 from .user_views import (

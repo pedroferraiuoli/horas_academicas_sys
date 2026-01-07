@@ -14,6 +14,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         if UserSelectors.is_user_aluno(user):
             self.dashboard_type = 'aluno'
             self.template_name = 'dashboards/dashboard.html'
+            if request.headers.get('HX-Request'):
+                self.template_name = 'dashboards/htmx/dashboard_partial.html'
         elif UserSelectors.is_user_coordenador(user):
             self.dashboard_type = 'coordenador'
             self.template_name = 'dashboards/dashboard_coord.html'

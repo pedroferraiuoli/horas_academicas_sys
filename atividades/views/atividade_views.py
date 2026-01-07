@@ -120,21 +120,6 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         
         return redirect(request.META.get('HTTP_REFERER', 'listar_atividades'))
 
-class ListarAtividadesRecentesView(AlunoRequiredMixin, TemplateView):
-    htmx_template_name = 'listas/htmx/atividades_list.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
-        atividades = AtividadeSelectors.get_atividades_recentes_aluno(aluno, limite=5)
-        context['atividades'] = atividades
-        return context
-
-    def get_template_names(self):
-        if self.request.headers.get('HX-Request'):
-            return [self.htmx_template_name]
-        return None
-
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
     template_name = 'listas/listar_atividades.html'
     htmx_template_name = 'listas/htmx/atividades_list.html'

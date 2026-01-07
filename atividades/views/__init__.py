@@ -1,120 +1,20 @@
 # Importa todas as views dos módulos especializados para manter compatibilidade
-from .curso_views import (
-    CriarCursoView,
-    EditarCursoView,
-    ExcluirCursoView,
-    ListarCursosView,
-    AtualizarHorasSemestresView,
-)
+from .curso_views import *
 
-from .semestre_views import (
-    CriarSemestreView,
-    EditarSemestreView,
-    ExcluirSemestreView,
-    ListarSemestresView,
-)
+from .semestre_views import *
 
-from .categoria_views import (
-    CriarCategoriaView,
-    EditarCategoriaView,
-    ExcluirCategoriaView,
-    ListarCategoriasView,
-)
+from .categoria_views import *
 
-from .curso_categoria_views import (
-    CriarCategoriaCursoView,
-    EditarCategoriaCursoView,
-    ExcluirCategoriaCursoView,
-    ListarCategoriasCursoView,
-    CriarCategoriaCursoDiretaView,
-    AssociarCategoriasCursoView,
-)
+from .curso_categoria_views import *
 
-from .relatorio_views import (
-    GerarRelatorioAlunoView,
-)
+from .relatorio_views import *
 
-from .atividade_views import (
-    CadastrarAtividadeView,
-    EditarAtividadeView,
-    ExcluirAtividadeView,
-    ListarAtividadesView,
-    ListarAtividadesCoordenadorView,
-    AprovarHorasAtividadeView,
-)
+from .atividade_views import *
 
-from .user_views import (
-    RegisterView,
-    AlterarEmailView,
-    CriarUsuarioAdminView,
-    ListarUsuariosAdminView,
-    ListarAlunosCoordenadorView,
-    ativar_desativar_usuario,
-)
+from .user_views import *
 
-from .dashboard_views import DashboardView
+from .dashboard_views import *
 
-from .log_views import VisualizarLogsView
+from .log_views import *
 
-from .error_handlers import (
-    custom_404,
-    custom_500,
-    custom_403,
-    custom_400,
-)
-
-__all__ = [
-    # Curso
-    'CriarCursoView',
-    'EditarCursoView',
-    'ExcluirCursoView',
-    'ListarCursosView',
-    
-    # Semestre
-    'CriarSemestreView',
-    'EditarSemestreView',
-    'ExcluirSemestreView',
-    'ListarSemestresView',
-    
-    # Categoria
-    'CriarCategoriaView',
-    'EditarCategoriaView',
-    'ExcluirCategoriaView',
-    'ListarCategoriasView',
-    
-    # CursoCategoria
-    'CriarCategoriaCursoView',
-    'EditarCategoriaCursoView',
-    'ExcluirCategoriaCursoView',
-    'ListarCategoriasCursoView',
-    'CriarCategoriaCursoDiretaView',
-    'AssociarCategoriasCursoView',
-    
-    # Atividade
-    'CadastrarAtividadeView',
-    'EditarAtividadeView',
-    'ExcluirAtividadeView',
-    'ListarAtividadesView',
-    'ListarAtividadesCoordenadorView',
-    'AprovarHorasAtividadeView',
-    
-    # User
-    'RegisterView',
-    'AlterarEmailView',
-    'CriarUsuarioAdminView',
-    'ListarUsuariosAdminView',
-    'ListarAlunosCoordenadorView',
-    'ativar_desativar_usuario',
-    
-    # Dashboard
-    'DashboardView',
-    
-    # Logs
-    'VisualizarLogsView',
-    
-    # Error Handlers
-    'custom_404',
-    'custom_500',
-    'custom_403',
-    'custom_400',
-]
+from .error_handlers import *

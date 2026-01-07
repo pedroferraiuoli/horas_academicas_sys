@@ -45,8 +45,11 @@
         {% endif %}">
         
         <!-- Container para mensagens (atualizável via HTMX) -->
-        <div id="messages-container">
-            {% include 'components/messages.html' %}
+        <div id="messages-container"
+            hx-get="{% url 'get_messages' %}"
+            hx-trigger="showMessages from:body"
+            hx-swap="innerHTML">
+        {% include 'components/messages.html' %}
         </div>
 
         {% block content %}{% endblock %}

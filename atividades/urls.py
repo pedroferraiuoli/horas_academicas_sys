@@ -45,7 +45,7 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'), name='password_reset_complete'),
     
     path('', views.DashboardView.as_view(), name='dashboard'),
-    path('usuarios/<int:user_id>/ativar-desativar/', views.ativar_desativar_usuario, name='ativar_desativar_usuario'),
+    path('usuarios/<int:user_id>/ativar-desativar/', views.ToggleUsuarioAtivoView.as_view(), name='ativar_desativar_usuario'),
     path('associar-categorias-ao-curso/', views.AssociarCategoriasCursoView.as_view(), name='associar_categorias_ao_curso'),
     path('alunos-coordenador/', views.ListarAlunosCoordenadorView.as_view(), name='listar_alunos_coordenador'),
     path('atividades-coordenador/', views.ListarAtividadesCoordenadorView.as_view(), name='listar_atividades_coordenador'),

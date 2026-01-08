@@ -110,13 +110,10 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
             return [self.htmx_template_name]
         return [self.template_name]
 
-
-def ativar_desativar_usuario(request, user_id):
-    if not UserSelectors.is_user_gestor(request.user):
-        messages.warning(request, 'Acesso negado.')
-        return redirect('login')
-    UserService.toggle_user_active_status(user_id=user_id)
-    return redirect('listar_usuarios_admin')
+class ToggleUsuarioAtivoView(GestorRequiredMixin, View):
+    def post(self, request, user_id):
+        UserService.toggle_user_active_status(user_id=user_id)
+        return redirect('listar_usuarios_admin')
 
 class GetMessagesView(View):
     def get(self, request):

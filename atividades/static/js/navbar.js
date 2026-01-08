@@ -1,17 +1,23 @@
 // JavaScript para navbar - redirecionamento ao clicar nas categorias
-document.addEventListener('DOMContentLoaded', function() {
-    const navbarRows = document.querySelectorAll('.sidebar-item');
-    navbarRows.forEach(row => {
-        row.addEventListener('click', function() {
-            window.location.href = this.getAttribute('data-url');
-        });
-    });
+
+function initializeSidebar() {
+
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document
+                .querySelectorAll('.sidebar-item.active')
+                .forEach(i => i.classList.remove('active'))
+
+            item.classList.add('active')
+        })
+    })
+
+    window.addEventListener('popstate', () => {
+        document
+            .querySelectorAll('.sidebar-item.active')
+            .forEach(i => i.classList.remove('active'))
+    })
     
-    // Rolar até o item ativo quando a página carregar
-    const activeItem = document.querySelector('.sidebar-item.active');
-    if (activeItem) {
-        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
 
     // Fechar sidebar ao clicar em um item (mobile)
     const sidebarItems = document.querySelectorAll('.sidebar-item');
@@ -24,29 +30,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const sidebarToggle = document.getElementById('sidebar-toggle');
-    sidebarToggle.addEventListener('click', function() {
-        toggleSidebar();
-    });
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            toggleSidebar();
+        });
+    }
 
     const sidebarClose = document.getElementById('sidebar-close');
-    sidebarClose.addEventListener('click', function() {
-        closeSidebar();
-    });
-});
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', function() {
+            closeSidebar();
+        });
+    }
+}
 
-// Funções para controle do sidebar mobile
+document.addEventListener('DOMContentLoaded', initializeSidebar);
+
+document.body.addEventListener('htmx:historyRestore', initializeSidebar);
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebarMenu');
-    const overlay = document.querySelector('.sidebar-overlay');
     sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
 }
 
 function closeSidebar() {
     const sidebar = document.getElementById('sidebarMenu');
-    const overlay = document.querySelector('.sidebar-overlay');
     sidebar.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
+
 }

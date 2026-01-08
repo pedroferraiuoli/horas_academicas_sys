@@ -1,55 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
 {% block content %}
-<h2 class="text-main-blue mt-3">Minhas Atividades</h2>
 
-<div class="mb-3">
-<button type="button" 
-                      class="btn btn-info"
-                      hx-get="{% url 'cadastrar_atividade' %}{% if filter.form.categoria.value %}?categoria={{ filter.form.categoria.value }}{% endif %}"
-                      hx-trigger="click"
-                      hx-target="#modal-container"
-                      hx-swap="innerHTML"
-                      >
-                <i class="bi bi-plus-circle"></i> <span class="btn-text">Cadastrar Atividade</span>
-              </button>
-<a href="{% url 'dashboard' %}" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
-</div>
-
-<div class="mb-3">
-  <form method="get"
-      class="row g-2 align-items-center filtros-atividades"
-      hx-get="{% url 'listar_atividades' %}"
-      hx-trigger="change, keyup delay:200ms"
-      hx-target="#atividades-container"
-      hx-push-url="true">
-  <div class="row g-2 align-items-end">
-    <div class="col-4">
-      <label for="{{ filter.form.status.id_for_label }}" class="filtro-label">{{ filter.form.status.label }}</label>
-      {{ filter.form.status }}
-    </div>
-    <div class="col-4">
-      <label for="{{ filter.form.categoria.id_for_label }}" class="filtro-label">{{ filter.form.categoria.label }}</label>
-      {{ filter.form.categoria }}
-    </div>
-    <div class="col-3">
-      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'listar_atividades' %}'">Limpar</button>
-    </div>
-  </div>
-</form>
-</div>
-
-    <div id="atividades-container" 
-    hx-get="{% url 'listar_atividades' %}{% if filter.form.categoria.value %}?categoria={{ filter.form.categoria.value }}{% endif %}"
-    hx-trigger="atividadeModified from:body"
-    hx-swap="innerHTML">
-    {% include "listas/htmx/atividades_list.html" %}
-    </div>
-
-<div id="modal-container" 
-     hx-get="data:text/html,"
-     hx-trigger="atividadeModified from:body"
-     hx-swap="innerHTML"></div>
+{% include 'listas/partials/atividades_aluno.html' %}
 
 {% endblock %}
 

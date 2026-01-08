@@ -1,35 +1,49 @@
 {% load static %}
-    <div id="dashboard-aluno-container"     
-          hx-get="{% url 'dashboard' %}"
-          hx-trigger="atividadeModified from:body"
-          hx-swap="innerHTML">
 
+<!-- Partial do Dashboard (usado com HTMX) -->
+<div id="dashboard-aluno-container"
+     hx-get="{% url 'dashboard' %}"
+     hx-trigger="atividadeModified from:body"
+     hx-swap="innerHTML">
 
+    <!-- Seção de progresso -->
     <div class="dashboard-progress-section">
-      <div class="progress-info">
-        <span class="progress-percentage">{{progresso_percentual}}%</span>
-        <span class="progress-hours">{{ total_horas }}h / {{ horas_requeridas }}h</span>
-      </div>
-      <div class="progress dashboard-progress-bar">
-          <div class="progress-bar" role="progressbar" style="width:{{ progresso_percentual }}%;" aria-valuenow="{{ progresso_percentual }}" aria-valuemin="0" aria-valuemax="100">
-            <span class="fw-bold">{{ total_horas }} / {{ horas_requeridas }}h</span>
+        <div class="progress-info">
+            <span class="progress-percentage">{{ progresso_percentual }}%</span>
+            <span class="progress-hours">{{ total_horas }}h / {{ horas_requeridas }}h</span>
         </div>
-      </div>
-      <span class="dashboard-course-info">Horas pendentes: {{ horas_pendentes }}h | Horas válidas: {{ total_horas }}h | Total: {{ horas_totais }}h</span>
+
+        <div class="progress dashboard-progress-bar">
+            <div class="progress-bar"
+                 role="progressbar"
+                 style="width:{{ progresso_percentual }}%;"
+                 aria-valuenow="{{ progresso_percentual }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+                <span class="fw-bold">{{ total_horas }} / {{ horas_requeridas }}h</span>
+            </div>
+        </div>
+
+        <span class="dashboard-course-info">
+            Horas pendentes: {{ horas_pendentes }}h |
+            Horas válidas: {{ total_horas }}h |
+            Total: {{ horas_totais }}h
+        </span>
     </div>
 
+    <!-- Últimas atividades cadastradas -->
     <h4 class="mt-5 main-blue">Últimas atividades cadastradas</h4>
-    
+
     <div id="atividades-recentes-container">
-    {% if atividades_recentes %}
-    <!-- Lista Responsiva de Atividades -->
-    {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
-    {% else %}
-    <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda.</p>
-    {% endif %}
-  </div>
+        {% if atividades_recentes %}
+            <!-- Lista Responsiva de Atividades -->
+            {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
+        {% else %}
+            <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda.</p>
+        {% endif %}
+    </div>
 
 </div>
 
-<!-- Container para modais HTMX (Usado para form de atividade) -->
+<!-- Container para modais HTMX (usado para formulário de atividade) -->
 <div id="modal-container"></div>

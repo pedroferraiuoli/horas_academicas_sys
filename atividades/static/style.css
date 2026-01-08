@@ -184,7 +184,7 @@ body {
     transition: all 0.3s ease;
 }
 
-.sidebar-close-btn:hover {
+.sidebar .sidebar-close-btn:hover {
     background-color: var(--main-blue);
     transform: rotate(90deg);
 }
@@ -283,7 +283,7 @@ body {
 /* Sidebar Responsivo */
 @media (min-width: 992px) {
     .sidebar-toggle-btn,
-    .sidebar-close-btn {
+    .sidebar .sidebar-close-btn {
         display: none !important;
     }
 }
@@ -880,13 +880,6 @@ body {
 /* Textos secundários */
 .text-main-green {
     color: var(--main-green) !important;
-}
-
-.close-position {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    min-height: 25px !important;
 }
 
 /* Botões padrão Bootstrap */

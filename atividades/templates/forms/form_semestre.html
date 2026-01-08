@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+
+<div class="form-atividade-container">
+  <div class="form-atividade-wrapper">
+    
+    <!-- Header -->
+    <div class="form-atividade-header">
+      <div class="form-header-icon">
+        {% if edit %}
+          <i class="bi bi-pencil-square"></i>
+        {% else %}
+          <i class="bi bi-plus-circle"></i>
+        {% endif %}
+      </div>
+      <div class="form-header-content">
+        {% if edit %}
+          <h3 class="form-header-title">Editar Semestre</h3>
+          <p class="form-header-subtitle">{{ semestre.nome }}</p>
+        {% else %}
+          <h3 class="form-header-title">Cadastrar Novo Semestre</h3>
+          <p class="form-header-subtitle">Crie um novo período letivo</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Form Body -->
+    <div class="form-atividade-body">
+      <form method="post" enctype="multipart/form-data" autocomplete="off" class="modern-form">
+        {% csrf_token %}
+        
+        <div class="form-fields-grid">
+          {% for field in form.visible_fields %}
+            <div class="form-field {% if field.name == 'nome' %}form-field-full{% endif %}">
+              <label for="{{ field.id_for_label }}" class="form-field-label">
+                <span class="label-icon">
+                  {% if field.name == 'nome' %}<i class="bi bi-calendar3"></i>
+                  {% elif field.name == 'data_inicio' %}<i class="bi bi-calendar-check"></i>
+                  {% elif field.name == 'data_fim' %}<i class="bi bi-calendar-x"></i>
+                  {% else %}<i class="bi bi-dot"></i>
+                  {% endif %}
+                </span>
+                <span class="label-text">{{ field.label }}</span>
+                {% if field.field.required %}
+                  <span class="label-required">*</span>
+                {% endif %}
+              </label>
+              
+              <div class="form-field-wrapper">
+                {% if field.field.widget.input_type == 'select' %}
+                  {{ field|add_class:'form-field-input form-field-select' }}
+                {% elif field.field.widget.input_type == 'date' %}
+                  {{ field|add_class:'form-field-input form-field-date'}}
+                {% elif field.field.widget.input_type == 'checkbox' %}
+                  <div class="form-check form-switch">
+                    {{ field|add_class:'form-check-input'}}
+                  </div>
+                {% else %}
+                  {{ field|add_class:'form-field-input'}}
+                {% endif %}
+              </div>
+              
+              {% if field.help_text %}
+                <div class="form-field-help">
+                  <i class="bi bi-info-circle"></i>
+                  {{ field.help_text }}
+                </div>
+              {% endif %}
+              
+              {% for error in field.errors %}
+                <div class="form-field-error">
+                  <i class="bi bi-exclamation-circle"></i>
+                  {{ error }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+          <div class="form-field form-field-full">
+            <label for="copiar_de" class="form-field-label">
+              <span class="label-icon"><i class="bi bi-files"></i></span>
+              <span class="label-text">Copiar categorias de</span>
+            </label>
+            <div class="form-field-wrapper">
+              <select id="copiar_de" name="copiar_de" class="form-field-input form-field-select">
+                <option value="">Nenhum</option>
+                {% for semestre in semestres %}
+                  <option value="{{ semestre.id }}">{{ semestre.nome }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field-help">
+              <i class="bi bi-info-circle"></i>
+              Opcionalmente, copie todas as categorias de curso de um semestre anterior
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-atividade-actions">
+          <a href="{% url 'dashboard' %}" class="form-action-btn form-action-secondary">
+            <i class="bi bi-arrow-left"></i>
+            <span>Voltar</span>
+          </a>
+          <button type="submit" class="form-action-btn form-action-primary">
+            <i class="bi bi-check-circle"></i>
+            <span>Salvar Semestre</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/datepicker.js' %}"></script>
+
+
+{% endblock %}

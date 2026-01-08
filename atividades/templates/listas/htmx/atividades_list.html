@@ -1,0 +1,189 @@
+<!-- Tabela Responsiva -->
+{% load static %}
+
+<!-- Filtro por categoria -->
+{% if categoria_filtrada %}
+    <div class="alert alert-warning">
+        Filtrando por categoria: <b>{{ categoria_filtrada }}</b>
+        <a href="{% url 'listar_atividades' %}" class="btn btn-sm btn-outline-main-blue ms-2">
+            Remover filtro
+        </a>
+    </div>
+{% endif %}
+
+<!-- Lista de Atividades -->
+<div class="atividades-list">
+    {% for atividade in atividades %}
+        <div class="atividade-item" id="atividade-{{ atividade.id }}">
+            <!-- Linha principal (Desktop: tabela / Mobile: card compacto) -->
+            <div class="atividade-main"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#collapse-{{ atividade.id }}"
+                 aria-expanded="false">
+
+                <div class="row g-2">
+                    <!-- Nome da Atividade -->
+                    <div class="col-xl-2 col-lg-2 col-12">
+                        <div class="ativ-col">
+                            <span class="ativ-label">Nome</span>
+                            <span class="ativ-value">{{ atividade.nome }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Categoria (apenas desktop) -->
+                    <div class="col-xl-3 col-lg-3 col-6 desktop-only">
+                        <div class="ativ-col">
+                            <span class="ativ-label">Categoria</span>
+                            <span class="ativ-value">{{ atividade.categoria.categoria.nome }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Horas -->
+                    <div class="col-xl col-lg col-5">
+                        <div class="ativ-col">
+                            <span class="ativ-label">Horas</span>
+                            <span class="ativ-value">
+                                <span class="badge bg-opacity-75">{{ atividade.horas }}h</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Status/Aprovadas -->
+                    <div class="col-xl col-lg col-6">
+                        <div class="ativ-col">
+                            <span class="ativ-label">Aprovadas</span>
+                            <span class="ativ-value">
+                                {% if atividade.status == 'Rejeitada' %}
+                                    <span class="badge bg-danger">Rejeitada</span>
+                                {% elif atividade.status == 'Pendente' %}
+                                    <span class="badge bg-warning text-dark">Aguardando</span>
+                                {% elif atividade.status == 'Limite Atingido' %}
+                                    <span class="badge bg-secondary">Limite Categoria Atingido</span>
+                                {% else %}
+                                    <span class="badge bg-success">{{ atividade.horas_aprovadas }}h</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Data (apenas desktop) -->
+                    <div class="col-xl col-lg desktop-only">
+                        <div class="ativ-col">
+                            <span class="ativ-label">Data</span>
+                            <span class="ativ-value">{{ atividade.data }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Ações (apenas desktop) -->
+                    <div class="col-xl col-lg-2 desktop-only">
+                        <div class="ativ-col">
+                            <span class="ativ-label">Ações</span>
+                            <div class="ativ-actions">
+                                <!-- Botão Editar -->
+                                <button type="button"
+                                        class="btn btn-outline-main-blue btn-sm"
+                                        hx-get="{% url 'editar_atividade' atividade.id %}"
+                                        hx-trigger="click"
+                                        hx-target="#modal-container"
+                                        hx-swap="innerHTML">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                                <!-- Botão Excluir -->
+                                <button type="button"
+                                        class="btn btn-danger btn-sm"
+                                        hx-get="{% url 'excluir_atividade' atividade.id %}"
+                                        hx-trigger="click"
+                                        hx-target="#modal-container"
+                                        hx-swap="innerHTML">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <!-- Links do Documento -->
+                                {% if atividade.documento %}
+                                    <a href="{{ atividade.documento.url }}"
+                                       target="_blank"
+                                       class="btn btn-outline-main-blue btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ atividade.documento.url }}"
+                                       download
+                                       class="btn btn-outline-main-blue btn-sm">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalhes expandidos (mobile) -->
+            <div class="collapse atividade-details" id="collapse-{{ atividade.id }}">
+                <div class="details-content">
+                    <!-- Categoria -->
+                    <div class="detail-row">
+                        <span class="detail-label">Categoria:</span>
+                        <span class="detail-value">{{ atividade.categoria.categoria.nome }}</span>
+                    </div>
+
+                    <!-- Data -->
+                    <div class="detail-row">
+                        <span class="detail-label">Data:</span>
+                        <span class="detail-value">{{ atividade.data }}</span>
+                    </div>
+
+                    <!-- Documento -->
+                    {% if atividade.documento %}
+                        <div class="detail-row">
+                            <span class="detail-label">Documento:</span>
+                            <span class="detail-value">
+                                <a href="{{ atividade.documento.url }}"
+                                   target="_blank"
+                                   class="btn btn-outline-main-blue btn-sm">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a href="{{ atividade.documento.url }}"
+                                   download
+                                   class="btn btn-outline-main-blue btn-sm">
+                                    <i class="bi bi-download"></i> Baixar
+                                </a>
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Ações Mobile -->
+                    <div class="detail-actions">
+                        <button type="button"
+                                class="btn btn-outline-main-blue btn-sm w-100 mb-2"
+                                hx-get="{% url 'editar_atividade' atividade.id %}"
+                                hx-trigger="click"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-danger btn-sm w-100"
+                                hx-get="{% url 'excluir_atividade' atividade.id %}"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <!-- Mensagem quando não há atividades -->
+        <div class="text-center text-muted py-4">
+            Nenhuma atividade cadastrada.
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Paginação -->
+{% include 'pagination.html' with qs=atividades %}
+
+<!-- Scripts -->
+<script src="{% static 'js/listar_atividades.js' %}"></script>

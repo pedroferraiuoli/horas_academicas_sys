@@ -1,0 +1,53 @@
+{% load static %}
+ <!-- Sidebar -->
+            {% if user.is_authenticated and user.aluno %}
+
+            <!-- Toggle button for mobile - Fixed position -->
+            <button class="sidebar-toggle-btn d-lg-none" type="button" id="sidebar-toggle">
+                <i class="bi bi-list"></i>
+            </button>
+            
+
+            <nav class="sidebar" id="sidebarMenu">
+                    <!-- Close button for mobile -->
+                    <button class="sidebar-close-btn d-lg-none" id="sidebar-close">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    
+                    <div class="sidebar-content">
+                        
+                        {% for categoria in categorias_context %}
+                        
+                            <div class="sidebar-item" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}"
+                                    hx-get="{% url 'listar_atividades' %}?from_nav=true&categoria={{ categoria.id }}"
+                                    hx-target="#aluno-container"
+                                    hx-swap="innerHTML"
+                                    hx-push-url="true">
+
+                                <div class="sidebar-item-header">
+                                    <div class="sidebar-item-number">{{ forloop.counter|stringformat:"02d" }}</div>
+                                    <div class="sidebar-item-name">{{ categoria.categoria.nome }}</div>
+                                </div>
+                                <div class="sidebar-item-info">
+                                    <div class="info-group">
+                                        <span class="info-label">Carga Horária:</span>
+                                        <span class="info-value">{{ categoria.equivalencia_horas }}</span>
+                                    </div>
+                                    <div class="info-group">
+                                        <span class="info-label">Limite:</span>
+                                        <span class="info-value">{{ categoria.limite_horas }}h</span>
+                                    </div>
+                                    <div class="info-group">
+                                        <span class="info-label">Aprovadas:</span>
+                                        <span class="info-value badge bg-success">{{ categoria.horas_aprovadas_total }}h</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-muted text-center py-3">Nenhuma categoria</div>
+                        {% endfor %}
+                    </div>
+            </nav>
+            {% endif %}
+
+<script src="{% static 'js/navbar.js' %}"></script>

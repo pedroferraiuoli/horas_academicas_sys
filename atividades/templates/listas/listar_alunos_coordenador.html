@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mb-3">
+  <h2 class="main-blue">Alunos do curso: {{ curso.nome }}</h2>
+  <div class="mb-3">
+    <a href="javascript:history.back()" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+<div class="mb-3">
+  <form method="get"
+      class="row g-2 align-items-center filtros-atividades"
+      hx-get="{% url 'listar_alunos_coordenador' %}"
+      hx-trigger="change, keyup delay:200ms"
+      hx-target="#alunos-container"
+      hx-push-url="true">
+    {% for field in filter.form %}
+    <div class="col-12 col-md-3">
+      <label for="{{ field.id_for_label }}" class="filtro-label">{{ field.label }}</label>
+      {{ field }}
+    </div>
+    {% endfor %}
+    <div class="col-12 col-md-3 filtros-buttons">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
+    </div>
+  </form>
+</div>
+
+<div id="alunos-container">
+    {% include "listas/htmx/alunos_coord_list.html" %}
+</div>
+
+</div>
+
+{% endblock %}

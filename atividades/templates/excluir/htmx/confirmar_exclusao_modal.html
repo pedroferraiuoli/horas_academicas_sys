@@ -1,0 +1,40 @@
+<div class="modal fade show d-block" id="modalExclusao" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger bg-opacity-10 border-danger">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close" 
+                hx-get="data:text/html," 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning d-flex align-items-start mb-3" role="alert">
+          <i class="bi bi-info-circle-fill me-3 fs-4 mt-1"></i>
+          <div>
+            <strong>Atenção!</strong> Esta ação não pode ser desfeita.
+          </div>
+        </div>
+        <p class="mb-2"><strong>{{ tipo_exclusao }}:</strong></p>
+        <p class="text-muted mb-0">{{ nome_exclusao }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" 
+                hx-get="data:text/html," 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <form method="post" action="{{ delete_url }}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Confirmar Exclusão
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

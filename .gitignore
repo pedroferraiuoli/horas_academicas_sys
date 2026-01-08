@@ -21,10 +21,11 @@ venv
 *.coverage
 htmlcov/
 node_modules/
-
+staticfiles/
 # Windows
 Thumbs.db
 Desktop.ini
+logs/
 
 # VSCode
 .history/

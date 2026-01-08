@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+<h2 class="main-blue">Categorias do Curso</h2>
+<div class="mb-3">
+<a href="{% url 'criar_categoria_curso_direta' %}" class="btn btn-info"><i class="bi bi-plus-circle"></i> Nova Categoria</a>
+<a href="javascript:history.back()" class="btn btn-outline-main-blue"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+
+<div class="mb-3">
+  <form method="get"
+      class="row g-2 align-items-center filtros-atividades"
+      hx-get="{% url 'listar_categorias_curso' %}"
+      hx-trigger="change, keyup delay:200ms"
+      hx-target="#categorias-container"
+      hx-push-url="true">
+    {% for field in filter.form %}
+      <div class="col-12 col-md-3">
+        <label for="{{ field.id_for_label }}" class="filtro-label">{{ field.label }}</label>
+        {{ field }}
+      </div>
+    {% endfor %}
+    <div class="col-12 col-md filtros-buttons">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
+    </div>
+  </form>
+</div>
+
+<div id="categorias-container">
+    {% include "listas/htmx/categorias_curso_list.html" %}
+</div>
+
+</div>
+
+{% endblock %}

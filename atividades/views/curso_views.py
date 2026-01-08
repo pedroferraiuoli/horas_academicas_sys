@@ -1,0 +1,153 @@
+import logging
+from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView
+from django.contrib import messages
+
+from atividades.filters import CursoFilter
+from atividades.services import CursoService
+from ..utils import paginate_queryset
+
+from atividades.selectors import CursoSelectors, SemestreSelectors
+
+from ..models import Curso, CursoPorSemestre, Semestre
+from ..forms import CursoForm
+from ..mixins import GestorRequiredMixin
+
+business_logger = logging.getLogger('atividades.business')
+
+
+class CriarCursoView(GestorRequiredMixin, View):
+    template_name = 'forms/form_curso.html'
+
+    def get(self, request):
+        form = CursoForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = CursoForm(request.POST)
+        if form.is_valid():
+            curso_instance = form.save()
+            business_logger.warning(f"CURSO CRIADO: {curso_instance.nome} | User: {request.user.username}")
+            messages.success(request, f'Curso {curso_instance.nome} criado com sucesso!')
+            return redirect('dashboard')
+        
+        return render(request, self.template_name, {'form': form})
+
+
+class EditarCursoView(GestorRequiredMixin, View):
+    template_name = 'forms/form_curso.html'
+
+    def dispatch(self, request, curso_id, *args, **kwargs):
+        self.curso = get_object_or_404(Curso, id=curso_id)       
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        form = CursoForm(instance=self.curso)
+        semestres_config = self._get_semestres_config()
+        return render(request, self.template_name, {
+            'form': form, 
+            'curso': self.curso, 
+            'edit': True,
+            'semestres_config': semestres_config
+        })
+
+    def post(self, request):
+        form = CursoForm(request.POST, instance=self.curso)
+        if form.is_valid():
+            form.save()
+            business_logger.warning(f"CURSO EDITADO: {self.curso.nome} | User: {request.user.username}")
+            messages.success(request, f'Curso {self.curso.nome} atualizado com sucesso!')
+            return redirect('listar_cursos')
+            
+        semestres_config = self._get_semestres_config()
+        return render(request, self.template_name, {
+            'form': form, 
+            'curso': self.curso, 
+            'edit': True,
+            'semestres_config': semestres_config
+        })
+    
+    def _get_semestres_config(self):
+        """Retorna lista de semestres com suas configurações de horas"""
+        semestres_todos = Semestre.objects.all().order_by('-nome')
+        semestres_config = []
+        for semestre in semestres_todos:
+            config = CursoPorSemestre.objects.filter(curso=self.curso, semestre=semestre).first()
+            semestres_config.append({
+                'semestre': semestre,
+                'horas_requeridas': config.horas_requeridas if config else self.curso.horas_requeridas,
+                'id': config.id if config else None
+            })
+        return semestres_config
+
+
+class AtualizarHorasSemestresView(GestorRequiredMixin, View):
+    """View dedicada para atualizar horas requeridas dos semestres de um curso"""
+
+    def dispatch(self, request, curso_id, *args, **kwargs):
+        self.curso = get_object_or_404(Curso, id=curso_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request):
+        semestres_atualizados = CursoService.atualizar_horas_semestres(
+            curso=self.curso,
+            post_data=request.POST
+        )
+
+        business_logger.warning(
+            f"HORAS DOS SEMESTRES ATUALIZADAS: Curso {self.curso.nome} | "
+            f"{semestres_atualizados} semestres | User: {request.user.username}"
+        )
+
+        messages.success(
+            request,
+            f'{semestres_atualizados} semestre(s) atualizado(s) com sucesso!'
+        )
+
+        return redirect('editar_curso', curso_id=self.curso.id)
+
+
+class ExcluirCursoView(GestorRequiredMixin, View):
+    template_name = 'excluir/excluir_generic.html'
+
+    def dispatch(self, request, curso_id, *args, **kwargs):
+        self.curso = get_object_or_404(Curso, id=curso_id)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        tipo_exclusao = "Curso"
+        nome_exclusao = self.curso.nome
+        return render(request, self.template_name, {'tipo_exclusao': tipo_exclusao, 'nome_exclusao': nome_exclusao})
+
+    def post(self, request):
+        curso_nome = self.curso.nome
+        self.curso.delete()
+        business_logger.warning(f"CURSO EXCLUÍDO: {curso_nome} | User: {request.user.username}")
+        messages.success(request, f'Curso {curso_nome} excluído com sucesso!')
+        return redirect('listar_cursos')
+
+
+class ListarCursosView(GestorRequiredMixin, TemplateView):
+    template_name = 'listas/listar_cursos.html'
+    htmx_template_name = 'listas/htmx/cursos_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cursos = CursoSelectors.listar_cursos_com_categorias_semestre_atual()
+  
+        filter = CursoFilter(self.request.GET, queryset=cursos, user=self.request.user)
+        cursos = filter.qs
+
+        cursos_paginados = paginate_queryset(qs=cursos, page=self.request.GET.get('page'), per_page=15)
+
+        context['cursos'] = cursos_paginados
+        context['semestre_atual'] = SemestreSelectors.get_semestre_atual()
+        context['filter'] = filter
+        
+        return context
+    
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return [self.htmx_template_name]
+        return [self.template_name]

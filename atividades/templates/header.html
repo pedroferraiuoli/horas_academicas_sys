@@ -1,0 +1,90 @@
+ <!-- Header -->
+  {% load static %}
+    <header class="bg-primary-dark text-white py-3 shadow-sm">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center header-brand">
+                {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}"><img src="{% static 'images/logo1.png' %}" alt="Logo" class="header-logo"></a>
+                 <a href="{% url 'dashboard' %}" class="link-limpo"><h4 class="mb-0 header-title">ATIVIDADES COMPLEMENTARES</h4></a>
+                 {% else %}
+                  <a href="{% url 'login' %}"><img src="{% static 'images/logo1.png' %}" alt="Logo" class="header-logo"></a>
+                  <a href="{% url 'login' %}" class="link-limpo"><h4 class="mb-0 header-title">ATIVIDADES COMPLEMENTARES</h4></a>
+                 {% endif %}
+            </div>
+            {% if user.is_authenticated %}
+            <div class="grp-botton">
+              <button onclick="abrirModal('img1')" class="header-btn">Sobre</button>
+              <button onclick="abrirModal('img2')" class="header-btn">Guia</button>
+            </div>
+            <span class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {% if user.aluno %}
+                  <i class="bi bi-person-circle"></i> <span class="user-name-text">{{ user.aluno.nome }}</span>
+                  {% else %}
+                  <i class="bi bi-person-circle"></i> <span class="user-name-text">{{ user.get_full_name|default:user.username }}</span>
+                  {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li><span class="dropdown-item-text"><strong>Email:</strong> {{ user.email }}</span></li>
+                  {% if user.coordenador %}
+                    <li><span class="dropdown-item-text"><strong>Coordenador de:</strong> {{ user.coordenador.curso }}</span></li>
+                  {% endif %}
+                  {% if user.aluno %}
+                  <li><span class="dropdown-item-text"><strong>Curso:</strong> {{ user.aluno.curso }}</span></li>
+                    <li><span class="dropdown-item-text"><strong>Matrícula:</strong> {{ user.username }}</span></li>
+                    <li><span class="dropdown-item-text"><strong>Semestre de ingresso:</strong> {{ user.aluno.semestre_ingresso.nome }}</span></li>
+                  {% endif %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="{% url 'password_change' %}">Trocar senha</a></li>
+                  <li><a class="dropdown-item" href="{% url 'alterar_email' %}">Alterar e-mail</a></li>
+                  <li>
+                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="dropdown-item">Sair</button>
+                    </form>
+                  </li>
+                </ul>
+              </span>
+            {% else %}
+              <div class="d-flex header-auth-links">
+              <span class="nav-item"><a class="nav-link" href="{% url 'login' %}">Entrar</a></span>
+              <span class="nav-item"><a class="nav-link" href="{% url 'register' %}">Cadastrar</a></span>
+              </div>
+            {% endif %}
+        </div>
+    </header>
+ <!-- Modal 1 -->
+  <div id="img1" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal('img1')">&times;</span>
+      <img src="{% static 'images/Como app pode te ajudar.png' %}" alt="Imagem 1">
+    </div>
+  </div>
+
+  <!-- Modal 2 -->
+  <div id="img2" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal('img2')" style="color: white;">&times;</span>
+      <img src="{% static 'images/Guia do aluno.png' %}" alt="Imagem 2">
+    </div>
+  </div>
+
+  <script>
+    function abrirModal(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    // Fecha se clicar fora do conteúdo
+    window.onclick = function(event) {
+      const modais = document.querySelectorAll(".modal");
+      modais.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    }
+  </script>

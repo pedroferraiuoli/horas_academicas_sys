@@ -4,67 +4,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <!-- Header do Dashboard -->
-    <div class="dashboard-header">
-        <h2 class="orange dashboard-welcome">Bem-vindo, {{ aluno.nome }}!</h2>
-        
-        <div class="dashboard-actions">
-            <!-- Botão Cadastrar Atividade -->
-            <button type="button" 
-                    class="btn btn-info"
-                    hx-get="{% url 'cadastrar_atividade' %}"
-                    hx-trigger="click"
-                    hx-target="#modal-container"
-                    hx-swap="innerHTML">
-                <i class="bi bi-plus-circle"></i>
-                <span class="btn-text">Cadastrar Atividade</span>
-            </button>
-            
-            <!-- Botão Listar Atividades -->
-            <button type="button" 
-                    class="btn btn-info"
-                    hx-get="{% url 'listar_atividades' %}"
-                    hx-trigger="click"
-                    hx-target="#aluno-container"
-                    hx-swap="innerHTML"
-                    hx-push-url="true">
-                <i class="bi bi-list"></i>
-                <span class="btn-text">Listar Atividades</span>
-            </button>
-            
-            <!-- Botão Gerar Relatório -->
-            <a href="{% url 'gerar_relatorio_aluno' %}" 
-               class="btn btn-primary" 
-               title="Gerar relatório em PDF">
-                <i class="bi bi-file-earmark-pdf"></i>
-                <span class="btn-text">Gerar Relatório</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- Informações do Curso -->
-    <p class="dashboard-course-info">
-        Curso: <span class="fw-bold">{{ aluno.curso }} ({{ horas_requeridas }}h)</span>
-    </p>
-
-    <!-- Alerta de Limite Ultrapassado -->
-    {% if ultrapassou_limite %}
-        <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Você possui categorias em que o total de horas aprovadas excede o limite permitido. 
-            Apenas as horas dentro do limite serão consideradas para a conclusão.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-        </div>
-    {% endif %}
-
-    <!-- Container do Dashboard com HTMX -->
-    <div id="dashboard-aluno-container"
-         hx-get="{% url 'dashboard' %}"
-         hx-trigger="atividadeModified from:body"
-         hx-swap="innerHTML">
+    
         {% include "dashboards/htmx/dashboard_partial.html" %}
-    </div>
 
-    <!-- Scripts -->
-    <script src="{% static 'js/listar_atividades.js' %}"></script>
 {% endblock %}

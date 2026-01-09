@@ -1,0 +1,19 @@
+<!-- Modal de Observação do Aluno -->
+{% if atividade.observacoes_para_aprovador %}
+<div class="modal fade" id="obsModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="obsModalLabel{{ forloop.counter }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="obsModalLabel{{ forloop.counter }}">Observação do Aluno</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-0">{{ atividade.observacoes_para_aprovador }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}

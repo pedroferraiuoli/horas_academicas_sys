@@ -6,7 +6,7 @@
       <li class="page-item">
         <a class="page-link"
            hx-get="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-           hx-target="#atividades-container"
+           hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
            aria-label="Primeira">
@@ -17,7 +17,7 @@
       <li class="page-item">
         <a class="page-link"
            hx-get="?page={{ qs.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-           hx-target="#atividades-container"
+           hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
            aria-label="Anterior">
@@ -38,7 +38,7 @@
         <li class="page-item">
           <a class="page-link"
              hx-get="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-             hx-target="#atividades-container"
+             hx-target="#lista-container"
              hx-swap="innerHTML"
              hx-push-url="true">
             {{ num }}
@@ -51,7 +51,7 @@
       <li class="page-item">
         <a class="page-link"
            hx-get="?page={{ qs.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-           hx-target="#atividades-container"
+           hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
            aria-label="Próxima">
@@ -62,7 +62,7 @@
       <li class="page-item">
         <a class="page-link"
            hx-get="?page={{ qs.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
-           hx-target="#atividades-container"
+           hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
            aria-label="Última">

@@ -28,7 +28,7 @@
           class="row g-2 align-items-center filtros-atividades"
           hx-get="{% url 'listar_atividades' %}"
           hx-trigger="change, keyup delay:200ms"
-          hx-target="#atividades-container"
+          hx-target="#lista-container"
           hx-push-url="true">
 
         <div class="row g-2 align-items-end">
@@ -61,7 +61,7 @@
 </div>
 
 <!-- Container das Atividades -->
-<div id="atividades-container"
+<div id="lista-container"
      hx-get="{% url 'listar_atividades' %}{% if filter.form.categoria.value %}?categoria={{ filter.form.categoria.value }}{% endif %}"
      hx-trigger="atividadeModified from:body"
      hx-swap="innerHTML">

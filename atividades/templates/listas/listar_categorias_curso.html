@@ -15,7 +15,7 @@
       class="row g-2 align-items-center filtros-atividades"
       hx-get="{% url 'listar_categorias_curso' %}"
       hx-trigger="change, keyup delay:200ms"
-      hx-target="#categorias-container"
+      hx-target="#lista-container"
       hx-push-url="true">
     {% for field in filter.form %}
       <div class="col-12 col-md-3">
@@ -29,7 +29,7 @@
   </form>
 </div>
 
-<div id="categorias-container">
+<div id="lista-container">
     {% include "listas/htmx/categorias_curso_list.html" %}
 </div>
 

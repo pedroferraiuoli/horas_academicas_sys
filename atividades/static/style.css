@@ -1001,20 +1001,6 @@ header button:hover {
     overflow-wrap: break-word;
 }
 
-.close {
-    position: absolute;
-    top: 6px;
-    right: 15px;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #333;
-    cursor: pointer;
-}
-
-.close:hover {
-    color: var(--main-orange) !important;
-}
-
 .main-login-register {
     width: 100% !important;
     min-height: 100vh;
@@ -2585,6 +2571,7 @@ header button:hover {
     border-color: #dee2e6;
     padding: 0.5rem 0.75rem;
     transition: all 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .pagination .page-link:hover {

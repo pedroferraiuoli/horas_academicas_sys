@@ -147,8 +147,13 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
     
     def get_template_names(self):
         if self.request.headers.get('HX-Request'):
-            if self.request.GET and self.request.GET.get('from_nav', None) != 'true':
+            from_nav = self.request.GET.get('from_nav', None) == 'true'
+            page = self.request.GET.get('page', None)
+            if not self.request.GET:
+                return [self.htmx_template_name]
+            if not from_nav or page:
                 return [self.htmx_partial_template_name]
+                      
             return [self.htmx_template_name]
         return [self.template_name]
 

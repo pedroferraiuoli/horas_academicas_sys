@@ -21,6 +21,11 @@ body {
     font-family: 'DM Sans', sans-serif !important;
 }
 
+body.modal-open {
+    overflow: hidden;
+    touch-action: none; /* mobile */
+}
+
 .link-limpo {
     text-decoration: none;
     color: var(--main-bg) !important;
@@ -1069,8 +1074,8 @@ header button:hover {
 
 /* Item de atividade */
 .atividade-item {
-    background: white;
-    border: 1px solid #ddd;
+    background: var(--main-bg);
+    border: 1px solid var(--main-blue);
     border-radius: 8px;
     margin-bottom: 1rem;
     overflow: hidden;

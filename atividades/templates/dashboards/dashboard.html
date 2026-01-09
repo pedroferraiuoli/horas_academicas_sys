@@ -26,7 +26,8 @@
                     hx-get="{% url 'listar_atividades' %}"
                     hx-trigger="click"
                     hx-target="#aluno-container"
-                    hx-swap="innerHTML">
+                    hx-swap="innerHTML"
+                    hx-push-url="true">
                 <i class="bi bi-list"></i>
                 <span class="btn-text">Listar Atividades</span>
             </button>

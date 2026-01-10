@@ -1001,6 +1001,10 @@ header button:hover {
     overflow-wrap: break-word;
 }
 
+body:has(#modal-container .modal) {
+  overflow: hidden;
+}
+
 .main-login-register {
     width: 100% !important;
     min-height: 100vh;

@@ -5,7 +5,7 @@
     {% if qs.has_previous %}
       <li class="page-item">
         <a class="page-link"
-           hx-get="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+           hx-get="?page=1&target=list{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
            hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
@@ -16,7 +16,7 @@
 
       <li class="page-item">
         <a class="page-link"
-           hx-get="?page={{ qs.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+           hx-get="?page={{ qs.previous_page_number }}&target=list{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
            hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
@@ -37,7 +37,7 @@
       {% elif num > qs.number|add:'-3' and num < qs.number|add:'3' %}
         <li class="page-item">
           <a class="page-link"
-             hx-get="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+             hx-get="?page={{ num }}&target=list{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
              hx-target="#lista-container"
              hx-swap="innerHTML"
              hx-push-url="true">
@@ -50,7 +50,7 @@
     {% if qs.has_next %}
       <li class="page-item">
         <a class="page-link"
-           hx-get="?page={{ qs.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+           hx-get="?page={{ qs.next_page_number }}&target=list{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
            hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"
@@ -61,7 +61,7 @@
 
       <li class="page-item">
         <a class="page-link"
-           hx-get="?page={{ qs.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+           hx-get="?page={{ qs.paginator.num_pages }}&target=list{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
            hx-target="#lista-container"
            hx-swap="innerHTML"
            hx-push-url="true"

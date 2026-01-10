@@ -216,8 +216,8 @@
         </div>
 
         <!-- Modals fora do loop visual -->
-        {% include "listas/partials/modal_observacao.html" %}
-        {% include "listas/partials/modal_aprovacao.html" %}
+        {% include "listas/components/modal_observacao.html" %}
+        {% include "listas/components/modal_aprovacao.html" %}
 
     {% empty %}
         <!-- Mensagem quando não há atividades -->
@@ -228,7 +228,7 @@
 </div>
 
 <!-- Paginação -->
-{% include 'pagination.html' with qs=atividades %}
+{% include 'components/pagination.html' with qs=atividades %}
 
 <!-- Scripts -->
 <script src="{% static 'js/listar_atividades.js' %}"></script>

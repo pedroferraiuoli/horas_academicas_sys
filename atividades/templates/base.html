@@ -36,7 +36,7 @@
 
 <body>
     <!-- Header -->
-    {% include 'header.html' %}
+    {% include 'components/header.html' %}
 
     <!-- Conteúdo Principal -->
     <main class="
@@ -48,11 +48,11 @@
     ">
         <!-- Navbar (apenas para usuários autenticados) -->
         {% if user.is_authenticated and user.aluno %}
-            {% include 'navbar.html' %}
+            {% include 'components/navbar.html' %}
         {% elif user.is_authenticated and user.coordenador %}
-            {% include 'navbar_coordenador.html' %}
+            {% include 'components/navbar_coordenador.html' %}
         {% elif user.is_authenticated and user.groups.all.0.name == 'Gestor' %}
-            {% include 'navbar_gestor.html' %}
+            {% include 'components/navbar_gestor.html' %}
         {% endif %}
 
         <!-- Área de Conteúdo -->
@@ -71,19 +71,15 @@
             </div>
 
             <!-- Container principal do conteúdo -->
-            <div id="aluno-container"
-                 hx-get="{% url 'dashboard' %}"
-                 hx-trigger="atividadeModified from:body"
-                 hx-swap="innerHTML">
+            <div id="aluno-container">
                 {% block content %}{% endblock %}
+                
             </div>
         </div>
     </main>
 
     <!-- Footer -->
-    {% include 'footer.html' %}
+    {% include 'components/footer.html' %}
 
-    <!-- Scripts Personalizados -->
-    <script src="{% static 'js/lock_background.js' %}"></script>
 </body>
 </html>

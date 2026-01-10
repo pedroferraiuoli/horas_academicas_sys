@@ -84,7 +84,7 @@ class ListarUsuariosAdminView(GestorRequiredMixin, TemplateView):
 
 class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
     template_name = 'listas/listar_alunos_coordenador.html'
-    htmx_template_name = 'listas/htmx/alunos_coord_list.html'
+    htmx_template_name = 'listas/partials/alunos_coord_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -130,7 +130,7 @@ class ExcluirCursoView(GestorRequiredMixin, View):
 
 class ListarCursosView(GestorRequiredMixin, TemplateView):
     template_name = 'listas/listar_cursos.html'
-    htmx_template_name = 'listas/htmx/cursos_list.html'
+    htmx_template_name = 'listas/partials/cursos_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

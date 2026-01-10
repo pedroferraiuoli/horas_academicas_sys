@@ -2,6 +2,11 @@
 
 {% block content %}
 
+<div id="dashboard-aluno-container"
+     hx-get="{% url 'dashboard' %}"
+     hx-trigger="atividadeModified from:body"
+     hx-swap="innerHTML">
+
     <!-- Header do Dashboard -->
     <div class="dashboard-header">
         <h2 class="orange dashboard-welcome">Bem-vindo, {{ aluno.nome }}!</h2>
@@ -58,12 +63,6 @@
     <!-- Container do Dashboard com HTMX -->
     <div id="dashboard-aluno-container"
          >
-       
-
-<div id="dashboard-aluno-container"
-     hx-get="{% url 'dashboard' %}"
-     hx-trigger="atividadeModified from:body"
-     hx-swap="innerHTML">
 
     <!-- Seção de progresso -->
     <div class="dashboard-progress-section">
@@ -96,17 +95,18 @@
     <div id="atividades-recentes-container">
         {% if atividades_recentes %}
             <!-- Lista Responsiva de Atividades -->
-            {% include "listas/htmx/atividades_list.html" with atividades=atividades_recentes %}
+            {% include "listas/partials/atividades_list.html" with atividades=atividades_recentes %}
         {% else %}
             <p class="text-muted mt-4">Nenhuma atividade cadastrada ainda.</p>
         {% endif %}
     </div>
 
-</div>
+    <!-- Container para modais HTMX (usado para formulário de atividade) -->
+    <div id="modal-container"></div>
 
-<!-- Container para modais HTMX (usado para formulário de atividade) -->
-<div id="modal-container"></div>
-    </div>
+  </div>
+  
+</div>
 
     <!-- Scripts -->
     <script src="{% static 'js/listar_atividades.js' %}"></script>

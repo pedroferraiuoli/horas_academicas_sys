@@ -18,8 +18,8 @@
                         
                         {% for categoria in categorias_context %}
                         
-                            <div class="sidebar-item" data-url="{% url 'listar_atividades' %}?categoria={{ categoria.id }}"
-                                    hx-get="{% url 'listar_atividades' %}?from_nav=true&categoria={{ categoria.id }}"
+                            <div class="sidebar-item"
+                                    hx-get="{% url 'listar_atividades' %}?categoria={{ categoria.id }}"
                                     hx-target="#aluno-container"
                                     hx-swap="innerHTML"
                                     hx-push-url="true">

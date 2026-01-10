@@ -60,7 +60,7 @@
       class="row g-2 align-items-center filtros-atividades"
       hx-get="{% url 'listar_usuarios_admin' %}"
       hx-trigger="change, keyup delay:200ms"
-      hx-target="#coordenadores-container"
+      hx-target="#lista-container"
       hx-push-url="true">
     {% for field in filter.form %}
       <div class="col-12 col-md-3">
@@ -73,8 +73,8 @@
     </div>
   </form>
 </div>
-  <div id="coordenadores-container">
-      {% include "listas/htmx/users_admin_list.html" %}
+  <div id="lista-container">
+      {% include "listas/partials/users_admin_list.html" %}
   </div>
 </div>
 

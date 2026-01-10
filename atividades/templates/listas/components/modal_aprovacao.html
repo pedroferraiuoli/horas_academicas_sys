@@ -1,0 +1,24 @@
+<!-- Modal de Aprovação de Atividade -->
+<div class="modal fade" id="aprovarModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="aprovarModalLabel{{ forloop.counter }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aprovarModalLabel{{ forloop.counter }}">Aprovar atividade ({{ atividade.horas }}h)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <form action="{% url 'aprovar_horas_atividade' atividade.id %}" method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="horasAprovadas{{ forloop.counter }}" class="form-label">Horas aprovadas</label>
+            <input id="horasAprovadas{{ forloop.counter }}" name="horas_aprovadas" type="number" min="0" max="{{atividade.horas}}" step="1" class="form-control" required placeholder="Ex.: {{ atividade.horas }}" value="{{ atividade.horas_aprovadas|default:'' }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-outline-main-blue btn-sm">Salvar aprovação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

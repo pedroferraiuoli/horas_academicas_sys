@@ -21,6 +21,11 @@ body {
     font-family: 'DM Sans', sans-serif !important;
 }
 
+body.modal-open {
+    overflow: hidden;
+    touch-action: none; /* mobile */
+}
+
 .link-limpo {
     text-decoration: none;
     color: var(--main-bg) !important;
@@ -184,7 +189,7 @@ body {
     transition: all 0.3s ease;
 }
 
-.sidebar-close-btn:hover {
+.sidebar .sidebar-close-btn:hover {
     background-color: var(--main-blue);
     transform: rotate(90deg);
 }
@@ -283,7 +288,7 @@ body {
 /* Sidebar Responsivo */
 @media (min-width: 992px) {
     .sidebar-toggle-btn,
-    .sidebar-close-btn {
+    .sidebar .sidebar-close-btn {
         display: none !important;
     }
 }
@@ -882,13 +887,6 @@ body {
     color: var(--main-green) !important;
 }
 
-.close-position {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    min-height: 25px !important;
-}
-
 /* Botões padrão Bootstrap */
 .btn-success {
     background-color: var(--main-green) !important;
@@ -1003,18 +1001,8 @@ header button:hover {
     overflow-wrap: break-word;
 }
 
-.close {
-    position: absolute;
-    top: 6px;
-    right: 15px;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #333;
-    cursor: pointer;
-}
-
-.close:hover {
-    color: var(--main-orange) !important;
+body:has(#modal-container .modal) {
+  overflow: hidden;
 }
 
 .main-login-register {
@@ -1076,8 +1064,8 @@ header button:hover {
 
 /* Item de atividade */
 .atividade-item {
-    background: white;
-    border: 1px solid #ddd;
+    background: var(--main-bg);
+    border: 1px solid var(--main-blue);
     border-radius: 8px;
     margin-bottom: 1rem;
     overflow: hidden;
@@ -2587,6 +2575,7 @@ header button:hover {
     border-color: #dee2e6;
     padding: 0.5rem 0.75rem;
     transition: all 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .pagination .page-link:hover {

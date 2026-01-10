@@ -122,8 +122,8 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
 
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
     template_name = 'listas/listar_atividades.html'
-    htmx_template_name = 'listas/partials/atividades_aluno.html'
-    htmx_partial_template_name = 'listas/htmx/atividades_list.html'
+    htmx_template_name = 'listas/contents/atividades_aluno.html'
+    htmx_partial_template_name = 'listas/partials/atividades_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -146,16 +146,16 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         return context
     
     def get_template_names(self):
-        if self.request.headers.get('HX-Request'):
-            if self.request.GET and self.request.GET.get('from_nav', None) != 'true':
-                return [self.htmx_partial_template_name]
-            return [self.htmx_template_name]
-        return [self.template_name]
+            if self.request.headers.get('HX-Request'):
+                if self.request.GET.get('target') == 'list':
+                    return [self.htmx_partial_template_name]                  
+                return [self.htmx_template_name]
+            return [self.template_name]
 
 
 class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
     template_name = 'listas/listar_atividades_coordenador.html'
-    htmx_template_name = 'listas/htmx/atividades_coord_list.html'
+    htmx_template_name = 'listas/partials/atividades_coord_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

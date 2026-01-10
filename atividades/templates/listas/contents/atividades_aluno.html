@@ -1,5 +1,10 @@
 {% load static %}
 
+<div id="lista-aluno-container"
+     hx-get="{% url 'listar_atividades' %}"
+     hx-trigger="atividadeModified from:body"
+     hx-swap="innerHTML">
+
 <!-- Título da Página -->
 <h2 class="text-main-blue mt-3">Minhas Atividades</h2>
 
@@ -26,9 +31,9 @@
 <div class="mb-3">
     <form method="get"
           class="row g-2 align-items-center filtros-atividades"
-          hx-get="{% url 'listar_atividades' %}"
+          hx-get="{% url 'listar_atividades' %}?target=list"
           hx-trigger="change, keyup delay:200ms"
-          hx-target="#atividades-container"
+          hx-target="#lista-container"
           hx-push-url="true">
 
         <div class="row g-2 align-items-end">
@@ -61,17 +66,16 @@
 </div>
 
 <!-- Container das Atividades -->
-<div id="atividades-container"
+<div id="lista-container"
      hx-get="{% url 'listar_atividades' %}{% if filter.form.categoria.value %}?categoria={{ filter.form.categoria.value }}{% endif %}"
      hx-trigger="atividadeModified from:body"
      hx-swap="innerHTML">
-    {% include "listas/htmx/atividades_list.html" %}
+    {% include "listas/partials/atividades_list.html" %}
 </div>
 
 <!-- Container para Modais HTMX -->
-<div id="modal-container"
-     hx-get="data:text/html,"
-     hx-trigger="atividadeModified from:body"
-     hx-swap="innerHTML">
+<div id="modal-container">
+</div>
+
 </div>
 

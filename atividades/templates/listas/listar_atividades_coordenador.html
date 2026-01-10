@@ -15,7 +15,7 @@
       class="row g-2 align-items-center filtros-atividades"
       hx-get="{% url 'listar_atividades_coordenador' %}"
       hx-trigger="change, keyup delay:200ms"
-      hx-target="#atividades-container"
+      hx-target="#lista-container"
       hx-push-url="true">
     {% for field in filter.form %}
     {% if field.name != 'aluno_id' %}
@@ -33,8 +33,8 @@
   </form>
 </div>
 
- <div id="atividades-container">
-    {% include "listas/htmx/atividades_coord_list.html" %}
+ <div id="lista-container">
+    {% include "listas/partials/atividades_coord_list.html" %}
 </div>
 
 </div>

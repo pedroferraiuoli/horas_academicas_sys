@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
 from ..utils import paginate_queryset
-from ..models import Atividade, Aluno, CategoriaCurso
+from ..models import Atividade, Aluno, CategoriaCurso, Notificacao
 from ..forms import AtividadeForm
 from ..selectors import AlunoSelectors, AtividadeSelectors, UserSelectors
 from ..services import AtividadeService

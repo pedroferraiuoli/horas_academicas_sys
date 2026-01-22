@@ -149,3 +149,9 @@ class Atividade(BaseModel):
     def save(self):
         self.clean()
         return super().save()
+    
+class Notificacao(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    texto = models.CharField(max_length=255)
+    criada_em = models.DateTimeField(auto_now_add=True)
+    lida = models.BooleanField(default=False)

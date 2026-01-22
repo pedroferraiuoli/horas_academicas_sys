@@ -1,0 +1,81 @@
+<!-- Dropdown de Notificações -->
+<div class="notificacoes-dropdown">
+  <div class="notificacoes-dropdown-header">
+    <h6><i class="bi bi-bell-fill me-2"></i>Notificações</h6>
+    {% if notificacoes %}
+    <button 
+      hx-post="{% url 'marcar_todas_lidas' %}"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-target="#notificacoes-dropdown-container"
+      hx-swap="innerHTML"
+      class="btn-marcar-todas-pequeno"
+      title="Marcar todas como lidas">
+      <i class="bi bi-check-all"></i>
+    </button>
+    {% endif %}
+  </div>
+  
+  {% if notificacoes %}
+    <div class="notificacoes-dropdown-lista">
+      {% for notificacao in notificacoes %}
+      <div class="notificacao-item-dropdown notificacao-nao-lida" id="notificacao-item-{{ notificacao.id }}">
+        <div class="notificacao-conteudo">
+          <p class="mb-1">{{ notificacao.texto }}</p>
+          <small class="text-muted">{{ notificacao.criada_em|timesince }} atrás</small>
+        </div>
+        {% if not notificacao.lida %}
+        <button 
+          hx-post="{% url 'marcar_notificacao_lida' notificacao.id %}"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-target="#notificacao-item-{{ notificacao.id }}"
+          hx-swap="outerHTML"
+          class="btn-marcar-lida-pequeno"
+          title="Marcar como lida">
+          <i class="bi bi-check"></i>
+        </button>
+        {% else %}
+        <i class="bi bi-check-all text-success small"></i>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    
+    {% if tem_mais %}
+    <div class="notificacoes-dropdown-footer">
+      <button 
+        hx-get="{% url 'listar_notificacoes' %}"
+        hx-swap="innerHTML"
+        hx-vals='{"todas": "true"}'
+        hx-target="#notificacoes-dropdown-container"
+        class="btn btn-primary btn-sm w-100">
+        Exibir todas ({{ total_notificacoes }})
+      </button>
+    </div>
+    {% endif %}
+  {% else %}
+    <div class="notificacoes-vazia-dropdown">
+      <i class="bi bi-bell-slash"></i>
+      <p>Nenhuma notificação</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Fechar dropdown ao clicar fora
+  function fecharDropdownNotificacoes() {
+    document.getElementById('notificacoes-dropdown-container').innerHTML = '';
+  }
+  
+  // Adicionar listener para clicar fora
+  setTimeout(function() {
+    document.addEventListener('click', function handleClickOutside(event) {
+      const dropdown = document.querySelector('.notificacoes-dropdown');
+      const btn = document.getElementById('notif-btn');
+      
+      if (dropdown && !dropdown.contains(event.target) && !btn.contains(event.target)) {
+        fecharDropdownNotificacoes();
+        document.removeEventListener('click', handleClickOutside);
+      }
+    });
+  }, 100);
+</script>

@@ -2991,3 +2991,251 @@ body:has(#modal-container .modal) {
 }
 
 /* Fim Modal de Confirmação de Semestre */
+
+/* ==================== Notificações ==================== */
+
+/* Wrapper do botão de notificações */
+.notif-wrapper {
+    position: relative;
+    align-content: center;
+}
+
+/* Botão de notificações no header */
+.notif-btn {
+    position: relative;
+}
+
+/* Badge de contador */
+.notif-badge {
+    position: absolute;
+    top: -6px;
+    right: -5px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Dropdown de notificações */
+.notificacoes-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 380px;
+    max-height: 500px;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.notificacoes-dropdown-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e9ecef;
+    background: var(--main-blue);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notificacoes-dropdown-header h6 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.btn-marcar-todas-pequeno {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-marcar-todas-pequeno:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.notificacoes-dropdown-lista {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.notificacao-item-dropdown {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 0.75rem;
+    transition: background-color 0.2s;
+}
+
+.notificacao-item-dropdown:last-child {
+    border-bottom: none;
+}
+
+.notificacao-item-dropdown:hover {
+    background-color: #f8f9fa;
+}
+
+.notificacao-item-dropdown.notificacao-nao-lida {
+    background-color: #e7f3ff;
+    border-left: 3px solid var(--main-blue);
+}
+
+.notificacao-item-dropdown .notificacao-conteudo {
+    flex: 1;
+    overflow: hidden;
+}
+
+.notificacao-item-dropdown .notificacao-conteudo p {
+    color: var(--text-secondary);
+    line-height: 1.4;
+    font-size: 0.875rem;
+}
+
+.notificacao-item-dropdown .notificacao-conteudo small {
+    font-size: 0.75rem;
+}
+
+.btn-marcar-lida-pequeno {
+    background: var(--main-green);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.btn-marcar-lida-pequeno:hover {
+    background: var(--main-green-dark);
+    transform: scale(1.1);
+}
+
+.notificacoes-dropdown-footer {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e9ecef;
+    background-color: var(--main-bg);
+}
+
+.notificacoes-vazia-dropdown {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--main-bg);
+}
+
+.notificacoes-vazia-dropdown i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.3;
+}
+
+.notificacoes-vazia-dropdown p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Lista de notificações no modal */
+.notificacoes-lista {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.notificacao-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    gap: 1rem;
+}
+
+.notificacao-item:last-child {
+    border-bottom: none;
+}
+
+.notificacao-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Notificação não lida */
+.notificacao-nao-lida {
+    background-color: #e7f3ff;
+    border-left: 4px solid var(--main-blue);
+}
+
+.notificacao-conteudo {
+    flex: 1;
+}
+
+.notificacao-conteudo p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Estado vazio */
+.notificacoes-vazia {
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.notificacoes-vazia i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.notificacoes-vazia p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .notificacoes-dropdown {
+        width: 320px;
+        right: -100px;
+    }
+    
+    .notificacao-item-dropdown {
+        padding: 0.65rem 0.85rem;
+    }
+    
+    .notificacao-item {
+        padding: 0.75rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .notificacoes-lista {
+        max-height: 50vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .notificacoes-dropdown {
+        width: 80vw;
+        right: -56px;
+    }
+}
+
+/* ==================== Fim Notificações ==================== */
+

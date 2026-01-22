@@ -1,5 +1,5 @@
 from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, UserSelectors
-from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Semestre
+from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Notificacao, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
@@ -135,6 +135,11 @@ class AtividadeService:
 
         atividade.horas_aprovadas = horas_aprovadas
         atividade.save()
+
+        Notificacao.objects.create(
+            user=atividade.aluno.user,
+            texto=f"Sua atividade \"{atividade.nome}\" foi avaliada com {horas_aprovadas} horas."
+        )
         
         # Invalidar cache do aluno após aprovação
         AtividadeService.invalidar_cache_aluno(atividade.aluno_id)

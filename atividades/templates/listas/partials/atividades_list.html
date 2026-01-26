@@ -23,7 +23,7 @@
 
                 <div class="row g-2">
                     <!-- Nome da Atividade -->
-                    <div class="col-xl-2 col-lg-2 col-12">
+                    <div class="col-xl-3 col-lg-3 col-12 list-item-col">
                         <div class="ativ-col">
                             <span class="ativ-label">Nome</span>
                             <span class="ativ-value">{{ atividade.nome }}</span>
@@ -39,7 +39,7 @@
                     </div>
 
                     <!-- Horas -->
-                    <div class="col-xl col-lg col-5">
+                    <div class="col-xl-2 col-lg-2 col-5">
                         <div class="ativ-col">
                             <span class="ativ-label">Horas</span>
                             <span class="ativ-value">
@@ -49,7 +49,7 @@
                     </div>
 
                     <!-- Status/Aprovadas -->
-                    <div class="col-xl col-lg col-6">
+                    <div class="col-xl-2 col-lg-2 col-6">
                         <div class="ativ-col">
                             <span class="ativ-label">Aprovadas</span>
                             <span class="ativ-value">
@@ -66,16 +66,8 @@
                         </div>
                     </div>
 
-                    <!-- Data (apenas desktop) -->
-                    <div class="col-xl col-lg desktop-only">
-                        <div class="ativ-col">
-                            <span class="ativ-label">Data</span>
-                            <span class="ativ-value">{{ atividade.data }}</span>
-                        </div>
-                    </div>
-
                     <!-- Ações (apenas desktop) -->
-                    <div class="col-xl col-lg-2 desktop-only">
+                    <div class="col-auto desktop-only">
                         <div class="ativ-col">
                             <span class="ativ-label">Ações</span>
                             <div class="ativ-actions">

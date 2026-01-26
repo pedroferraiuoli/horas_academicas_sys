@@ -13,8 +13,8 @@
             </div>
             {% if user.is_authenticated %}
             <div class="grp-botton">
-              <button onclick="abrirModal('img1')" class="header-btn">Sobre</button>
-              <button onclick="abrirModal('img2')" class="header-btn">Guia</button>
+              <button onclick="abrirModal('img1')" class="">Sobre</button>
+              <button onclick="abrirModal('img2')" class="">Guia</button>
 
 
               {% if user.aluno %}
@@ -24,7 +24,7 @@
                   hx-get="{% url 'listar_notificacoes' %}" 
                   hx-target="#notificacoes-dropdown-container" 
                   hx-swap="innerHTML"
-                  class="header-btn notif-btn"
+                  class="notif-btn"
                   id="notif-btn">
 
                   <i class="bi bi-bell-fill"></i>

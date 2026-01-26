@@ -46,6 +46,7 @@ body.modal-open {
     background-position: center center;
     background-size: 200px;
     min-height: 100vh;
+    width: 100%;
 }
 
 
@@ -124,7 +125,8 @@ body.modal-open {
     top: 0;
     overflow-y: auto;
     background-color: var(--main-bg);
-    width: 500px;
+    width: 30%;
+    min-width: 30%;
 }
 
 .sidebar-gestor {
@@ -964,10 +966,6 @@ header button {
     white-space: nowrap;
 }
 
-header button:hover {
-    background: var(--main-orange)
-}
-
 .modal {
     display: none;
     background-color: rgba(0, 0, 0, 0.85);
@@ -1070,6 +1068,10 @@ body:has(#modal-container .modal) {
     margin-bottom: 1rem;
     overflow: hidden;
     transition: box-shadow 0.3s ease;
+}
+
+.list-item-col {
+    overflow: hidden;
 }
 
 .atividade-item:hover {

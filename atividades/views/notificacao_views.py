@@ -59,7 +59,6 @@ class MarcarTodasLidasView(LoginRequiredMixin, View):
     
 class CountNotificacoesNaoLidas(AlunoRequiredMixin, View):
         def get(self, request):
-            print("Contando notificações não lidas...")
             total_nao_lidas = Notificacao.objects.filter(
                 user=request.user,
                 lida=False

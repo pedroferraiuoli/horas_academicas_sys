@@ -47,7 +47,6 @@ body.modal-open {
     width: 100%;
 }
 
-
 .main-login {
     width: 100% !important;
     min-height: 100vh;
@@ -75,7 +74,6 @@ body.modal-open {
     border: 2px solid #e0e0e0 !important;
     border-radius: 10px !important;
     color: var(--text-secondary) !important;
-
 }
 
 .datepicker td,th{
@@ -83,7 +81,6 @@ body.modal-open {
     padding: 8px 12px;
     font-size: 14px;
 }
-
 
 .datepicker table tr td.today {
     background-color: var(--main-orange) !important;

@@ -120,7 +120,7 @@ class Atividade(BaseModel):
 
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name='atividades')
     categoria = models.ForeignKey(CategoriaCurso, on_delete=models.PROTECT)
-    nome = models.CharField(max_length=200)
+    nome = models.CharField(max_length=70)
     descricao = models.TextField(blank=True, null=True)
     observacoes_para_aprovador = models.TextField(blank=True, null=True)
     horas = models.PositiveIntegerField(help_text="Duração da atividade em horas")

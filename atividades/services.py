@@ -354,7 +354,7 @@ class RelatorioAlunoService:
             if not atividades.exists():
                 continue
 
-            horas_brutas = sum(a.horas_aprovadas for a in atividades)
+            horas_brutas = sum(a.horas_aprovadas for a in atividades if a.horas_aprovadas is not None)
 
             horas_validas = AlunoService.calcular_horas_complementares_validas(
                 aluno=aluno,
@@ -440,7 +440,6 @@ class StatsService:
         stats = {
             'num_alunos': AlunoSelectors.get_num_alunos(),
             'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(),
-            'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(),
         }
 
         cache.set(CACHE_KEY, stats, TTL)

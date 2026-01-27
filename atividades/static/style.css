@@ -7,9 +7,7 @@
     --text-muted: #6c757d;
     --text-secondary: #333;
     --main-orange: #F16F33;
-    --main-bg: #F8FCFF;
-    --background-card: #929EB4;
-}
+    --main-bg: #F8FCFF;}
 
 html,
 body {
@@ -118,6 +116,11 @@ body.modal-open {
     min-width: 50%;
 }
 
+.bg-success {
+    background-color: var(--main-green-light) !important;
+    color: white !important;
+}
+
 /* Sidebar - fundo claro, borda fina */
 .sidebar {
     height: 100vh;
@@ -130,11 +133,13 @@ body.modal-open {
 }
 
 .sidebar-gestor {
-    width: 360px;
+    width: 20% !important;
+    min-width: 20% !important;
 }
 
 .sidebar-coordenador {
-    width: 360px;
+    width: 20% !important;
+    min-width: 20% !important;
 }
 
 .sidebar-content {
@@ -491,21 +496,18 @@ body.modal-open {
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    animation: fadeInUp 0.6s ease-out;
+    animation: fadeInUp 0.2s ease-out;
 }
 
 /* === HEADER === */
 .form-atividade-header {
-    background: linear-gradient(135deg, var(--main-blue) 0%, #0d1630 100%);
+    background: var(--main-blue);
     padding: 1.5rem 2.5rem;
     display: flex;
     align-items: center;
     gap: 1.5rem;
     position: relative;
     overflow: hidden;
-}
-
-.form-header-icon {
 }
 
 .form-header-icon i {
@@ -572,7 +574,6 @@ body.modal-open {
 .label-icon {
     width: 24px;
     height: 24px;
-    background: var(--bg-light);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -606,7 +607,6 @@ body.modal-open {
     font-size: 0.95rem;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
-    transition: all 0.3s ease;
     background: #fafafa;
     color: var(--text-secondary);
 }
@@ -619,13 +619,7 @@ body.modal-open {
 }
 
 .form-field-select {
-    cursor: pointer;
-    padding-right: 2.5rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2315224F' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 16px;
-    appearance: none;
+    cursor: pointer;    
 }
 
 .form-field-file {
@@ -648,33 +642,20 @@ body.modal-open {
     background: var(--main-orange);
 }
 
-.form-field-textarea {
-    min-height: 120px;
-    resize: vertical;
-    font-family: inherit;
-}
-
-.form-field-date,
-.form-field-number {
+.form-field-wrapper,
+#id_data {
     cursor: pointer;
 }
 
 /* === HELP TEXT === */
 .form-field-help {
     display: flex;
-    align-items: flex-start;
     gap: 0.5rem;
     font-size: 0.85rem;
     color: var(--text-muted);
     padding: 0.5rem 0.75rem;
     background: var(--bg-light);
     border-radius: 6px;
-}
-
-.form-field-help i {
-    font-size: 0.9rem;
-    margin-top: 0.1rem;
-    flex-shrink: 0;
 }
 
 /* === ERROR === */
@@ -689,11 +670,6 @@ body.modal-open {
     border-left: 3px solid #cc0000;
     border-radius: 6px;
     animation: shake 0.5s;
-}
-
-.form-field-error i {
-    font-size: 0.9rem;
-    flex-shrink: 0;
 }
 
 /* === ACTIONS === */
@@ -713,7 +689,6 @@ body.modal-open {
     justify-content: center;
     gap: 0.625rem;
     padding: 0.875rem 2rem;
-    font-size: 1rem;
     font-weight: 600;
     border: none;
     border-radius: 12px;
@@ -736,7 +711,7 @@ body.modal-open {
 }
 
 .form-action-primary {
-    background: linear-gradient(135deg, var(--main-orange) 0%, #d95a20 100%);
+    background: var(--main-orange);
     color: white;
     box-shadow: 0 4px 15px rgba(241, 111, 51, 0.3);
 }
@@ -770,11 +745,7 @@ body.modal-open {
         flex-direction: column;
         text-align: center;
     }
-    
-    .form-header-icon {
 
-    }
-    
     .form-header-icon i {
         font-size: 1.5rem;
     }
@@ -1110,6 +1081,9 @@ body:has(#modal-container .modal) {
 .ativ-value {
     color: var(--text-secondary);
     font-size: 0.9rem;
+    white-space: normal;        /* permite quebra */
+    word-break: break-word;     /* quebra palavras grandes */
+    overflow-wrap: break-word;
 }
 
 .ativ-actions {

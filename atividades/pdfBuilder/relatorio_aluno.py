@@ -117,13 +117,12 @@ class RelatorioAlunoPdfBuilder:
             titulo = f"{categoria.categoria.nome} (Limite: {categoria.limite_horas}h)"
             self.elements.append(Paragraph(titulo, self.style_heading))
 
-            table_data = [['Atividade', 'Data', 'Horas']]
+            table_data = [['Atividade', 'Horas Aprovadas']]
 
             for ativ in atividades:
                 table_data.append([
-                    ativ.nome[:60],
-                    ativ.data.strftime('%d/%m/%Y'),
-                    f"{ativ.horas_aprovadas}h"
+                    ativ.nome[:50],
+                    f"{ativ.horas_aprovadas if ativ.horas_aprovadas is not None else 0}h"
                 ])
 
             subtotal = (
@@ -131,9 +130,9 @@ class RelatorioAlunoPdfBuilder:
                 f"<br/>Válidas: {item['horas_validas']}h"
             )
 
-            table_data.append([Paragraph(subtotal, self.style_normal), '', ''])
+            table_data.append([Paragraph(subtotal, self.style_normal), ''])
 
-            table = Table(table_data, colWidths=[10*cm, 3.5*cm, 3.5*cm])
+            table = Table(table_data, colWidths=[10*cm, 3.5*cm])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a4d8f')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),

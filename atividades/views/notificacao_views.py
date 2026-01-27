@@ -4,6 +4,7 @@ from django.views.generic import TemplateView, View
 from django.http import HttpResponse
 from atividades.mixins import AlunoRequiredMixin
 from atividades.models import Notificacao
+from atividades.selectors import NotificationSelectors
 
 
 class ListarNotificacoesDropdownView(LoginRequiredMixin, TemplateView):
@@ -14,10 +15,7 @@ class ListarNotificacoesDropdownView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        todas_notificacoes = Notificacao.objects.filter(
-            user=self.request.user,
-            lida=False
-        ).order_by('-criada_em')
+        todas_notificacoes = NotificationSelectors.get_notificacoes_nao_lidas(self.request.user)
 
         notificacoes_count = todas_notificacoes.count()
         limitado = False
@@ -49,20 +47,15 @@ class MarcarTodasLidasView(LoginRequiredMixin, View):
     Marca todas as notificações como lidas
     """
     def post(self, request):
-        Notificacao.objects.filter(
-            user=request.user,
-            lida=False
-        ).update(lida=True)
+        notificacoes = NotificationSelectors.get_notificacoes_nao_lidas(request.user)
+        notificacoes.update(lida=True)
         
         # Retorna badge vazio
         return HttpResponse("", headers={"HX-Trigger": "notificacaoLida"})
     
 class CountNotificacoesNaoLidas(AlunoRequiredMixin, View):
         def get(self, request):
-            total_nao_lidas = Notificacao.objects.filter(
-                user=request.user,
-                lida=False
-            ).count()
+            total_nao_lidas = NotificationSelectors.count_notificacoes_nao_lidas(request.user)
             
             if total_nao_lidas > 0:
                 return HttpResponse(f'<span class="notif-badge">{total_nao_lidas}</span>')

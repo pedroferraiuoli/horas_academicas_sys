@@ -31,7 +31,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         if self.dashboard_type == 'aluno':
             context.update(self.get_aluno_context())
         else:
-            context.update(self.get_gestor_context())
+            context.update(self.get_institucional_context())
 
         return context
     
@@ -71,7 +71,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'horas_totais': horas_pendentes + total_horas,
         }
 
-    def get_gestor_context(self):
+    def get_institucional_context(self):
         user = self.request.user
         grupo = UserSelectors.get_user_primary_group(user)
         semestre_atual = SemestreSelectors.get_semestre_atual()

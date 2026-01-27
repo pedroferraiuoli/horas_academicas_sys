@@ -113,6 +113,11 @@ class AtividadeForm(forms.ModelForm):
                 }
             )
         }
+        labels = {
+            'documento': 'Anexar documento (PDF, JPG, PNG, DOC, DOCX)',
+            'observacoes_para_aprovador': 'Observações para o aprovador (opcional)',
+            'descricao': 'Descrição',
+        }
 
     def __init__(self, *args, aluno=None, categoria_id=None, **kwargs):
         super().__init__(*args, **kwargs)

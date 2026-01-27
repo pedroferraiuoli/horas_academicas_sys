@@ -6,7 +6,6 @@ from ..services import RelatorioAlunoService
 from ..pdfBuilder.relatorio_aluno import RelatorioAlunoPdfBuilder
 from ..mixins import AlunoRequiredMixin
 
-
 class GerarRelatorioAlunoView(AlunoRequiredMixin, View):
 
     def get(self, request):

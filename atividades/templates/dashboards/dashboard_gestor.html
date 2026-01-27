@@ -10,8 +10,9 @@
     </div>
     
     <!-- Cards de Estatísticas -->
-    <div class="row mt-4 mb-4 w-100">
-      <div class="col-md-4 mb-3">
+    <div class="row mt-4 mb-4">
+
+      <div class="col-md-6">
         <div class="card dashboard-card shadow-sm h-100">
           <div class="card-body text-center">
             <div class="stat-number">{{ stats.num_alunos|default:0 }}</div>
@@ -20,7 +21,7 @@
         </div>
       </div>
 
-      <div class="col-md-4 mb-3">
+      <div class="col-md-6">
         <div class="card dashboard-card shadow-sm h-100">
           <div class="card-body text-center">
             <div class="stat-number">{{ stats.alunos_com_pendencias|floatformat:0|default:"0" }}</div>
@@ -29,14 +30,6 @@
         </div>
       </div>
 
-      <div class="col-md-4 mb-3">
-        <div class="card dashboard-card shadow-sm h-100">
-          <div class="card-body text-center">
-            <div class="stat-number">{{ stats.atividades_pendentes|floatformat:0|default:"0" }}</div>
-            <div class="stat-label">Atividades para Validar</div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Tabela de Últimos Semestres -->

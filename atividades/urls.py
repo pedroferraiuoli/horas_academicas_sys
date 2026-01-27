@@ -53,6 +53,11 @@ urlpatterns = [
     path('relatorio/gerar/', views.GerarRelatorioAlunoView.as_view(), name='gerar_relatorio_aluno'),
     #LOGS
     path('visualizar-logs/', views.VisualizarLogsView.as_view(), name='visualizar_logs'),
+    # Notificações
+    path('notificacoes/', views.ListarNotificacoesDropdownView.as_view(), name='listar_notificacoes'),
+    path('notificacoes/<int:notificacao_id>/marcar-lida/', views.MarcarNotificacaoLidaView.as_view(), name='marcar_notificacao_lida'),
+    path('notificacoes/marcar-todas-lidas/', views.MarcarTodasLidasView.as_view(), name='marcar_todas_lidas'),
+    path('notificacoes/count-nao-lidas/', views.CountNotificacoesNaoLidas.as_view(), name='contar_notificacoes'),
     #Mensagens HTMX
     path('get-messages/', views.GetMessagesView.as_view(), name='get_messages'),
 ]

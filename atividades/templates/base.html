@@ -41,7 +41,7 @@
     <!-- Conteúdo Principal -->
     <main class="
         {% if user.is_authenticated %}
-            d-flex main
+            d-flex
         {% else %}
             main-login
         {% endif %}
@@ -59,7 +59,7 @@
         <div class="
             px-4
             {% if user.is_authenticated %}
-                flex-grow-1 main
+                main
             {% endif %}
         ">
             <!-- Container para mensagens (atualizável via HTMX) -->
@@ -77,6 +77,9 @@
             </div>
         </div>
     </main>
+
+    <!-- Container para modais HTMX -->
+    <div id="modal-container"></div>
 
     <!-- Footer -->
     {% include 'components/footer.html' %}

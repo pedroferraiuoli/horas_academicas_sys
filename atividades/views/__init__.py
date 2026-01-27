@@ -17,4 +17,6 @@ from .dashboard_views import *
 
 from .log_views import *
 
+from .notificacao_views import *
+
 from .error_handlers import *

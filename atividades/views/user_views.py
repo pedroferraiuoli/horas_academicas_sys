@@ -1,16 +1,17 @@
+import logging
 from django.views import View
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib import messages
 from ..utils import paginate_queryset
-
 from ..forms import UserRegistrationForm, AlterarEmailForm, AdminUserForm
 from ..selectors import AlunoSelectors, UserSelectors
 from ..services import UserService
 from ..filters import AlunosFilter, UsuarioFilter
 from ..mixins import LoginRequiredMixin, GestorRequiredMixin, CoordenadorRequiredMixin
 
-
+business_logger = logging.getLogger('atividades.business')
+    
 class RegisterView(View):
     template_name = 'auth/register.html'
 
@@ -53,6 +54,7 @@ class CriarUsuarioAdminView(GestorRequiredMixin, View):
         form = AdminUserForm(request.POST)
         if form.is_valid():
             UserService.criar_usuario_admin(form=form)
+            business_logger.warning(f"USUÁRIO ADMIN CRIADO: {form.cleaned_data['username']} | Por User: {request.user.username}")
             messages.success(request, 'Usuário criado com sucesso!')
             return redirect('dashboard')
         return render(request, self.template_name, {'form': form})
@@ -113,6 +115,7 @@ class ListarAlunosCoordenadorView(CoordenadorRequiredMixin, TemplateView):
 class ToggleUsuarioAtivoView(GestorRequiredMixin, View):
     def post(self, request, user_id):
         UserService.toggle_user_active_status(user_id=user_id)
+        business_logger.warning(f"STATUS DE ATIVO/INATIVO ALTERADO: User ID {user_id} | Por User: {request.user.username}")
         return redirect('listar_usuarios_admin')
 
 class GetMessagesView(View):

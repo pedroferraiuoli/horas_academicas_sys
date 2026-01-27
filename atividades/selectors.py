@@ -1,7 +1,7 @@
 from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, Q
 from django.db.models.functions import Coalesce
 from typing import Optional, List
-from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, CursoPorSemestre, Semestre
+from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, CursoPorSemestre, Notificacao, Semestre
 from django.utils import timezone
 
 class AtividadeSelectors:
@@ -39,7 +39,9 @@ class AtividadeSelectors:
     @staticmethod
     def get_atividades_recentes_aluno(aluno: Aluno, limite: int = 5) -> List[Atividade]:
         """Busca atividades recentes de um aluno"""
-        return aluno.atividades.order_by('-created_at')[:limite]
+        return aluno.atividades.select_related(
+            'categoria__categoria'
+        ).order_by('-created_at')[:limite]
     
     @staticmethod
     def get_atividades_pendentes(curso=None):
@@ -381,5 +383,23 @@ class CursoPorSemestreSelectors:
             return CursoPorSemestre.objects.get(curso=curso, semestre=semestre)
         except CursoPorSemestre.DoesNotExist:
             return None
+        
+class NotificationSelectors:
+
+    @staticmethod
+    def get_notificacoes_nao_lidas(user) -> QuerySet:
+
+        return Notificacao.objects.filter(
+            user=user,
+            lida=False
+        ).order_by('-criada_em')
+
+    @staticmethod
+    def count_notificacoes_nao_lidas(user) -> int:
+
+        return Notificacao.objects.filter(
+            user=user,
+            lida=False
+        ).count()
 
     

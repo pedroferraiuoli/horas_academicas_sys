@@ -11,7 +11,7 @@
         <div class="modal-body">
           <div class="mb-3">
             <label for="horasAprovadas{{ forloop.counter }}" class="form-label">Horas aprovadas</label>
-            <input id="horasAprovadas{{ forloop.counter }}" name="horas_aprovadas" type="number" min="0" max="{{atividade.horas}}" step="1" class="form-control" required placeholder="Ex.: {{ atividade.horas }}" value="{{ atividade.horas_aprovadas|default:'' }}">
+            <input id="horasAprovadas{{ forloop.counter }}" name="horas_aprovadas" type="number" min="0" max="{{atividade.horas}}" step="1" class="form-control" required value="{{ atividade.horas|default:'' }}">
           </div>
         </div>
         <div class="modal-footer">

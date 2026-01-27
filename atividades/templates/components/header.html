@@ -13,8 +13,36 @@
             </div>
             {% if user.is_authenticated %}
             <div class="grp-botton">
-              <button onclick="abrirModal('img1')" class="header-btn">Sobre</button>
-              <button onclick="abrirModal('img2')" class="header-btn">Guia</button>
+              <button onclick="abrirModal('img1')" class="">Sobre</button>
+              <button onclick="abrirModal('img2')" class="">Guia</button>
+
+
+              {% if user.aluno %}
+              <div class="notif-wrapper">
+
+                <button 
+                  hx-get="{% url 'listar_notificacoes' %}" 
+                  hx-target="#notificacoes-dropdown-container" 
+                  hx-swap="innerHTML"
+                  class="notif-btn"
+                  id="notif-btn">
+
+                  <i class="bi bi-bell-fill"></i>
+                </button>
+
+                  <span id="notif-badge-header"
+                        hx-get="{% url 'contar_notificacoes' %}"
+                        hx-trigger="load, notificacaoLida from:body"
+                        hx-swap="innerHTML">
+                  </span>
+
+
+                <div id="notificacoes-dropdown-container"></div>
+
+              </div>
+              {% endif %}
+
+
             </div>
             <span class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle user-dropdown" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

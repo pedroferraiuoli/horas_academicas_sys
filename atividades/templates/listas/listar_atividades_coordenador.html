@@ -28,7 +28,14 @@
     {% endfor %}
 
     <div class="col-12 col-md-3 filtros-buttons">
-      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href=window.location.pathname"><i class="bi bi-x-circle"></i> Limpar</button>
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary"
+                hx-get="{% url 'listar_atividades_coordenador' %}"
+                hx-target="#lista-container"
+                hx-push-url="true"
+                hx-on:click="this.closest('form').reset()">
+            <i class="bi bi-x-circle"></i> Limpar
+        </button>
     </div>
   </form>
 </div>

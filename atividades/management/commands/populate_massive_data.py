@@ -249,7 +249,7 @@ class Command(BaseCommand):
                         
                         aluno_id = aluno_ids[user_ids[username]]
                         
-                        for j in range(60):
+                        for j in range(30):
                             categoria = random.choice(categorias_semestre)
                             
                             # Definir datas

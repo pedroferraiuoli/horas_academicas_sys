@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+
 {% block content %}
 
 <div class="login-wrapper">
@@ -20,7 +21,8 @@
   </div>
 
   <!-- Lado Direito com Formulário -->
-  <div class="login-right-side">
+  <div class="login-right-side" id="login-container">
+
     <div class="login-form-wrapper">
       <div class="login-form-header">
         <h3 class="login-form-title">Bem-vindo</h3>
@@ -65,10 +67,13 @@
               Esqueceu a senha?
             </a>
             <span class="login-divider">•</span>
-            <a href="{% url 'register' %}" class="login-link">
+
+            <button hx-get="{% url 'register' %}" 
+            hx-target="#login-container" class=" btn login-link" hx-swap="innerHTML" hx-push-url="true">
               <i class="bi bi-person-plus"></i>
               Cadastre-se
-            </a>
+            </button>
+
           </div>
         </div>
       </form>
@@ -78,6 +83,7 @@
       </div>
     </div>
   </div>
+
 </div>
 
 {% endblock %}

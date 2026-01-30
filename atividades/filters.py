@@ -132,18 +132,8 @@ class AtividadesFilter(django_filters.FilterSet):
         model = Atividade
         fields = ['status', 'categoria']
 
-    @property
-    def aluno(self):
-        req = getattr(self, 'request', None)
-        if req and req.user.is_authenticated:
-            return AlunoSelectors.get_aluno_by_user(req.user)
-        return None
-
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, aluno=None, **kwargs):
         super().__init__(*args, **kwargs)
-
-        aluno = self.aluno
 
         if aluno:
             self.filters['categoria'].queryset = CategoriaCursoSelectors.get_categorias_curso(

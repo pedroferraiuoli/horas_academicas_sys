@@ -32,9 +32,11 @@ class AtividadeSelectors:
         if not aprovadas:
             atividades = atividades.exclude(status='Aprovada')
         return atividades.select_related(
-            'categoria__categoria',
-            'categoria__curso_semestre',
-        ).order_by('horas_aprovadas', '-created_at')
+        'categoria__categoria',
+        'categoria__curso_semestre',
+        'categoria__curso_semestre__curso',
+        'categoria__curso_semestre__semestre'
+            ).order_by('horas_aprovadas', '-created_at')
     
     @staticmethod
     def get_atividades_recentes_aluno(aluno: Aluno, limite: int = 5) -> List[Atividade]:

@@ -313,24 +313,14 @@ class AlunoService:
             total = min(soma, limite) if limite > 0 else soma
             return total
 
-        categorias = CategoriaCursoSelectors.get_categorias_curso(
-            curso=aluno.curso,
-            semestre=aluno.semestre_ingresso
+
+
+        soma = AtividadeSelectors.get_total_horas_validas_aluno(
+            aluno=aluno,
+            apenas_aprovadas=apenas_aprovadas
         )
 
-        total = 0
-
-        for curso_categoria in categorias:
-            soma = AtividadeSelectors.get_total_horas_aluno(
-                aluno=aluno,
-                categoria=curso_categoria,
-                apenas_aprovadas=apenas_aprovadas
-            )
-
-            limite = curso_categoria.limite_horas or 0
-            total += min(soma, limite) if limite > 0 else soma
-
-        return total
+        return soma
     
 
 class RelatorioAlunoService:

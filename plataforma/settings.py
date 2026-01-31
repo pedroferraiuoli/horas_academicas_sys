@@ -67,10 +67,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'atividades',
     'widget_tweaks',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,6 +82,14 @@ MIDDLEWARE = [
     'atividades.middleware.ErrorLoggingMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Captura erros e exceções
 ]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+}
 
 ROOT_URLCONF = 'plataforma.urls'
 

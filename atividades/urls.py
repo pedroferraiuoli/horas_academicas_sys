@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import path
+from django.urls import include, path
 from django.contrib.auth import views as auth_views
 from . import views
 from .forms import EmailOrUsernameAuthenticationForm
@@ -60,6 +60,7 @@ urlpatterns = [
     path('notificacoes/count-nao-lidas/', views.CountNotificacoesNaoLidas.as_view(), name='contar_notificacoes'),
     #Mensagens HTMX
     path('get-messages/', views.GetMessagesView.as_view(), name='get_messages'),
+    path('__debug__/', include('debug_toolbar.urls')),
 ]
 
 if settings.DEBUG:

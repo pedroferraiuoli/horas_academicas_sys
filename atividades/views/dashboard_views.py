@@ -49,11 +49,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         ultrapassou_limite = False
         if aluno.curso:
-            categorias = CategoriaCursoSelectors.get_categorias_curso(curso=aluno.curso, semestre=aluno.semestre_ingresso)
-            ultrapassou_limite = any(
-                c.ultrapassou_limite_pelo_aluno(aluno)
-                for c in categorias
-            )
+            ultrapassou_limite = AlunoSelectors.aluno_ultrapassou_limite_em_alguma_categoria(aluno=aluno)
 
         horas_pendentes = AtividadeSelectors.get_total_horas_aluno(
             aluno=aluno,

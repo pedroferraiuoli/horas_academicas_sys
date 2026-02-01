@@ -15,6 +15,11 @@ body {
   margin: 0;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
 * {
     font-family: 'DM Sans', sans-serif !important;
 }
@@ -22,6 +27,11 @@ body {
 body.modal-open {
     overflow: hidden;
     touch-action: none; /* mobile */
+}
+
+main {
+    flex: 1;
+    display: flex;
 }
 
 .link-limpo {
@@ -43,17 +53,21 @@ body.modal-open {
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 200px;
-    min-height: 100vh;
+    min-height: calc(100vh - 70px);
     width: 100%;
+    margin-top: 70px;
+    flex: 1;
 }
 
 .main-login {
     width: 100% !important;
-    min-height: 100vh;
+    min-height: calc(100vh - 70px);
     background-color: var(--bg-light);
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 70px;
+    flex: 1;
 }
 
 .container {
@@ -97,6 +111,15 @@ body.modal-open {
 }
 
 /* Header - azul escuro */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background-color: var(--main-blue) !important;
+}
+
 .bg-primary-dark {
     background-color: var(--main-blue) !important;
     color: white;
@@ -120,11 +143,13 @@ body.modal-open {
 
 /* Sidebar - fundo claro, borda fina */
 .sidebar {
-    height: 100vh;
+    height: calc(100vh - 70px);
     overflow-y: auto;
     background-color: var(--main-bg);
     width: 30%;
     min-width: 30%;
+    position: sticky;
+    top: 70px;
 }
 
 .sidebar-gestor {
@@ -144,7 +169,7 @@ body.modal-open {
 /* Botão toggle da sidebar (mobile) - Fixed position */
 .sidebar-toggle-btn {
     position: fixed;
-    top: 70px;
+    top: 80px;
     left: 10px;
     z-index: 1040;
     background-color: var(--main-blue);
@@ -291,15 +316,15 @@ body.modal-open {
 @media (max-width: 991px) {
     .sidebar {
         position: fixed;
-        top: 0;
+        top: 70px;
         left: -100%;
         width: 100%;
         max-width: 100%;
-        height: 100vh;
+        height: calc(100vh - 70px);
         z-index: 1050;
         box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
         transition: left 0.3s ease;
-        padding: 60px 15px 15px 15px;
+        padding: 15px 15px 15px 15px;
         overflow-y: auto;
     }
     
@@ -323,7 +348,7 @@ body.modal-open {
     .sidebar {
         width: 100%;
         max-width: 100%;
-        padding: 60px 12px 12px 12px;
+        padding: 12px 12px 12px 12px;
     }
     
     .sidebar-item {

@@ -89,9 +89,4 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'semestre_atual': semestre_atual,
         }
 
-        if grupo == 'Gestor':
-            context['ultimos_semestres'] = SemestreSelectors.get_ultimos_semestres_com_alunos(5)
-        elif grupo == 'Coordenador' and curso:
-            context['ultimos_semestres'] = SemestreSelectors.get_ultimos_semestres_com_alunos(5, curso=curso)
-
         return context

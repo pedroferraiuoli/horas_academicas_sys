@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
 from django.utils.formats import date_format
+from django.contrib.postgres.indexes import Index
+from django.db.models import Q
+
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
@@ -14,11 +17,6 @@ class Semestre(BaseModel):
     nome = models.CharField(max_length=20)
     data_inicio = models.DateField(null=True, blank=True)
     data_fim = models.DateField(null=True, blank=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['data_inicio', 'data_fim'], name='semestre_periodo_idx'),
-        ]
 
     def __str__(self):
         inicio = date_format(self.data_inicio, "F/Y") if self.data_inicio else ''
@@ -48,9 +46,6 @@ class CursoPorSemestre(BaseModel):
     
     class Meta:
         unique_together = ('curso', 'semestre')
-        indexes = [
-            models.Index(fields=['curso', 'semestre'], name='curso_semestre_idx'),
-        ]
     
     def __str__(self):
         return f"{self.curso.nome} - {self.semestre.nome} ({self.horas_requeridas}h)"
@@ -62,10 +57,7 @@ class CategoriaCurso(BaseModel):
     curso_semestre = models.ForeignKey(CursoPorSemestre, on_delete=models.CASCADE, related_name='categorias_curso')
     class Meta:
         unique_together = ('curso_semestre', 'categoria')
-        indexes = [
-            models.Index(fields=['curso_semestre', 'categoria'], name='cat_curso_semestre_idx'),
-        ]
-
+    
     def __str__(self):
         return f"{self.categoria.nome} ({self.limite_horas}h)"
     
@@ -99,12 +91,7 @@ class Aluno(BaseModel):
     nome = models.CharField(max_length=200, help_text="Nome completo do aluno")
     matricula = models.CharField(max_length=20, unique=True, help_text="Matrícula do aluno")
     curso = models.ForeignKey(Curso, on_delete=models.PROTECT, related_name='alunos')
-    semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['matricula'], name='aluno_matricula_idx'),
-        ]
+    semestre_ingresso = models.ForeignKey('Semestre', on_delete=models.PROTECT, null=True, blank=True, related_name='alunos_ingresso')
 
     def __str__(self):
         return f"{self.nome} - {self.matricula} ({self.semestre_ingresso})"
@@ -129,14 +116,17 @@ class Atividade(BaseModel):
     documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
     status = models.CharField(max_length=20, choices=status_choices, default='Pendente')
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['aluno', 'categoria'], name='ativ_aluno_cat_idx'),
-            models.Index(fields=['aluno', 'status'], name='ativ_aluno_status_idx'),
-        ]
-
     def __str__(self):
         return f"{self.nome} ({self.aluno})"
+    
+    class Meta:
+        indexes = [
+            Index(
+                fields=['aluno'],
+                name='idx_ativ_pendentes_aluno',
+                condition=Q(status='Pendente'),
+            ),
+        ]
     
     
     def clean(self):

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from atividades.models import Curso, Categoria, CategoriaCurso, Aluno, Semestre, Atividade
@@ -15,16 +16,18 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING('='*60))
         self.stdout.write(self.style.WARNING('POPULAÇÃO MASSIVA ULTRA-RÁPIDA (SQL PURO)'))
         self.stdout.write(self.style.WARNING('='*60))
-        
-        # Otimizações SQLite
-        self.stdout.write('\n[OTIMIZAÇÃO] Configurando SQLite para máxima velocidade...')
-        with connection.cursor() as cursor:
-            cursor.execute("PRAGMA synchronous = OFF")
-            cursor.execute("PRAGMA journal_mode = MEMORY")
-            cursor.execute("PRAGMA temp_store = MEMORY")
-            cursor.execute("PRAGMA cache_size = 1000000")
-        self.stdout.write(self.style.SUCCESS('  ✓ SQLite otimizado'))
-        
+        if 'sqlite' in settings.DATABASES['default']['ENGINE']:
+            # Otimizações SQLite
+            self.stdout.write('\n[OTIMIZAÇÃO] Configurando SQLite para máxima velocidade...')
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA synchronous = OFF")
+                cursor.execute("PRAGMA journal_mode = MEMORY")
+                cursor.execute("PRAGMA temp_store = MEMORY")
+                cursor.execute("PRAGMA cache_size = 1000000")
+            self.stdout.write(self.style.SUCCESS('  ✓ SQLite otimizado'))
+        elif 'postgresql' in settings.DATABASES['default']['ENGINE']:
+            # PostgreSQL já é otimizado, mas podemos desabilitar autocommit temporariamente
+            self.stdout.write(self.style.SUCCESS('  ✓ PostgreSQL detectado (otimizações automáticas)'))
         # Buscar todos os cursos e semestres
         cursos = list(Curso.objects.all())
         semestres = list(Semestre.objects.all())
@@ -316,10 +319,13 @@ class Command(BaseCommand):
         
         # Restaurar configurações SQLite
         self.stdout.write('\n[FINALIZAÇÃO] Restaurando configurações SQLite...')
-        with connection.cursor() as cursor:
-            cursor.execute("PRAGMA synchronous = FULL")
-            cursor.execute("PRAGMA journal_mode = DELETE")
-        self.stdout.write(self.style.SUCCESS('  ✓ Configurações restauradas'))
+        if 'sqlite' in settings.DATABASES['default']['ENGINE']:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA synchronous = FULL")
+                cursor.execute("PRAGMA journal_mode = DELETE")
+            self.stdout.write(self.style.SUCCESS('  ✓ Configurações SQLite restauradas'))
+        else:
+            self.stdout.write(self.style.SUCCESS('  ✓ Banco de dados finalizado'))
         
         tempo_total = time.time() - tempo_inicio
         minutos = int(tempo_total // 60)

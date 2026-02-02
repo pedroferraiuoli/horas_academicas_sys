@@ -1,4 +1,4 @@
-from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, UserSelectors
+from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, SemestreSelectors, UserSelectors
 from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Notificacao, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
@@ -430,6 +430,8 @@ class StatsService:
         stats = {
             'num_alunos': AlunoSelectors.get_num_alunos(),
             'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(),
+            'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(),
+            'ultimos_semestres': SemestreSelectors.get_ultimos_semestres_com_alunos(5),
         }
 
         cache.set(CACHE_KEY, stats, TTL)
@@ -448,6 +450,7 @@ class StatsService:
             'num_alunos': AlunoSelectors.get_num_alunos(curso=curso),
             'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(curso=curso),
             'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(curso=curso),
+            'ultimos_semestres': SemestreSelectors.get_ultimos_semestres_com_alunos(5, curso=curso)
         }
 
         cache.set(CACHE_KEY, stats, TTL)

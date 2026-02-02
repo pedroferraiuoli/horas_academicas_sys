@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: horas_academicas_db_dev
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME:-horas_academicas_dev}
+      - POSTGRES_USER=${DB_USER:-horas_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+     
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U horas_user -d horas_academicas_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: horas_academicas_web_dev
+    # Modo desenvolvimento: runserver com reload automático
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      # Sincroniza código para hot-reload
+      - .:/app
+      # Logs FORA do container (persiste mesmo se container for removido)
+      - ./logs:/app/logs
+      # Media files persistentes
+      - ./media:/app/media
+      # Static files (não precisa de volume nomeado em dev)
+      - ./staticfiles:/app/staticfiles
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=*
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT:-5432}
+    depends_on:
+      db:
+        condition: service_healthy
+    # Não reinicia automaticamente em dev
+    restart: "no"
+
+volumes:
+  postgres_data_dev:

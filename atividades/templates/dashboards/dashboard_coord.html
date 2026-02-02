@@ -54,7 +54,7 @@
         <h5 class="main-blue mb-0">Últimos 5 Semestres - Alunos Ingressantes</h5>
       </div>
       <div class="card-body">
-        {% if ultimos_semestres %}
+        {% if stats.ultimos_semestres %}
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
@@ -64,9 +64,9 @@
               </tr>
             </thead>
             <tbody>
-              {% for item in ultimos_semestres %}
+              {% for item in stats.ultimos_semestres %}
               <tr>
-                <td class="text-center"><strong>{{ item.semestre.nome }}</strong></td>
+                <td class="text-center"><strong>{{ item.nome }}</strong></td>
                 <td class="text-center"><span class="badge bg-info">{{ item.num_alunos }}</span></td>
               </tr>
               {% endfor %}

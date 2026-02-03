@@ -42,8 +42,6 @@
     <main class="
         {% if user.is_authenticated %}
             d-flex
-        {% else %}
-            main-login
         {% endif %}
     ">
         <!-- Navbar (apenas para usuários autenticados) -->
@@ -62,6 +60,8 @@
             px-4
             {% if user.is_authenticated %}
                 main
+            {% else %}
+                main-login
             {% endif %}
         ">
             <!-- Container para mensagens (atualizável via HTMX) -->

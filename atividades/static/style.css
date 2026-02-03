@@ -175,8 +175,8 @@ header {
 
 @media (max-width: 768px) {
     .sidebar {
-        height: calc(100vh - 60px);
-        top: 60px;
+        height: calc(100vh - 60px) !important;
+        top: 60px !important;
     }
 }
 
@@ -424,7 +424,7 @@ header {
     .sidebar {
         width: 100%;
         max-width: 100%;
-        padding: 60px 10px 10px 10px;
+        padding: 0px 10px 10px 10px;
     }
     
     .sidebar-toggle-btn {
@@ -454,6 +454,10 @@ header {
     .info-value {
         font-size: 0.8rem;
     }
+}
+
+.actions-col {
+    justify-content: end;
 }
 
 .table th {
@@ -1397,12 +1401,6 @@ body:has(#modal-container .modal) {
         max-height: 100vh !important;
         overflow: auto !important;
     }
-
-    .sidebar-content {
-        padding: 1rem;
-        max-height: 100vh;
-        overflow: auto;
-    }
     
     main.d-flex {
         flex-direction: column !important;
@@ -2083,10 +2081,6 @@ body:has(#modal-container .modal) {
         font-size: 0.85rem;
     }
     
-    .dashboard-progress-bar {
-        height: 25px;
-    }
-    
     .dashboard-progress-bar .progress-bar span {
         font-size: 0.75rem;
     }
@@ -2094,9 +2088,6 @@ body:has(#modal-container .modal) {
 
 /* Dashboard - Responsivo Antigo (manter compatibilidade) */
 @media (max-width: 768px) {
-    .progress {
-        height: 25px !important;
-    }
     
     .progress-bar span {
         font-size: 0.85rem;
@@ -2112,9 +2103,6 @@ body:has(#modal-container .modal) {
 }
 
 @media (max-width: 480px) {
-    .progress {
-        height: 20px !important;
-    }
     
     .progress-bar span {
         font-size: 0.75rem;

@@ -4,11 +4,12 @@
 [![Django](https://img.shields.io/badge/Django-6.0-green.svg)](https://www.djangoproject.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![HTXM](https://img.shields.io/badge/HTMX-red)](https://www.htmx.org/)
+
 
 ## 📋 Sobre o Projeto
 
-Plataforma web robusta e escalável desenvolvida em **Django** para gestão completa de atividades complementares acadêmicas. Sistema multi-tenant com controle granular de permissões, suportando **39 cursos** e gerenciando milhares de atividades simultaneamente com alta performance.
+Plataforma web robusta e escalável desenvolvida em **Django** para gestão completa de atividades complementares acadêmicas. Sistema multi-tenant com controle granular de permissões, suportando dezenas de cursos e gerenciando milhares de atividades simultaneamente com alta performance.
 
 ### 🎯 Problema Resolvido
 
@@ -16,10 +17,10 @@ Instituições de ensino superior enfrentam desafios na validação e controle d
 
 ### 💼 Impacto de Negócio
 
-- ⚡ **Redução de 70%** no tempo de validação de atividades
+- ⚡ **Redução** no tempo de validação de atividades
 - 📊 **Dashboards em tempo real** para tomada de decisão
-- 🔒 **Rastreabilidade completa** com sistema de logs
-- 📱 **Interface responsiva** (mobile-first)
+- 🔒 **Rastreabilidade** com sistema de logs
+- 📱 **Interface responsiva**
 - 🚀 **Escalável** para milhares de usuários simultâneos
 
 ---
@@ -34,7 +35,7 @@ Instituições de ensino superior enfrentam desafios na validação e controle d
 - **Web Server:** Gunicorn (produção) / Django Dev Server (desenvolvimento)
 - **Frontend:** Bootstrap 5, JavaScript ES6+, HTMX
 - **Cache:** Django Cache Framework
-- **Storage:** Arquivos locais (pronto para S3/cloud)
+- **Storage:** Arquivos locais
 
 ### **Padrões e Boas Práticas**
 
@@ -51,24 +52,24 @@ Instituições de ensino superior enfrentam desafios na validação e controle d
 
 ### **Para Alunos**
 - ✅ Cadastro e upload de comprovantes de atividades
-- 📊 Dashboard com progresso em tempo real por categoria
+- 📊 Dashboard com progresso em tempo real e controle por categoria
 - 🔔 Notificações de status de validação
 - 📈 Visualização de horas aprovadas vs. requeridas
 - 📄 Geração de relatórios em PDF
+- 📋 Listagem de atividades com filtragem dinâmica
 
 ### **Para Coordenadores**
 - 🎯 Validação/rejeição de atividades do seu curso
 - 👥 Gestão de alunos e categorias
 - 📊 Relatórios analíticos do curso
-- ⚙️ Configuração de limites de horas por categoria
+- ⚙️ Configuração de limites de horas por categoria do seu curso
 - 🔍 Filtros avançados e busca
 
 ### **Para Gestores**
 - 🏢 Visão consolidada de todos os cursos
 - 👤 Gestão de coordenadores e permissões
-- 📈 Dashboards executivos com KPIs
+- 📈 Dashboards de números gerais
 - 🗄️ Auditoria completa do sistema
-- ⚡ Operações em massa (importação/exportação)
 
 ### **Diferenciais Técnicos**
 - 🔄 Sistema de notificações em tempo real
@@ -91,7 +92,7 @@ Instituições de ensino superior enfrentam desafios na validação e controle d
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/seu-usuario/horas-academicas-sys.git
+git clone https://github.com/pedroferraiuoli/horas-academicas-sys.git
 cd horas-academicas-sys
 
 # 2. Configure variáveis de ambiente
@@ -114,37 +115,13 @@ docker-compose exec web python manage.py createsuperuser
 # http://localhost:8000
 ```
 
-### **Comandos Úteis**
-
-```bash
-# Ver logs em tempo real
-docker-compose logs -f web
-
-# Parar containers
-docker-compose down
-
-# Rebuild completo
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
-
-# Executar comandos Django
-docker-compose exec web python manage.py <comando>
-
-# Acessar banco PostgreSQL
-docker-compose exec db psql -U horas_user -d horas_academicas_dev
-
-# Popular dados massivos para testes de carga
-docker-compose exec web python manage.py populate_massive_data
-```
-
 ---
 
 ## 💻 Instalação Local (Sem Docker)
 
 ```bash
 # 1. Clone e entre no diretório
-git clone https://github.com/seu-usuario/horas-academicas-sys.git
+git clone https://github.com/pedroferraiuoli/horas-academicas-sys.git
 cd horas-academicas-sys
 
 # 2. Crie ambiente virtual
@@ -190,7 +167,7 @@ python manage.py runserver
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                   CAMADA DE LÓGICA DE NEGÓCIO                │
-│  services.py (write) | selectors.py (read) | validators.py  │
+│  services.py (write) | selectors.py (read)
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -261,74 +238,6 @@ horas_academicas_sys/
 - 🔄 **Lazy Loading:** Paginação em listagens grandes
 - 📉 **Query Reduction:** Redução de N+1 queries
 
-### **Benchmarks**
-
-| Operação | Sem Otimização | Com Otimização | Ganho |
-|----------|----------------|----------------|-------|
-| Dashboard Aluno | 850ms | 45ms | **18.9x** |
-| Listagem Atividades | 1.2s | 80ms | **15x** |
-| Validação em Lote | 3.5s | 250ms | **14x** |
-| Cálculo Total Horas | 500ms | 35ms | **14.3x** |
-
----
-
-## 🧪 Testes
-
-```bash
-# Executar todos os testes
-docker-compose exec web python manage.py test
-
-# Com cobertura
-docker-compose exec web coverage run --source='.' manage.py test
-docker-compose exec web coverage report
-```
-
----
-
-## 📊 Dados de Demonstração
-
-```bash
-# Popular dados iniciais (cursos, categorias, semestres)
-docker-compose exec web python manage.py populate_initial_data
-
-# Popular dados massivos para testes de carga
-# (~28.000 alunos, ~840.000 atividades)
-docker-compose exec web python manage.py populate_massive_data
-```
-
----
-
-## 🚀 Deploy em Produção
-
-### **Usando Docker Compose (Produção)**
-
-```bash
-# 1. Configure variáveis de produção
-cp .env.example .env.production
-nano .env.production  # Ajuste para valores de produção
-
-# 2. Suba com configuração de produção
-docker-compose -f docker-compose.prod.yml up -d --build
-
-# 3. Execute migrações
-docker-compose -f docker-compose.prod.yml exec web python manage.py migrate
-
-# 4. Colete arquivos estáticos
-docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
-```
-
-### **Checklist de Produção**
-
-- [ ] `DEBUG=False` no `.env.production`
-- [ ] `SECRET_KEY` gerada com segurança
-- [ ] Senha forte para PostgreSQL
-- [ ] `ALLOWED_HOSTS` configurado corretamente
-- [ ] Configurar HTTPS/SSL
-- [ ] Backup automático do banco
-- [ ] Monitoramento (Sentry, New Relic, etc.)
-- [ ] Logs centralizados
-- [ ] Firewall e security groups configurados
-
 ---
 
 ## 🤝 Contribuindo
@@ -351,13 +260,13 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 👨‍💻 Autor
 
-**Pedro** - [GitHub](https://github.com/seu-usuario) | [LinkedIn](https://linkedin.com/in/seu-perfil)
+**Pedro** - [GitHub](https://github.com/pedroferraiuoli) | [LinkedIn](https://linkedin.com/in/pedroferraiuli)
 
 ---
 
 ## 📞 Suporte
 
-Para dúvidas ou sugestões, abra uma [issue](https://github.com/seu-usuario/horas-academicas-sys/issues).
+Para dúvidas ou sugestões, abra uma [issue](https://github.com/pedroferraiuoli/horas-academicas-sys/issues).
 
 ---
 

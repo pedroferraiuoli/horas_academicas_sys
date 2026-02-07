@@ -1,4 +1,4 @@
-from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, UserSelectors
+from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, SemestreSelectors, UserSelectors
 from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Notificacao, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
@@ -313,24 +313,14 @@ class AlunoService:
             total = min(soma, limite) if limite > 0 else soma
             return total
 
-        categorias = CategoriaCursoSelectors.get_categorias_curso(
-            curso=aluno.curso,
-            semestre=aluno.semestre_ingresso
+
+
+        soma = AtividadeSelectors.get_total_horas_validas_aluno(
+            aluno=aluno,
+            apenas_aprovadas=apenas_aprovadas
         )
 
-        total = 0
-
-        for curso_categoria in categorias:
-            soma = AtividadeSelectors.get_total_horas_aluno(
-                aluno=aluno,
-                categoria=curso_categoria,
-                apenas_aprovadas=apenas_aprovadas
-            )
-
-            limite = curso_categoria.limite_horas or 0
-            total += min(soma, limite) if limite > 0 else soma
-
-        return total
+        return soma
     
 
 class RelatorioAlunoService:
@@ -440,6 +430,8 @@ class StatsService:
         stats = {
             'num_alunos': AlunoSelectors.get_num_alunos(),
             'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(),
+            'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(),
+            'ultimos_semestres': SemestreSelectors.get_ultimos_semestres_com_alunos(5),
         }
 
         cache.set(CACHE_KEY, stats, TTL)
@@ -458,6 +450,7 @@ class StatsService:
             'num_alunos': AlunoSelectors.get_num_alunos(curso=curso),
             'alunos_com_pendencias': AlunoSelectors.get_num_alunos_com_pendencias(curso=curso),
             'atividades_pendentes': AtividadeSelectors.get_num_atividades_pendentes(curso=curso),
+            'ultimos_semestres': SemestreSelectors.get_ultimos_semestres_com_alunos(5, curso=curso)
         }
 
         cache.set(CACHE_KEY, stats, TTL)

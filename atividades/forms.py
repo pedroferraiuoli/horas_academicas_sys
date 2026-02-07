@@ -1,6 +1,6 @@
 import re
 from atividades.selectors import CategoriaCursoSelectors, UserSelectors
-from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras, ValidadorDeNome
+from atividades.validators import AtividadeValidators, AlunoValidators
 from .models import Curso, CategoriaCurso, Semestre, Categoria, Atividade, Aluno
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
@@ -130,17 +130,22 @@ class AtividadeForm(forms.ModelForm):
                 categoria = CategoriaCurso.objects.get(id=categoria_id)
                 self.fields['categoria'].initial = categoria
             except CategoriaCurso.DoesNotExist:
-                pass         
+                pass    
+
+    def clean_matricula(self):
+        matricula = self.cleaned_data.get('matricula')
+        AlunoValidators.validar_matricula(matricula)
+        return matricula
     
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')
         if documento:
-            ValidadorDeArquivo.validar(documento)
+            AtividadeValidators.validar_arquivo(documento)
         return documento
     
     def clean_horas(self):
         horas = self.cleaned_data.get('horas')
-        ValidadorDeHoras.validar_horas(horas)
+        AtividadeValidators.validar_horas(horas)
         return horas
     
     def clean_data(self):
@@ -207,7 +212,7 @@ class UserRegistrationForm(forms.Form):
     
     def clean_nome(self):
         nome_validar = self.cleaned_data.get('nome')
-        nome = ValidadorDeNome.validar_nome(nome_validar)
+        nome = AlunoValidators.validar_nome(nome_validar)
         return nome
 
 class CategoriaCursoDiretaForm(forms.Form):

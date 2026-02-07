@@ -129,8 +129,11 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         aluno = AlunoSelectors.get_aluno_by_user(self.request.user)
         atividades = AtividadeSelectors.get_atividades_aluno(aluno)
-        filtro = AtividadesFilter(self.request.GET or None, queryset=atividades, request=self.request)
-        atividades_filtradas = filtro.qs
+        filtro = AtividadesFilter(self.request.GET or None, queryset=atividades, request=self.request, aluno=aluno)
+        atividades_filtradas = filtro.qs.select_related(
+            'categoria__categoria',
+            'categoria__curso_semestre'
+        )
 
         atividades_paginadas = paginate_queryset(qs=atividades_filtradas, page=self.request.GET.get('page'), per_page=10)
         context['atividades'] = atividades_paginadas

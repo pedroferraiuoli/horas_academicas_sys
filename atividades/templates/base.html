@@ -42,25 +42,23 @@
     <main class="
         {% if user.is_authenticated %}
             d-flex
-        {% else %}
-            main-login
         {% endif %}
     ">
         <!-- Navbar (apenas para usuários autenticados) -->
-        {% if user.is_authenticated and user.aluno %}
-            {% include 'components/navbar.html' %}
-        {% elif user.is_authenticated and user.coordenador %}
-            {% include 'components/navbar_coordenador.html' %}
-        {% elif user.is_authenticated and user.groups.all.0.name == 'Gestor' %}
-            {% include 'components/navbar_gestor.html' %}
+        {% if user.is_authenticated %}
+                {% if user.aluno %}
+                    {% include 'components/navbar.html' %}
+                {% elif user.coordenador %}
+                    {% include 'components/navbar_coordenador.html' %}
+                {% else %}
+                    {% include 'components/navbar_gestor.html' %}
+                {% endif %}
         {% endif %}
 
         <!-- Área de Conteúdo -->
         <div class="
             px-4
-            {% if user.is_authenticated %}
                 main
-            {% endif %}
         ">
             <!-- Container para mensagens (atualizável via HTMX) -->
             <div id="messages-container"

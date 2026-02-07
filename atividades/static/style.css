@@ -15,6 +15,11 @@ body {
   margin: 0;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+}
+
 * {
     font-family: 'DM Sans', sans-serif !important;
 }
@@ -22,6 +27,11 @@ body {
 body.modal-open {
     overflow: hidden;
     touch-action: none; /* mobile */
+}
+
+main {
+    flex: 1;
+    display: flex;
 }
 
 .link-limpo {
@@ -43,17 +53,17 @@ body.modal-open {
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 200px;
-    min-height: 100vh;
+    min-height: calc(100vh - 70px);
     width: 100%;
+    margin-top: 70px;
+    flex: 1;
 }
 
-.main-login {
-    width: 100% !important;
-    min-height: 100vh;
-    background-color: var(--bg-light);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+@media (max-width: 768px) {
+    .main {
+        margin-top: 60px;
+        min-height: calc(100vh - 60px);
+    }
 }
 
 .container {
@@ -97,6 +107,24 @@ body.modal-open {
 }
 
 /* Header - azul escuro */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    background-color: var(--main-blue) !important;
+    height: 70px;
+    align-content: center;
+}
+
+/* Header mobile - altura reduzida */
+@media (max-width: 768px) {
+    header {
+        height: 60px;
+    }
+}
+
 .bg-primary-dark {
     background-color: var(--main-blue) !important;
     color: white;
@@ -120,13 +148,20 @@ body.modal-open {
 
 /* Sidebar - fundo claro, borda fina */
 .sidebar {
-    height: 100vh;
-    position: sticky;
-    top: 0;
+    height: calc(100vh - 70px);
     overflow-y: auto;
     background-color: var(--main-bg);
     width: 30%;
     min-width: 30%;
+    position: sticky;
+    top: 70px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        height: calc(100vh - 60px) !important;
+        top: 60px !important;
+    }
 }
 
 .sidebar-gestor {
@@ -146,7 +181,7 @@ body.modal-open {
 /* Botão toggle da sidebar (mobile) - Fixed position */
 .sidebar-toggle-btn {
     position: fixed;
-    top: 70px;
+    top: 80px;
     left: 10px;
     z-index: 1040;
     background-color: var(--main-blue);
@@ -164,6 +199,28 @@ body.modal-open {
     transition: all 0.3s ease;
 }
 
+@media (max-width: 991px) {
+    .sidebar-toggle-btn {
+        top: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar-toggle-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar-toggle-btn {
+        top: 70px;
+        width: 45px;
+        height: 45px;
+    }
+}
+
 .sidebar-toggle-btn:hover {
     background-color: var(--main-orange);
     transform: scale(1.05);
@@ -178,26 +235,19 @@ body.modal-open {
     position: absolute;
     top: 15px;
     right: 15px;
-    background: var(--main-orange);
-    color: white;
+    background: transparent;
+    color: var(--main-orange);
     border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    font-size: 2rem;
     cursor: pointer;
     z-index: 1001;
-    transition: all 0.3s ease;
 }
 
-.sidebar .sidebar-close-btn:hover {
-    background-color: var(--main-blue);
-    transform: rotate(90deg);
+.sidebar-close-btn i{
+    display: inline-flex;
+    border-radius: 50%;
+    background: white;
 }
-
 
 /* Sidebar items - novo layout */
 .sidebar-item {
@@ -300,15 +350,15 @@ body.modal-open {
 @media (max-width: 991px) {
     .sidebar {
         position: fixed;
-        top: 0;
+        top: 70px;
         left: -100%;
         width: 100%;
         max-width: 100%;
-        height: 100vh;
+        height: calc(100vh - 70px);
         z-index: 1050;
         box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
         transition: left 0.3s ease;
-        padding: 60px 15px 15px 15px;
+        padding: 15px 15px 15px 15px;
         overflow-y: auto;
     }
     
@@ -332,7 +382,7 @@ body.modal-open {
     .sidebar {
         width: 100%;
         max-width: 100%;
-        padding: 60px 12px 12px 12px;
+        padding: 12px 12px 12px 12px;
     }
     
     .sidebar-item {
@@ -358,7 +408,7 @@ body.modal-open {
     .sidebar {
         width: 100%;
         max-width: 100%;
-        padding: 60px 10px 10px 10px;
+        padding: 0px 10px 10px 10px;
     }
     
     .sidebar-toggle-btn {
@@ -388,6 +438,10 @@ body.modal-open {
     .info-value {
         font-size: 0.8rem;
     }
+}
+
+.actions-col {
+    justify-content: end;
 }
 
 .table th {
@@ -680,6 +734,35 @@ body.modal-open {
     border-top: 2px solid var(--bg-light);
 }
 
+.form-register-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-register-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .form-register-actions .form-action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-register-actions {
+        gap: 0.5rem;
+    }
+    
+    .form-register-actions .form-action-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
 .form-action-btn {
     display: flex;
     align-items: center;
@@ -787,10 +870,6 @@ body.modal-open {
     .form-atividade-header {
         padding: 1rem 1.25rem;
         gap: 0.5rem;
-    }
-    
-    .form-header-icon {
-
     }
     
     .form-header-icon i {
@@ -1283,6 +1362,7 @@ body:has(#modal-container .modal) {
 @media (max-width: 480px) {
     .header-title {
         font-size: 0.75rem !important;
+        display: none;
     }
     
     .header-logo {
@@ -1304,12 +1384,6 @@ body:has(#modal-container .modal) {
         margin-bottom: 1rem;
         max-height: 100vh !important;
         overflow: auto !important;
-    }
-
-    .sidebar-content {
-        padding: 1rem;
-        max-height: 100vh;
-        overflow: auto;
     }
     
     main.d-flex {
@@ -1375,9 +1449,7 @@ body:has(#modal-container .modal) {
 /* Login Responsivo */
 
 /* Classes do Login */
-.login-wrapper {
-    min-height: 100vh;
-}
+
 
 .login-left-side {
     max-width: 56%;
@@ -1399,7 +1471,9 @@ body:has(#modal-container .modal) {
 .login-wrapper {
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
+    background: var(--main-bg);
+    width: 80%;
+    justify-self: center;
 }
 
 /* === LADO ESQUERDO - BRANDING === */
@@ -1439,11 +1513,11 @@ body:has(#modal-container .modal) {
     max-width: 400px;
     height: auto;
     filter: brightness(1.1);
-    animation: fadeInDown 0.8s ease-out;
+    animation: fadeInDown 0.5s ease-out;
 }
 
 .login-brand-text {
-    animation: fadeInLeft 0.8s ease-out 0.2s both;
+    animation: fadeInLeft 0.5s ease-out 0.2s both;
 }
 
 .login-brand-title {
@@ -1471,13 +1545,17 @@ body:has(#modal-container .modal) {
     animation: fadeInUp 0.8s ease-out 0.4s both;
 }
 
+.no-animation {
+    animation: none !important;
+}
+
 /* === LADO DIREITO - FORMULÁRIO === */
 .login-right-side {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
+    padding: 1rem 0rem;
 }
 
 .login-form-wrapper {
@@ -1487,7 +1565,7 @@ body:has(#modal-container .modal) {
     border-radius: 24px;
     padding: 3rem 2.5rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-    animation: fadeInRight 0.8s ease-out;
+    animation: fadeInRight 0.5s ease-out;
 }
 
 .login-form-header {
@@ -1738,16 +1816,26 @@ body:has(#modal-container .modal) {
 }
 
 @media (max-width: 768px) {
+    header {
+        height: 60px;
+    }
+    
+    .login-wrapper {
+        min-height: calc(100vh - 60px);
+        overflow-y: auto;
+    }
+    
     .login-right-side {
         padding: 1.5rem;
+        min-height: auto;
     }
     
     .login-form-wrapper {
-        padding: 2.5rem 2rem;
+        padding: 2rem 1.5rem;
     }
     
     .login-form-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
     
     .login-form-subtitle {
@@ -1763,23 +1851,29 @@ body:has(#modal-container .modal) {
 @media (max-width: 480px) {
     .login-wrapper {
         background: white;
+        padding: 0;
+        min-height: calc(100vh - 60px);
+        overflow-y: auto;
     }
     
     .login-right-side {
         padding: 1rem;
+        min-height: auto;
+        overflow-y: visible;
     }
     
     .login-form-wrapper {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1rem;
         box-shadow: none;
+        max-width: 100%;
     }
     
     .login-form-header {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
     
     .login-form-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
     
     .login-form-body {
@@ -1966,10 +2060,6 @@ body:has(#modal-container .modal) {
         font-size: 0.85rem;
     }
     
-    .dashboard-progress-bar {
-        height: 25px;
-    }
-    
     .dashboard-progress-bar .progress-bar span {
         font-size: 0.75rem;
     }
@@ -1977,9 +2067,6 @@ body:has(#modal-container .modal) {
 
 /* Dashboard - Responsivo Antigo (manter compatibilidade) */
 @media (max-width: 768px) {
-    .progress {
-        height: 25px !important;
-    }
     
     .progress-bar span {
         font-size: 0.85rem;
@@ -1995,9 +2082,6 @@ body:has(#modal-container .modal) {
 }
 
 @media (max-width: 480px) {
-    .progress {
-        height: 20px !important;
-    }
     
     .progress-bar span {
         font-size: 0.75rem;
@@ -2306,14 +2390,12 @@ body:has(#modal-container .modal) {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-size: 1.2rem;
+    color: var(--main-bg);
+    font-size: 1.5rem;
     transition: all 0.3s ease;
-    text-decoration: none;
 }
 
 .footer-social-link:hover {

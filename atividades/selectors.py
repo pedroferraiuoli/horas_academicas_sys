@@ -1,5 +1,5 @@
-from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, Q
-from django.db.models.functions import Coalesce
+from django.db.models import QuerySet, OuterRef, Exists, Prefetch, Sum, Q, Sum, Case, When, F, Count
+from django.db.models.functions import Coalesce, Least
 from typing import Optional, List
 from .models import Atividade, Aluno, Categoria, Curso, Coordenador, CategoriaCurso, CursoPorSemestre, Notificacao, Semestre
 from django.utils import timezone
@@ -32,9 +32,11 @@ class AtividadeSelectors:
         if not aprovadas:
             atividades = atividades.exclude(status='Aprovada')
         return atividades.select_related(
-            'categoria__categoria',
-            'categoria__curso_semestre',
-        ).order_by('horas_aprovadas', '-created_at')
+        'categoria__categoria',
+        'categoria__curso_semestre',
+        'categoria__curso_semestre__curso',
+        'categoria__curso_semestre__semestre'
+            ).order_by('horas_aprovadas', '-created_at')
     
     @staticmethod
     def get_atividades_recentes_aluno(aluno: Aluno, limite: int = 5) -> List[Atividade]:
@@ -84,7 +86,44 @@ class AtividadeSelectors:
             total=Sum(campo)
         )['total'] or 0
     
-    
+    @staticmethod
+    def get_total_horas_validas_aluno(
+        *,
+        aluno,
+        apenas_aprovadas=False,
+    ):
+        qs = (
+        Atividade.objects
+        .filter(
+            aluno=aluno,
+            categoria__curso_semestre__curso=aluno.curso,
+            categoria__curso_semestre__semestre=aluno.semestre_ingresso,
+        )
+        .values(
+            'categoria',
+            'categoria__limite_horas'
+        )
+        .annotate(
+            soma=Coalesce(
+                Sum('horas_aprovadas' if apenas_aprovadas else 'horas'),
+                0
+            )
+        )
+        .annotate(
+            soma_limitada=Case(
+                When(
+                    categoria__limite_horas__gt=0,
+                    then=Least(F('soma'), F('categoria__limite_horas'))
+                ),
+                default=F('soma')
+            )
+        )
+        .aggregate(total=Coalesce(Sum('soma_limitada'), 0))
+        )       
+
+        return qs['total']
+        
+        
 class SemestreSelectors:
     
     @staticmethod
@@ -99,26 +138,18 @@ class SemestreSelectors:
             return None
     
     @staticmethod
-    def get_ultimos_semestres_com_alunos(limite: int = 5, *, curso=None) -> List[dict]:
-        """Retorna os últimos semestres com contagem de alunos ingressantes"""
-        from django.db.models import Count, Q
-        
+    def get_ultimos_semestres_com_alunos(limite: int = 5, *, curso=None):
+
+        qs = Semestre.objects.all()
+
         if curso:
-            semestres = Semestre.objects.annotate(
-                num_alunos=Count('aluno', filter=Q(aluno__curso=curso))
-            ).order_by('-data_inicio')[:limite]
-        else:
-            semestres = Semestre.objects.annotate(
-                num_alunos=Count('aluno')
-            ).order_by('-data_inicio')[:limite]
-        
-        return [
-            {
-                'semestre': s,
-                'num_alunos': s.num_alunos
-            }
-            for s in semestres
-        ]
+            qs = qs.filter(alunos_ingresso__curso=curso)
+
+        return (
+            qs.values('id', 'nome', 'data_inicio')
+            .annotate(num_alunos=Count('alunos_ingresso'))
+            .order_by('-data_inicio')[:limite]
+    )
         
 class CategoriaCursoSelectors:
     
@@ -161,30 +192,31 @@ class CategoriaCursoSelectors:
     def get_categorias_curso_usuario(user) -> QuerySet['CategoriaCurso']:
         """Retorna categorias de curso visíveis para o usuário"""
         if user.groups.filter(name='Gestor').exists():
-            return CategoriaCurso.objects.select_related('curso_semestre', 'categoria').all()
+            return CategoriaCurso.objects.select_related('curso_semestre', 'categoria', 'curso_semestre__semestre').all()
         elif user.groups.filter(name='Coordenador').exists():
             try:
                 coordenador = Coordenador.objects.get(user=user)
-                return CategoriaCurso.objects.select_related('curso_semestre', 'categoria').filter(curso_semestre__curso=coordenador.curso)
+                return CategoriaCurso.objects.select_related('curso_semestre', 'categoria', 'curso_semestre__semestre').filter(curso_semestre__curso=coordenador.curso)
             except Coordenador.DoesNotExist:
                 return CategoriaCurso.objects.none()
         return CategoriaCurso.objects.none()
     
     @staticmethod
     def get_categorias_curso_com_horas_por_aluno(*, aluno):
+
         return (
             CategoriaCurso.objects
             .filter(
-                curso_semestre__curso_id=aluno.curso_id, 
+                curso_semestre__curso_id=aluno.curso_id,
                 curso_semestre__semestre_id=aluno.semestre_ingresso_id,
             )
             .annotate(
                 horas_aprovadas_total=Coalesce(
                     Sum(
-                        'atividade__horas_aprovadas',
+                        'atividades__horas_aprovadas',
                         filter=Q(
-                            atividade__aluno_id=aluno.id,
-                            atividade__horas_aprovadas__isnull=False
+                            atividades__aluno_id=aluno.id,
+                            atividades__horas_aprovadas__isnull=False
                         )
                     ),
                     0
@@ -192,13 +224,15 @@ class CategoriaCursoSelectors:
             )
             .select_related('categoria')
             .only(
-                'id', 
-                'limite_horas', 
+                'id',
+                'limite_horas',
                 'equivalencia_horas',
+                'categoria_id',
                 'categoria__nome'
             )
             .order_by('categoria__nome')
-        )
+    )
+
     
 class AlunoSelectors:
 
@@ -220,21 +254,20 @@ class AlunoSelectors:
         
     @staticmethod
     def get_alunos_com_pendencias(*, curso=None) -> QuerySet[Aluno]:
-        alunos = Aluno.objects
+        atividades = Atividade.objects.filter(status='Pendente')
         if curso:
-            alunos = alunos.filter(curso=curso)
-        return AlunoSelectors._with_pendencia_annotation(alunos).filter(
-            tem_pendencia=True
-        ).select_related('user', 'curso')
+            atividades = atividades.filter(aluno__curso=curso)
+        return Aluno.objects.filter(
+                id__in=atividades.values('aluno_id').distinct()
+            )
 
     @staticmethod
     def get_num_alunos_com_pendencias(*, curso=None) -> int:
-        alunos = Aluno.objects
+        atividades = Atividade.objects.filter(status='Pendente')
         if curso:
-            alunos = alunos.filter(curso=curso)
-        return AlunoSelectors._with_pendencia_annotation(alunos).filter(
-            tem_pendencia=True
-        ).count()
+            atividades = atividades.filter(aluno__curso=curso)
+        
+        return atividades.values('aluno_id').distinct().count()
     
     @staticmethod
     def get_num_alunos(*, curso=None) -> int:
@@ -254,7 +287,7 @@ class AlunoSelectors:
         alunos = (
             alunos
             .annotate(tem_pendencia=Exists(pendentes))
-            .select_related('user', 'curso')
+            .select_related('user', 'curso', 'semestre_ingresso')
         )
         return alunos.order_by('-tem_pendencia', 'user__first_name', 'user__last_name')
     
@@ -263,6 +296,30 @@ class AlunoSelectors:
         return aluno.curso.configuracoes_semestre.filter(
             semestre=aluno.semestre_ingresso
         ).first().horas_requeridas
+    
+    @staticmethod
+    def aluno_ultrapassou_limite_em_alguma_categoria(*, aluno) -> bool:
+        return (
+            CategoriaCurso.objects
+            .filter(
+                curso_semestre__curso=aluno.curso,
+                curso_semestre__semestre=aluno.semestre_ingresso,
+            )
+            .annotate(
+                total_aprovadas=Coalesce(
+                    Sum(
+                        'atividades__horas_aprovadas',
+                        filter=Q(atividades__aluno=aluno)
+                    ),
+                    0
+                )
+            )
+            .filter(
+                limite_horas__gt=0,
+                total_aprovadas__gt=F('limite_horas')
+            )
+            .exists()
+        )
     
 class UserSelectors:
 
@@ -305,7 +362,7 @@ class UserSelectors:
         from django.contrib.auth.models import User, Group
 
         coordenador_group = Group.objects.get(name='Coordenador')
-        return User.objects.filter(groups=coordenador_group)
+        return User.objects.filter(groups=coordenador_group).select_related('coordenador', 'coordenador__curso')
     
     @staticmethod
     def get_user_groups(user) -> List[str]:

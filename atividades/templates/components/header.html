@@ -1,6 +1,6 @@
  <!-- Header -->
   {% load static %}
-    <header class="bg-primary-dark text-white py-3 shadow-sm">
+    <header class="bg-primary-dark text-white shadow-sm">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center header-brand">
                 {% if user.is_authenticated %}
@@ -84,7 +84,7 @@
  <!-- Modal 1 -->
   <div id="img1" class="modal">
     <div class="modal-content">
-      <span class="sidebar-close-btn" onclick="fecharModal('img1')">&times;</span>
+      <span class="sidebar-close-btn" onclick="fecharModal('img1')"><i class="bi bi-x-circle-fill"></i></span>
       <img src="{% static 'images/Como app pode te ajudar.png' %}" alt="Imagem 1">
     </div>
   </div>
@@ -92,7 +92,7 @@
   <!-- Modal 2 -->
   <div id="img2" class="modal">
     <div class="modal-content">
-      <span class="sidebar-close-btn" onclick="fecharModal('img2')" style="color: white;">&times;</span>
+      <span class="sidebar-close-btn" onclick="fecharModal('img2')"><i class="bi bi-x-circle-fill"></i></span>
       <img src="{% static 'images/Guia do aluno.png' %}" alt="Imagem 2">
     </div>
   </div>

@@ -14,18 +14,26 @@ business_logger = logging.getLogger('atividades.business')
     
 class RegisterView(View):
     template_name = 'auth/register.html'
+    partial_template_name = 'auth/htmx/register_modal.html'
 
     def get(self, request):
         form = UserRegistrationForm()
-        return render(request, self.template_name, {'form': form})
+        print(self.get_template_name())
+        return render(request, self.get_template_name(), {'form': form})
     
     def post(self, request):
         form = UserRegistrationForm(request.POST)
+        print(self.get_template_name(), "oooooo")
         if form.is_valid():
             UserService.register_user_with_aluno(form=form)
             messages.success(request, 'Registro realizado com sucesso!')
             return redirect('login')
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.get_template_name(), {'form': form})
+    
+    def get_template_name(self):
+        if self.request.headers.get('HX-Request'):
+            return self.partial_template_name
+        return self.template_name
 
 class AlterarEmailView(LoginRequiredMixin, View):
     template_name = 'auth/alterar_email.html'

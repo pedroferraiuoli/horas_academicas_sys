@@ -12,7 +12,7 @@
     <!-- Cards de Estatísticas -->
     <div class="row mt-4 mb-4">
 
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card dashboard-card shadow-sm h-100">
           <div class="card-body text-center">
             <div class="stat-number">{{ stats.num_alunos|default:0 }}</div>
@@ -21,11 +21,20 @@
         </div>
       </div>
 
-      <div class="col-md-6">
+      <div class="col-md-4">
         <div class="card dashboard-card shadow-sm h-100">
           <div class="card-body text-center">
             <div class="stat-number">{{ stats.alunos_com_pendencias|floatformat:0|default:"0" }}</div>
             <div class="stat-label">Alunos com Horas Pendentes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card dashboard-card shadow-sm h-100">
+          <div class="card-body text-center">
+            <div class="stat-number">{{ stats.atividades_pendentes|floatformat:0|default:"0" }}</div>
+            <div class="stat-label">Atividades Pendentes</div>
           </div>
         </div>
       </div>
@@ -38,7 +47,7 @@
         <h5 class="main-blue mb-0">Últimos 5 Semestres - Alunos Ingressantes</h5>
       </div>
       <div class="card-body">
-        {% if ultimos_semestres %}
+        {% if stats.ultimos_semestres %}
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
@@ -48,9 +57,9 @@
               </tr>
             </thead>
             <tbody>
-              {% for item in ultimos_semestres %}
+              {% for item in stats.ultimos_semestres %}
               <tr>
-                <td class="text-center"><strong>{{ item.semestre.nome }}</strong></td>
+                <td class="text-center"><strong>{{ item.nome }}</strong></td>
                 <td class="text-center"><span class="badge bg-info">{{ item.num_alunos }}</span></td>
               </tr>
               {% endfor %}

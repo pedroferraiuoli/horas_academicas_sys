@@ -66,22 +66,6 @@ main {
     }
 }
 
-.main-login {
-    width: 100% !important;
-    background-color: var(--bg-light);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 70px;
-    flex: 1;
-}
-
-@media (max-width: 768px) {
-    .main-login {
-        margin-top: 60px;
-    }
-}
-
 .container {
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -1465,9 +1449,7 @@ body:has(#modal-container .modal) {
 /* Login Responsivo */
 
 /* Classes do Login */
-.login-wrapper {
-    min-height: 100vh;
-}
+
 
 .login-left-side {
     max-width: 56%;
@@ -1489,7 +1471,9 @@ body:has(#modal-container .modal) {
 .login-wrapper {
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--bg-light) 0%, #ffffff 100%);
+    background: var(--main-bg);
+    width: 80%;
+    justify-self: center;
 }
 
 /* === LADO ESQUERDO - BRANDING === */
@@ -1834,11 +1818,6 @@ body:has(#modal-container .modal) {
 @media (max-width: 768px) {
     header {
         height: 60px;
-    }
-    
-    .main-login {
-        margin-top: 60px;
-        min-height: calc(100vh - 60px);
     }
     
     .login-wrapper {

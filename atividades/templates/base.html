@@ -58,11 +58,7 @@
         <!-- Área de Conteúdo -->
         <div class="
             px-4
-            {% if user.is_authenticated %}
                 main
-            {% else %}
-                main-login
-            {% endif %}
         ">
             <!-- Container para mensagens (atualizável via HTMX) -->
             <div id="messages-container"

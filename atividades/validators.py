@@ -1,41 +1,35 @@
+import datetime
 import re
 import magic
 from django.core.exceptions import ValidationError
 
+class AtividadeValidators:
+    
+    @staticmethod
+    def validar_arquivo(arquivo):
+        MIME_PERMITIDOS = {
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        }
 
-class ValidadorDeArquivo:
-    MIME_PERMITIDOS = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ]
+        TAMANHO_MAXIMO_MB = 15
+        TAMANHO_MAXIMO_BYTES = TAMANHO_MAXIMO_MB * 1024 * 1024
 
-    TAMANHO_MAXIMO_MB = 15
-    TAMANHO_MAXIMO_BYTES = TAMANHO_MAXIMO_MB * 1024 * 1024
-
-    @classmethod
-    def validar(cls, arquivo):
-        cls._validar_tamanho(arquivo)
-        cls._validar_mime(arquivo)
-
-    @classmethod
-    def _validar_tamanho(cls, arquivo):
-        if arquivo.size > cls.TAMANHO_MAXIMO_BYTES:
+        # valida tamanho
+        if arquivo.size > TAMANHO_MAXIMO_BYTES:
             raise ValidationError(
-                f'O arquivo excede o tamanho máximo permitido de {cls.TAMANHO_MAXIMO_MB} MB.'
+                f'O arquivo excede o tamanho máximo permitido de {TAMANHO_MAXIMO_MB} MB.'
             )
 
-    @classmethod
-    def _validar_mime(cls, arquivo):
+        # valida mime
         mime = magic.from_buffer(arquivo.read(2048), mime=True)
         arquivo.seek(0)
 
-        if mime not in cls.MIME_PERMITIDOS:
+        if mime not in MIME_PERMITIDOS:
             raise ValidationError('Tipo de arquivo inválido.')
-
-class ValidadorDeHoras:
     
     @staticmethod
     def validar_horas(horas: int, horas_aprovadas: int = None):
@@ -47,7 +41,7 @@ class ValidadorDeHoras:
             if horas_aprovadas > horas:
                 raise ValidationError('As horas aprovadas não podem exceder as horas da atividade.')
             
-class ValidadorDeNome:
+class AlunoValidators:
     
     @staticmethod
     def validar_nome(nome: str):
@@ -77,3 +71,20 @@ class ValidadorDeNome:
         nome = ' '.join(p.capitalize() for p in partes)
 
         return nome
+    
+    @staticmethod
+    def validar_matricula(matricula: str):
+        if not matricula.isdigit():
+            raise ValidationError('A matrícula deve conter apenas números.')
+        
+        MATRICULA_REGEX = r'^\d{11}$'
+        if not re.match(MATRICULA_REGEX, matricula):
+            raise ValidationError(
+                "Matrícula deve conter exatamente 11 dígitos numéricos."
+            )
+       
+        ano = int(matricula[:4])
+        ano_atual = datetime.now().year
+
+        if ano < 2000 or ano > ano_atual + 1:
+            raise ValidationError("Ano da matrícula inválido.")

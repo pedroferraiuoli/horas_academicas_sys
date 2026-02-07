@@ -1,6 +1,7 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
-from atividades.validators import ValidadorDeArquivo, ValidadorDeHoras
+from atividades.validators import AtividadeValidators, AlunoValidators
 from django.utils.formats import date_format
 from django.contrib.postgres.indexes import Index
 from django.db.models import Q
@@ -95,6 +96,14 @@ class Aluno(BaseModel):
 
     def __str__(self):
         return f"{self.nome} - {self.matricula} ({self.semestre_ingresso})"
+    
+    def clean(self):
+        AlunoValidators.validar_matricula(self.matricula)
+        return super().clean()
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 class Atividade(BaseModel):
 
@@ -128,17 +137,15 @@ class Atividade(BaseModel):
             ),
         ]
     
-    
     def clean(self):
+        AtividadeValidators.validar_horas(self.horas, self.horas_aprovadas)
         if self.documento:
-            ValidadorDeArquivo.validar(self.documento)
-        ValidadorDeHoras.validar_horas(self.horas, self.horas_aprovadas)
-        
+            AtividadeValidators.validar_arquivo(self.documento)
         return super().clean()
     
-    def save(self):
-        self.clean()
-        return super().save()
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
     
 class Notificacao(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

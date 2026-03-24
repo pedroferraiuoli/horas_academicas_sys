@@ -61,6 +61,8 @@ urlpatterns = [
     #Mensagens HTMX
     path('get-messages/', views.GetMessagesView.as_view(), name='get_messages'),
     path('__debug__/', include('debug_toolbar.urls')),
+    # Comprovante da atividade
+    path('comprovante/<int:atividade_id>/', views.ver_comprovante, name='ver_comprovante')
 ]
 
 if settings.DEBUG:

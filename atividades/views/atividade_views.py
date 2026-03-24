@@ -231,3 +231,38 @@ class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
 
         messages.success(request, f'Atividade {self.atividade.nome} aprovada com {horas_aprovadas} horas!')
         return redirect(request.META.get('HTTP_REFERER', 'listar_atividades_coordenador'))
+
+"""
+View para visualização do comprovante em PDF. A regra de permissão garante que apenas o aluno dono da atividade ou 
+]o coordenador do curso possam acessar o arquivo. O caminho do arquivo é verificado para garantir que o arquivo exista 
+antes de tentar servi-lo. Se o arquivo não existir ou o usuário não tiver permissão, um erro 404 é retornado. 
+"""
+from django.contrib.auth.decorators import login_required
+from django.http import FileResponse, Http404
+import os
+@login_required
+def ver_comprovante(request, atividade_id):
+    atividade = Atividade.objects.select_related(
+        'aluno__user',
+        'aluno__curso'
+    ).get(id=atividade_id)
+
+    user = request.user
+
+    if UserSelectors.is_user_aluno(user):
+        if atividade.aluno.user != user:
+            raise Http404()
+    
+    elif UserSelectors.is_user_coordenador(user):
+        if atividade.aluno.curso != user.coordenador.curso:
+            raise Http404()
+    
+    else:
+        raise Http404()
+
+    file_path = atividade.documento.path
+
+    if not os.path.exists(file_path):
+        raise Http404()
+
+    return FileResponse(open(file_path, 'rb'), content_type='application/pdf')

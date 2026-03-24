@@ -4,13 +4,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib import messages
 from ..utils import paginate_queryset
-from ..models import Atividade, Aluno, CategoriaCurso, Notificacao
+from ..models import Atividade, Aluno, CategoriaCurso
 from ..forms import AtividadeForm
 from ..selectors import AlunoSelectors, AtividadeSelectors, UserSelectors
 from ..services import AtividadeService
 from ..filters import AtividadesCoordenadorFilter, AtividadesFilter
 from ..mixins import AlunoRequiredMixin, CoordenadorRequiredMixin
 
+"""
+Cadastro de novas atividades. HX-Request verifica se a requisição é feita via HTMX para retornar apenas o 
+conteúdo parcial ou trigger de atualização sem recarregar a página. 
+mesmo se aplica para edição e exclusão de atividades.
+"""
 
 class CadastrarAtividadeView(AlunoRequiredMixin, View):
     template_name = 'forms/form_atividade.html'
@@ -121,6 +126,11 @@ class ExcluirAtividadeView(AlunoRequiredMixin, View):
         return redirect(request.META.get('HTTP_REFERER', 'listar_atividades'))
 
 class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
+    """ 
+    Listagem de atividades para o aluno. O filtro por categoria é opcional e, se presente, exibe o nome da categoria filtrada. 
+    A paginação é aplicada após a filtragem para garantir que o número correto de atividades seja exibido por página. 
+    """
+
     template_name = 'listas/listar_atividades.html'
     htmx_template_name = 'listas/contents/atividades_aluno.html'
     htmx_partial_template_name = 'listas/partials/atividades_list.html'
@@ -155,8 +165,12 @@ class ListarAtividadesView(AlunoRequiredMixin, TemplateView):
                 return [self.htmx_template_name]
             return [self.template_name]
 
-
 class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
+    """ 
+    Listagem de atividades para o coordenador. Exibe todas as atividades pendentes do curso do coordenador ou, 
+    se um aluno específico for selecionado, exibe as atividades desse aluno. 
+    """
+
     template_name = 'listas/listar_atividades_coordenador.html'
     htmx_template_name = 'listas/partials/atividades_coord_list.html'
 
@@ -190,6 +204,10 @@ class ListarAtividadesCoordenadorView(CoordenadorRequiredMixin, TemplateView):
 
 
 class AprovarHorasAtividadeView(CoordenadorRequiredMixin, View):
+
+    """
+    View para aprovação de horas de uma atividade. O coordenador pode aprovar uma quantidade específica de horas.
+    """
     def dispatch(self, request, atividade_id, *args, **kwargs):
         self.coordenador = UserSelectors.get_coordenador_by_user(request.user)
         self.atividade = get_object_or_404(Atividade, id=atividade_id)

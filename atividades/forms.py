@@ -131,11 +131,6 @@ class AtividadeForm(forms.ModelForm):
                 self.fields['categoria'].initial = categoria
             except CategoriaCurso.DoesNotExist:
                 pass    
-
-    def clean_matricula(self):
-        matricula = self.cleaned_data.get('matricula')
-        AlunoValidators.validar_matricula(matricula)
-        return matricula
     
     def clean_documento(self):
         documento = self.cleaned_data.get('documento')

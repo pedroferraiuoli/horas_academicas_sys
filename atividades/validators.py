@@ -2,8 +2,15 @@ import datetime
 import re
 import magic
 from django.core.exceptions import ValidationError
+import os
 
 class AtividadeValidators:
+
+    """
+    Valida o arquivo enviado para a atividade, garantindo que seja do tipo permitido e dentro do limite de tamanho. 
+    Aceita PDF, JPEG e PNG, com tamanho máximo de 15 MB. A validação é feita tanto pela extensão quanto pelo MIME type 
+    real do arquivo, utilizando a biblioteca python-magic para evitar falsificação de extensão.
+    """
     
     @staticmethod
     def validar_arquivo(arquivo):
@@ -11,21 +18,29 @@ class AtividadeValidators:
             'application/pdf',
             'image/jpeg',
             'image/png',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        }
+
+        EXTENSOES_PERMITIDAS = {
+            '.pdf', '.jpg', '.jpeg', '.png'
         }
 
         TAMANHO_MAXIMO_MB = 15
         TAMANHO_MAXIMO_BYTES = TAMANHO_MAXIMO_MB * 1024 * 1024
 
-        # valida tamanho
+        # tamanho
         if arquivo.size > TAMANHO_MAXIMO_BYTES:
             raise ValidationError(
-                f'O arquivo excede o tamanho máximo permitido de {TAMANHO_MAXIMO_MB} MB.'
+                f'O arquivo excede {TAMANHO_MAXIMO_MB} MB.'
             )
 
-        # valida mime
-        mime = magic.from_buffer(arquivo.read(2048), mime=True)
+        # extensão
+        ext = os.path.splitext(arquivo.name)[1].lower()
+        if ext not in EXTENSOES_PERMITIDAS:
+            raise ValidationError('Extensão inválida.')
+
+        # mime real
+        content = arquivo.read()
+        mime = magic.from_buffer(content, mime=True)
         arquivo.seek(0)
 
         if mime not in MIME_PERMITIDOS:
@@ -77,14 +92,14 @@ class AlunoValidators:
         if not matricula.isdigit():
             raise ValidationError('A matrícula deve conter apenas números.')
         
-        MATRICULA_REGEX = r'^\d{11}$'
+        MATRICULA_REGEX = r'^\d{12}$'
         if not re.match(MATRICULA_REGEX, matricula):
             raise ValidationError(
-                "Matrícula deve conter exatamente 11 dígitos numéricos."
+                "Matrícula deve conter exatamente 12 dígitos numéricos."
             )
        
         ano = int(matricula[:4])
-        ano_atual = datetime.now().year
+        ano_atual = datetime.datetime.now().year
 
         if ano < 2000 or ano > ano_atual + 1:
             raise ValidationError("Ano da matrícula inválido.")

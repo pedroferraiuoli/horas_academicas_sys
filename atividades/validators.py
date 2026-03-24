@@ -92,14 +92,14 @@ class AlunoValidators:
         if not matricula.isdigit():
             raise ValidationError('A matrícula deve conter apenas números.')
         
-        MATRICULA_REGEX = r'^\d{11}$'
+        MATRICULA_REGEX = r'^\d{12}$'
         if not re.match(MATRICULA_REGEX, matricula):
             raise ValidationError(
-                "Matrícula deve conter exatamente 11 dígitos numéricos."
+                "Matrícula deve conter exatamente 12 dígitos numéricos."
             )
        
         ano = int(matricula[:4])
-        ano_atual = datetime.now().year
+        ano_atual = datetime.datetime.now().year
 
         if ano < 2000 or ano > ano_atual + 1:
             raise ValidationError("Ano da matrícula inválido.")

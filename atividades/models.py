@@ -1,4 +1,6 @@
 import datetime
+import os
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from atividades.validators import AtividadeValidators, AlunoValidators
@@ -105,6 +107,16 @@ class Aluno(BaseModel):
         self.full_clean()
         super().save(*args, **kwargs)
 
+
+def atividade_upload_path(instance, filename):
+    ext = os.path.splitext(filename)[1].lower()
+
+    # fallback caso venha sem extensão
+    if not ext:
+        ext = ''
+
+    return f'comprovantes/aluno_{instance.aluno.id}/{uuid.uuid4()}{ext}'
+    
 class Atividade(BaseModel):
 
     status_choices = [
@@ -122,7 +134,7 @@ class Atividade(BaseModel):
     horas = models.PositiveIntegerField(help_text="Duração da atividade em horas")
     horas_aprovadas = models.PositiveIntegerField(null=True, blank=True)
     data = models.DateField()
-    documento = models.FileField(upload_to='comprovantes/', null=True, blank=True)
+    documento = models.FileField(upload_to=atividade_upload_path, null=True, blank=True)
     status = models.CharField(max_length=20, choices=status_choices, default='Pendente')
 
     def __str__(self):

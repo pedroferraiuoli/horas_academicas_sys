@@ -1,4 +1,5 @@
 from atividades.selectors import AlunoSelectors, AtividadeSelectors, CategoriaCursoSelectors, CursoPorSemestreSelectors, SemestreSelectors, UserSelectors
+from atividades.utils import CacheKeys, CacheService
 from .models import Aluno, Atividade, Categoria, Coordenador, CategoriaCurso, CursoPorSemestre, Notificacao, Semestre
 from django.db import transaction
 from django.contrib.auth.models import Group
@@ -9,6 +10,7 @@ from django.core.cache import cache
     
 class SemestreService:
 
+    # Cria um novo semestre e, opcionalmente, copia as categorias de um semestre existente.
     @staticmethod
     def criar_semestre_com_copia(*, form, copiar_de_id):
         if copiar_de_id and copiar_de_id != 'Nenhum':
@@ -18,6 +20,7 @@ class SemestreService:
                 return True          
         return False
     
+    # Duplica categorias de um semestre para outro, garantindo que o novo semestre tenha as mesmas categorias associadas.
     @staticmethod
     def duplicate_categories_from(*, semestre_novo, source_semestre):
         if source_semestre is None or source_semestre.id == semestre_novo.id:
@@ -51,6 +54,7 @@ class SemestreService:
 
 class UserService:
 
+    # Cria user e depois um aluno associado a esse user, usando os dados do formulário. A matrícula é usada como username.
     @staticmethod
     def register_user_with_aluno(*, form):
         from django.contrib.auth.models import User
@@ -73,6 +77,7 @@ class UserService:
 
         return user
 
+    # Cria usuário gestor ou coordenador com base no formulário, atribuindo o grupo correto e associando o curso para coordenadores.
     @staticmethod
     def criar_usuario_admin(*, form):
         """
@@ -100,6 +105,7 @@ class UserService:
 
         return user
     
+    # Alterna o status ativo de um usuário, ativando ou desativando sua conta. Retorna o usuário atualizado.
     @staticmethod
     def toggle_user_active_status(*, user_id):
         user = User.objects.get(id=user_id)
@@ -108,13 +114,11 @@ class UserService:
         return user
     
 class AtividadeService:
-
-    @staticmethod
-    def invalidar_cache_aluno(aluno_id: int):
-        """Invalida o cache de categorias para um aluno específico"""
-        cache_key = f'categorias_aluno_{aluno_id}'
-        cache.delete(cache_key)
-
+    """
+    Salva as horas aprovadas pelo coordenador para uma atividade, garantindo que as regras de validação sejam respeitadas. 
+    Envia notificação ao aluno e recalcula status das atividades relacionadas.
+    Invalida caches relacionados para manter os dados atualizados no dashboard do aluno e coordenador.
+    """
     @staticmethod
     def aprovar_horas(*, atividade: Atividade, horas_aprovadas: int):
         
@@ -142,10 +146,13 @@ class AtividadeService:
         )
         
         # Invalidar cache do aluno após aprovação
-        AtividadeService.invalidar_cache_aluno(atividade.aluno_id)
-        StatsService.invalidar_cache_coordenador(atividade.aluno.curso_id)
+
+        CacheService.invalidar_aluno(atividade.aluno_id)
+        CacheService.invalidar_coordenador(atividade.aluno.curso_id)
         AtividadeService.recalcular_status_atividade(atividade=atividade)
 
+    # Recalcula o status de uma atividade com base nas horas aprovadas e no limite da categoria, 
+    # garantindo que o status seja atualizado corretamente após mudanças.
     @staticmethod
     def recalcular_status_atividades_qs(atividades: QuerySet[Atividade]):
         for atividade in atividades:
@@ -173,23 +180,23 @@ class AtividadeService:
         ).exclude(id=atividade.id)
         AtividadeService.recalcular_status_atividades_qs(atividades=atividades)
 
-    @staticmethod
-    def recalcular_status_atividades_apos_exclusao(aluno: Aluno, categoria: CategoriaCurso):
-        atividades = AtividadeSelectors.get_atividades_aluno(
-            aluno=aluno,
-            curso_categoria=categoria,
-            limite_atingido=True
-        )
-        AtividadeService.recalcular_status_atividades_qs(atividades=atividades)
-
+    # Exclui uma atividade e recalcula o status das atividades relacionadas, 
+    # garantindo que o dashboard do aluno seja atualizado corretamente.
     @staticmethod
     def exluir_atividade(atividade: Atividade):
         aluno = atividade.aluno
         categoria = atividade.categoria
         atividade.delete()
-        AtividadeService.recalcular_status_atividades_apos_exclusao(aluno=aluno, categoria=categoria)
-        AtividadeService.invalidar_cache_aluno(aluno.id)
+        atividades_recalcular = AtividadeSelectors.get_atividades_aluno(
+            aluno=aluno,
+            curso_categoria=categoria,
+            limite_atingido=True
+        )
+        AtividadeService.recalcular_status_atividades_qs(atividades=atividades_recalcular)
+        CacheService.invalidar_aluno(atividade.aluno_id)
 
+    # Cadastra uma nova atividade para um aluno, associando-a ao aluno e verificando se o limite da categoria foi atingido.
+    # Invalida o cache do aluno e do coordenador para garantir que as informações sejam atualizadas no dashboard após o cadastro da atividade.
     @staticmethod
     def cadastrar_atividade(*, form, aluno: Aluno):
         atividade = form.save(commit=False)
@@ -197,8 +204,8 @@ class AtividadeService:
         if atividade.categoria.atingiu_limite_pelo_aluno(aluno):
             atividade.status = 'Limite Atingido'
         atividade.save()
-        AtividadeService.invalidar_cache_aluno(aluno.id)
-        StatsService.invalidar_cache_coordenador(aluno.curso_id)
+        CacheService.invalidar_aluno(atividade.aluno_id)
+        CacheService.invalidar_coordenador(atividade.aluno.curso_id)
         return atividade
 
 class CategoriaCursoService:
@@ -420,9 +427,7 @@ class StatsService:
 
     @staticmethod
     def get_stats_gestor():
-        CACHE_KEY = 'gestor_dashboard_stats'
-        TTL = 600
-
+        CACHE_KEY = CacheKeys.GESTOR_STATS
         stats = cache.get(CACHE_KEY)
         if stats is not None:
             return stats
@@ -434,13 +439,12 @@ class StatsService:
             'ultimos_semestres': SemestreSelectors.get_ultimos_semestres_com_alunos(5),
         }
 
-        cache.set(CACHE_KEY, stats, TTL)
+        cache.set(CACHE_KEY, stats, CacheService.TTL_GESTOR)
         return stats
     
     @staticmethod
     def get_stats_coordenador(curso):
-        CACHE_KEY = f'coordenador_{curso.id}_dashboard_stats'
-        TTL = 600
+        CACHE_KEY = CacheKeys.COORDENADOR_STATS.format(curso.id)
 
         stats = cache.get(CACHE_KEY)
         if stats is not None:
@@ -453,14 +457,8 @@ class StatsService:
             'ultimos_semestres': SemestreSelectors.get_ultimos_semestres_com_alunos(5, curso=curso)
         }
 
-        cache.set(CACHE_KEY, stats, TTL)
+        cache.set(CACHE_KEY, stats, CacheService.TTL_COORDENADOR)
         return stats
-    
-    @staticmethod
-    def invalidar_cache_coordenador(curso_id: int):
-        try:
-            cache_key = f'coordenador_{curso_id}_dashboard_stats'
-            cache.delete(cache_key)
-        except Exception:
-            pass
+
+
 

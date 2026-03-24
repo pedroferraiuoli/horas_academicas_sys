@@ -2,8 +2,15 @@ import datetime
 import re
 import magic
 from django.core.exceptions import ValidationError
+import os
 
 class AtividadeValidators:
+
+    """
+    Valida o arquivo enviado para a atividade, garantindo que seja do tipo permitido e dentro do limite de tamanho. 
+    Aceita PDF, JPEG e PNG, com tamanho máximo de 15 MB. A validação é feita tanto pela extensão quanto pelo MIME type 
+    real do arquivo, utilizando a biblioteca python-magic para evitar falsificação de extensão.
+    """
     
     @staticmethod
     def validar_arquivo(arquivo):
@@ -11,21 +18,29 @@ class AtividadeValidators:
             'application/pdf',
             'image/jpeg',
             'image/png',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        }
+
+        EXTENSOES_PERMITIDAS = {
+            '.pdf', '.jpg', '.jpeg', '.png'
         }
 
         TAMANHO_MAXIMO_MB = 15
         TAMANHO_MAXIMO_BYTES = TAMANHO_MAXIMO_MB * 1024 * 1024
 
-        # valida tamanho
+        # tamanho
         if arquivo.size > TAMANHO_MAXIMO_BYTES:
             raise ValidationError(
-                f'O arquivo excede o tamanho máximo permitido de {TAMANHO_MAXIMO_MB} MB.'
+                f'O arquivo excede {TAMANHO_MAXIMO_MB} MB.'
             )
 
-        # valida mime
-        mime = magic.from_buffer(arquivo.read(2048), mime=True)
+        # extensão
+        ext = os.path.splitext(arquivo.name)[1].lower()
+        if ext not in EXTENSOES_PERMITIDAS:
+            raise ValidationError('Extensão inválida.')
+
+        # mime real
+        content = arquivo.read()
+        mime = magic.from_buffer(content, mime=True)
         arquivo.seek(0)
 
         if mime not in MIME_PERMITIDOS:
